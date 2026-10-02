@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[10.0.11, )",
+        "resolved": "10.0.11",
+        "contentHash": "IBf7lbovvjGWVWXZX5cJ/cO0WXbId0Zq4BuSeT94mGZuOAP66oMeH9PTBZ9Jpp3Jb6jtK0qm/NyUbPRo1gC/wQ=="
+      },
+      "Microsoft.NET.Sdk.WebAssembly.Pack": {
+        "type": "Direct",
+        "requested": "[10.0.11, )",
+        "resolved": "10.0.11",
+        "contentHash": "qTQsflEOjG1xG8FCfQJZbVd7DErJdKqKoW4gxH1HlgGQ5IBBloehLvXhMhzYqogYyajU7YEUKZvJ4n/vA7sAmQ=="
+      },
+      "locus.application": {
+        "type": "Project",
+        "dependencies": {
+          "Locus.Core": "[0.1.0, )"
+        }
+      },
+      "locus.core": {
+        "type": "Project"
+      }
+    },
+    "net10.0/browser-wasm": {}
+  }
+}

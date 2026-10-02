@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Locus · Công thức theo cách bạn gõ</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main>
+    <header><a class="wordmark" href="/">locus<span>●</span></a><span class="phase">Phòng thử M1 · chạy cục bộ</span></header>
+    <section class="intro"><p class="eyebrow">TỪ CÁCH GÕ QUEN THUỘC</p><h1>Viết ý tưởng. <br>Thấy công thức.</h1><p>Gõ tiếng Việt, xem từng cách hiểu và chọn kết quả bạn muốn.</p></section>
+    <div class="workspace">
+      <section class="input-panel" aria-labelledby="input-title">
+        <div class="panel-title"><h2 id="input-title">Bạn muốn viết gì?</h2><span id="count">0 ký tự</span></div>
+        <label class="sr-only" for="input">Chuỗi công thức hoặc đoạn văn</label>
+        <textarea id="input" spellcheck="false" maxlength="65536" rows="5">căn(x+1) mũ 2</textarea>
+        <div class="examples" aria-label="Ví dụ"><span>Thử:</span><button type="button" data-example="căn(x+1) mũ 2">Căn &amp; lũy thừa</button><button type="button" data-example="2/3x">Hai cách hiểu</button><button type="button" data-example="lc[x^2]" data-mode="marked">Dấu bao lc[ ]</button></div>
+        <label for="mode" class="field-label">Cách nhận diện</label>
+        <select id="mode"><option value="explicit">Cả vùng này là công thức</option><option value="passive">Tìm công thức trong đoạn văn</option><option value="marked">Chỉ vùng nằm trong cặp dấu</option></select>
+        <div id="marker-fields" class="marker-fields" hidden><label>Dấu mở<input id="open" value="lc[" maxlength="64" autocomplete="off"></label><label>Dấu đóng<input id="close" value="]" maxlength="64" autocomplete="off"></label></div>
+        <p id="mode-help" class="hint">Phù hợp khi bạn nhập một công thức độc lập.</p>
+        <button id="analyze" class="primary" type="button">Xem công thức <span aria-hidden="true">↗</span></button>
+        <p class="local-note">Nội dung được xử lý trên máy này và không được lưu.</p>
+      </section>
+      <section class="result-panel" aria-labelledby="result-title">
+        <div class="panel-title"><h2 id="result-title">Công thức của bạn</h2><span id="status" role="status" aria-live="polite">Đang mở…</span></div>
+        <div id="diagnostics"></div>
+        <div id="results" aria-live="polite"></div>
+      </section>
+    </div>
+    <footer><span>Toán · xem trước bằng MathML</span><span>Bản thử lõi · chưa kết nối Word</span></footer>
+  </main>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

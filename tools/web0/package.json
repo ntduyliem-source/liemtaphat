@@ -1,0 +1,9 @@
+{
+  "name": "locus-web0-verification",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "jsxgraph": "1.13.3",
+    "playwright": "1.63.0"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "locus-web1-delivery-scope/1",
+  "decidedOn": "2026-09-14",
+  "mode": "local-only",
+  "userInstruction": "tiếp đi bro, không cần phải lên sites đâu, tạm ở local là được",
+  "localUrl": "http://127.0.0.1:4183/",
+  "online": "deferred-by-user",
+  "futureOnlineAudience": "private-unless-user-changes-it",
+  "web104": [
+    "Versioned static build with complete integrity-checked offline cache",
+    "User-controlled update and source recovery; existing update tests remain required",
+    "Local launcher, duplicate launch, stop/restart, actual server-down browser use",
+    "Verified archives, matching static assets and local quickstart"
+  ],
+  "web103": "Real Telex and VNI remain required separately; changing delivery scope does not pass IME acceptance"
+}

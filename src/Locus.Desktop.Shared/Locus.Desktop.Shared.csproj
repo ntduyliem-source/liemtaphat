@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.17763.0</TargetFramework><OutputType>WinExe</OutputType><UseWPF>true</UseWPF><UseWindowsForms>true</UseWindowsForms><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile><TreatWarningsAsErrors>true</TreatWarningsAsErrors><Version>0.4.0-sh</Version><Title>Locus Desktop</Title>
+  </PropertyGroup>
+  <ItemGroup><PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="10.0.101" /><ProjectReference Include="../Locus.Editor/Locus.Editor.csproj" /><Content Update="wwwroot/**" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+  <ItemGroup><Using Remove="System.Windows.Forms" /><Using Remove="System.Drawing" /></ItemGroup>
+</Project>

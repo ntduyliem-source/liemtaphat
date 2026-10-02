@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETFramework,Version=v4.8": {
+      "locus.core": {
+        "type": "Project"
+      },
+      "locus.word": {
+        "type": "Project",
+        "dependencies": {
+          "Locus.Core": "[0.1.0, )"
+        }
+      }
+    },
+    ".NETFramework,Version=v4.8/win-x86": {}
+  }
+}

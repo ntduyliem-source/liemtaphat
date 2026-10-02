@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Locus.WebProbe.Shared</AssemblyName><RootNamespace>Locus.WebProbe</RootNamespace>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.11" />
+    <ProjectReference Include="../../../src/Locus.Core/Locus.Core.csproj" />
+    <Compile Include="../../../tests/Locus.Core.Tests/*.cs" Link="CoreChecks/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="../../../corpus/m0/cases.json" LogicalName="locus.corpus.json" />
+  </ItemGroup>
+</Project>

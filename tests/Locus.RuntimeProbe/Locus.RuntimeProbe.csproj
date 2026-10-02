@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net48</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net48'"><PlatformTarget>x86</PlatformTarget></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../../src/Locus.Core/Locus.Core.csproj" /></ItemGroup>
+</Project>

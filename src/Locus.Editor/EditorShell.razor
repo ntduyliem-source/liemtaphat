@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="_content/Locus.Editor/web1.css" />
+<link rel="stylesheet" href="_content/Locus.Editor/ux1.css" />
+<link rel="stylesheet" href="_content/Locus.Editor/plot.css" />
+<link rel="stylesheet" href="_content/Locus.Editor/geometry.css" />
+<div class="tab-strip" role="tablist" aria-label="Editor"><button id="editor-tab" role="tab" aria-selected="@(active=="formula")" @onclick='()=>Switch("formula")'>ƒ Công thức</button><button id="plot-tab" role="tab" aria-selected="@(active=="plot")" @onclick='()=>Switch("plot")'>⌁ Đồ thị</button><button id="geometry-tab" role="tab" aria-selected="@(active=="geometry")" @onclick='()=>Switch("geometry")'>△ Hình học</button>@if(active=="formula"&&opened&&DesktopWindow==null){<button id="close-editor-tab" aria-label="Đóng tab công thức" @onclick="CloseFormula">×</button>}</div>
+@if(active=="plot"){<PlotWorkspace @ref="plotView" Host="@Host" DesktopWindow="@DesktopWindow" />}
+else if(active=="geometry"){<GeometryWorkspace @ref="geometryView" Host="@Host" DesktopWindow="@DesktopWindow" />}
+else if(opened){<Workspace @ref="formulaView" Host="@Host" DesktopWindow="@DesktopWindow" />}
+else{<div class="closed-tab"><h1>Phiên công thức vẫn được giữ.</h1><p>Mở lại tab để tiếp tục. Nháp được giữ trên thiết bị nếu bạn đã bật tự lưu; tệp .locus giúp giữ bản sao riêng.</p><button id="reopen-editor-tab" @onclick="()=>opened=true">Mở lại công thức</button></div>}
+@code{
+    [Parameter] public string Host {get;set;}="browser";
+    [Parameter] public Locus.Application.IEditorWindow? DesktopWindow {get;set;}
+    private bool opened=true;
+    private string active="formula";
+    private Workspace? formulaView;
+    private PlotWorkspace? plotView;
+    private GeometryWorkspace? geometryView;
+    private bool switching;
+    private async Task<bool> CanLeave()=>active switch
+    {
+        "formula"=>!opened||formulaView==null||await formulaView.CanLeaveAsync(),
+        "plot"=>plotView==null||await plotView.CanLeaveAsync(),
+        _=>geometryView==null||await geometryView.CanLeaveAsync()
+    };
+    private async Task Switch(string next)
+    {
+        if(switching)return;switching=true;
+        try{if(next==active||await CanLeave()){active=next;if(next=="formula")opened=true;}}
+        finally{switching=false;}
+    }
+    private async Task CloseFormula(){if(await CanLeave())opened=false;}
+}

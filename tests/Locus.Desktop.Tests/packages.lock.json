@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0-windows7.0": {
+      "locus.core": {
+        "type": "Project"
+      },
+      "locus.desktop": {
+        "type": "Project",
+        "dependencies": {
+          "Locus.Core": "[0.1.0, )"
+        }
+      }
+    }
+  }
+}

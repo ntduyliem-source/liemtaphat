@@ -1,0 +1,981 @@
+{
+  "evidenceType": "synthetic-state-machine-trace",
+  "generatedAt": "2026-09-12T04:54:33.110Z",
+  "runtime": "v24.15.0",
+  "platform": "win32",
+  "warning": "Browser UX model only. No Word, native equation, real IME, participant observation or production parser was exercised by this trace.",
+  "observations": [
+    {
+      "policy": "retain",
+      "sample": "x mũ 2 cộng 1",
+      "trace": [
+        {
+          "action": {
+            "type": "insert",
+            "text": "x"
+          },
+          "source": "x",
+          "caretUtf16": 1,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "x"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "x ",
+          "caretUtf16": 2,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "x "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "mũ"
+          },
+          "source": "x mũ",
+          "caretUtf16": 4,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "x mũ"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "x mũ ",
+          "caretUtf16": 5,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "x mũ "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "2"
+          },
+          "source": "x mũ 2",
+          "caretUtf16": 6,
+          "phase": "editing-source",
+          "status": "ready",
+          "candidates": [
+            {
+              "id": "power",
+              "kind": "direct"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "x mũ 2"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "x mũ 2 ",
+          "caretUtf16": 7,
+          "phase": "editing-source",
+          "status": "ready",
+          "candidates": [
+            {
+              "id": "power",
+              "kind": "direct"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "x mũ 2 "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "cộng"
+          },
+          "source": "x mũ 2 cộng",
+          "caretUtf16": 11,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "x mũ 2 cộng"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "x mũ 2 cộng ",
+          "caretUtf16": 12,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "x mũ 2 cộng "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "1"
+          },
+          "source": "x mũ 2 cộng 1",
+          "caretUtf16": 13,
+          "phase": "editing-source",
+          "status": "ready",
+          "candidates": [
+            {
+              "id": "power-sum",
+              "kind": "direct"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "x mũ 2 cộng 1"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "x mũ 2 cộng 1 ",
+          "caretUtf16": 14,
+          "phase": "editing-source",
+          "status": "ready",
+          "candidates": [
+            {
+              "id": "power-sum",
+              "kind": "direct"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "x mũ 2 cộng 1 "
+        }
+      ]
+    },
+    {
+      "policy": "retain",
+      "sample": "1 trên 2",
+      "trace": [
+        {
+          "action": {
+            "type": "insert",
+            "text": "1"
+          },
+          "source": "1",
+          "caretUtf16": 1,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "1"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "1 ",
+          "caretUtf16": 2,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "1 "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "trên"
+          },
+          "source": "1 trên",
+          "caretUtf16": 6,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "1 trên"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "1 trên ",
+          "caretUtf16": 7,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "1 trên "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "2"
+          },
+          "source": "1 trên 2",
+          "caretUtf16": 8,
+          "phase": "editing-source",
+          "status": "ready",
+          "candidates": [
+            {
+              "id": "half",
+              "kind": "direct"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "1 trên 2"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "1 trên 2 ",
+          "caretUtf16": 9,
+          "phase": "editing-source",
+          "status": "ready",
+          "candidates": [
+            {
+              "id": "half",
+              "kind": "direct"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "1 trên 2 "
+        }
+      ]
+    },
+    {
+      "policy": "retain",
+      "sample": "căn x cộng 1",
+      "trace": [
+        {
+          "action": {
+            "type": "insert",
+            "text": "căn"
+          },
+          "source": "căn",
+          "caretUtf16": 3,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "căn"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "căn ",
+          "caretUtf16": 4,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "căn "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "x"
+          },
+          "source": "căn x",
+          "caretUtf16": 5,
+          "phase": "editing-source",
+          "status": "ready",
+          "candidates": [
+            {
+              "id": "root",
+              "kind": "direct"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "căn x"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "căn x ",
+          "caretUtf16": 6,
+          "phase": "editing-source",
+          "status": "ready",
+          "candidates": [
+            {
+              "id": "root",
+              "kind": "direct"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "căn x "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "cộng"
+          },
+          "source": "căn x cộng",
+          "caretUtf16": 10,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "căn x cộng"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "căn x cộng ",
+          "caretUtf16": 11,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "căn x cộng "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "1"
+          },
+          "source": "căn x cộng 1",
+          "caretUtf16": 12,
+          "phase": "editing-source",
+          "status": "review",
+          "candidates": [
+            {
+              "id": "root-plus",
+              "kind": "direct"
+            },
+            {
+              "id": "root-sum",
+              "kind": "repair"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "căn x cộng 1"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "căn x cộng 1 ",
+          "caretUtf16": 13,
+          "phase": "editing-source",
+          "status": "review",
+          "candidates": [
+            {
+              "id": "root-plus",
+              "kind": "direct"
+            },
+            {
+              "id": "root-sum",
+              "kind": "repair"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "căn x cộng 1 "
+        }
+      ]
+    },
+    {
+      "policy": "retain",
+      "sample": "2/3x · nhiều cách hiểu",
+      "trace": [
+        {
+          "action": {
+            "type": "insert",
+            "text": "2/3x"
+          },
+          "source": "2/3x",
+          "caretUtf16": 4,
+          "phase": "editing-source",
+          "status": "ambiguous",
+          "candidates": [
+            {
+              "id": "divide-then-multiply",
+              "kind": "direct"
+            },
+            {
+              "id": "implicit-denominator",
+              "kind": "interpretation"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "2/3x"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "2/3x ",
+          "caretUtf16": 5,
+          "phase": "editing-source",
+          "status": "ambiguous",
+          "candidates": [
+            {
+              "id": "divide-then-multiply",
+              "kind": "direct"
+            },
+            {
+              "id": "implicit-denominator",
+              "kind": "interpretation"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "2/3x "
+        }
+      ]
+    },
+    {
+      "policy": "commit",
+      "sample": "x mũ 2 cộng 1",
+      "trace": [
+        {
+          "action": {
+            "type": "insert",
+            "text": "x"
+          },
+          "source": "x",
+          "caretUtf16": 1,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "x"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "x ",
+          "caretUtf16": 2,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "x "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "mũ"
+          },
+          "source": "x mũ",
+          "caretUtf16": 4,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "x mũ"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "x mũ ",
+          "caretUtf16": 5,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "x mũ "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "2"
+          },
+          "source": "x mũ 2",
+          "caretUtf16": 6,
+          "phase": "editing-source",
+          "status": "ready",
+          "candidates": [
+            {
+              "id": "power",
+              "kind": "direct"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "x mũ 2"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "",
+          "caretUtf16": 0,
+          "phase": "text-after-equation",
+          "status": "empty",
+          "candidates": [],
+          "committed": [
+            {
+              "kind": "equation",
+              "source": "x mũ 2",
+              "candidate": {
+                "id": "power",
+                "kind": "direct",
+                "label": "x²",
+                "math": "<msup><mi>x</mi><mn>2</mn></msup>"
+              }
+            },
+            {
+              "kind": "text",
+              "text": " "
+            }
+          ],
+          "sourceTranscript": "x mũ 2 "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "cộng"
+          },
+          "source": "cộng",
+          "caretUtf16": 4,
+          "phase": "editing-source",
+          "status": "unsupported",
+          "candidates": [],
+          "committed": [
+            {
+              "kind": "equation",
+              "source": "x mũ 2",
+              "candidate": {
+                "id": "power",
+                "kind": "direct",
+                "label": "x²",
+                "math": "<msup><mi>x</mi><mn>2</mn></msup>"
+              }
+            },
+            {
+              "kind": "text",
+              "text": " "
+            }
+          ],
+          "sourceTranscript": "x mũ 2 cộng"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "cộng ",
+          "caretUtf16": 5,
+          "phase": "editing-source",
+          "status": "unsupported",
+          "candidates": [],
+          "committed": [
+            {
+              "kind": "equation",
+              "source": "x mũ 2",
+              "candidate": {
+                "id": "power",
+                "kind": "direct",
+                "label": "x²",
+                "math": "<msup><mi>x</mi><mn>2</mn></msup>"
+              }
+            },
+            {
+              "kind": "text",
+              "text": " "
+            }
+          ],
+          "sourceTranscript": "x mũ 2 cộng "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "1"
+          },
+          "source": "cộng 1",
+          "caretUtf16": 6,
+          "phase": "editing-source",
+          "status": "unsupported",
+          "candidates": [],
+          "committed": [
+            {
+              "kind": "equation",
+              "source": "x mũ 2",
+              "candidate": {
+                "id": "power",
+                "kind": "direct",
+                "label": "x²",
+                "math": "<msup><mi>x</mi><mn>2</mn></msup>"
+              }
+            },
+            {
+              "kind": "text",
+              "text": " "
+            }
+          ],
+          "sourceTranscript": "x mũ 2 cộng 1"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "cộng 1 ",
+          "caretUtf16": 7,
+          "phase": "editing-source",
+          "status": "unsupported",
+          "candidates": [],
+          "committed": [
+            {
+              "kind": "equation",
+              "source": "x mũ 2",
+              "candidate": {
+                "id": "power",
+                "kind": "direct",
+                "label": "x²",
+                "math": "<msup><mi>x</mi><mn>2</mn></msup>"
+              }
+            },
+            {
+              "kind": "text",
+              "text": " "
+            }
+          ],
+          "sourceTranscript": "x mũ 2 cộng 1 "
+        }
+      ]
+    },
+    {
+      "policy": "commit",
+      "sample": "1 trên 2",
+      "trace": [
+        {
+          "action": {
+            "type": "insert",
+            "text": "1"
+          },
+          "source": "1",
+          "caretUtf16": 1,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "1"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "1 ",
+          "caretUtf16": 2,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "1 "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "trên"
+          },
+          "source": "1 trên",
+          "caretUtf16": 6,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "1 trên"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "1 trên ",
+          "caretUtf16": 7,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "1 trên "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "2"
+          },
+          "source": "1 trên 2",
+          "caretUtf16": 8,
+          "phase": "editing-source",
+          "status": "ready",
+          "candidates": [
+            {
+              "id": "half",
+              "kind": "direct"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "1 trên 2"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "",
+          "caretUtf16": 0,
+          "phase": "text-after-equation",
+          "status": "empty",
+          "candidates": [],
+          "committed": [
+            {
+              "kind": "equation",
+              "source": "1 trên 2",
+              "candidate": {
+                "id": "half",
+                "kind": "direct",
+                "label": "½",
+                "math": "<mfrac><mn>1</mn><mn>2</mn></mfrac>"
+              }
+            },
+            {
+              "kind": "text",
+              "text": " "
+            }
+          ],
+          "sourceTranscript": "1 trên 2 "
+        }
+      ]
+    },
+    {
+      "policy": "commit",
+      "sample": "căn x cộng 1",
+      "trace": [
+        {
+          "action": {
+            "type": "insert",
+            "text": "căn"
+          },
+          "source": "căn",
+          "caretUtf16": 3,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "căn"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "căn ",
+          "caretUtf16": 4,
+          "phase": "editing-source",
+          "status": "incomplete",
+          "candidates": [],
+          "committed": [],
+          "sourceTranscript": "căn "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "x"
+          },
+          "source": "căn x",
+          "caretUtf16": 5,
+          "phase": "editing-source",
+          "status": "ready",
+          "candidates": [
+            {
+              "id": "root",
+              "kind": "direct"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "căn x"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "",
+          "caretUtf16": 0,
+          "phase": "text-after-equation",
+          "status": "empty",
+          "candidates": [],
+          "committed": [
+            {
+              "kind": "equation",
+              "source": "căn x",
+              "candidate": {
+                "id": "root",
+                "kind": "direct",
+                "label": "√x",
+                "math": "<msqrt><mi>x</mi></msqrt>"
+              }
+            },
+            {
+              "kind": "text",
+              "text": " "
+            }
+          ],
+          "sourceTranscript": "căn x "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "cộng"
+          },
+          "source": "cộng",
+          "caretUtf16": 4,
+          "phase": "editing-source",
+          "status": "unsupported",
+          "candidates": [],
+          "committed": [
+            {
+              "kind": "equation",
+              "source": "căn x",
+              "candidate": {
+                "id": "root",
+                "kind": "direct",
+                "label": "√x",
+                "math": "<msqrt><mi>x</mi></msqrt>"
+              }
+            },
+            {
+              "kind": "text",
+              "text": " "
+            }
+          ],
+          "sourceTranscript": "căn x cộng"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "cộng ",
+          "caretUtf16": 5,
+          "phase": "editing-source",
+          "status": "unsupported",
+          "candidates": [],
+          "committed": [
+            {
+              "kind": "equation",
+              "source": "căn x",
+              "candidate": {
+                "id": "root",
+                "kind": "direct",
+                "label": "√x",
+                "math": "<msqrt><mi>x</mi></msqrt>"
+              }
+            },
+            {
+              "kind": "text",
+              "text": " "
+            }
+          ],
+          "sourceTranscript": "căn x cộng "
+        },
+        {
+          "action": {
+            "type": "insert",
+            "text": "1"
+          },
+          "source": "cộng 1",
+          "caretUtf16": 6,
+          "phase": "editing-source",
+          "status": "unsupported",
+          "candidates": [],
+          "committed": [
+            {
+              "kind": "equation",
+              "source": "căn x",
+              "candidate": {
+                "id": "root",
+                "kind": "direct",
+                "label": "√x",
+                "math": "<msqrt><mi>x</mi></msqrt>"
+              }
+            },
+            {
+              "kind": "text",
+              "text": " "
+            }
+          ],
+          "sourceTranscript": "căn x cộng 1"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "cộng 1 ",
+          "caretUtf16": 7,
+          "phase": "editing-source",
+          "status": "unsupported",
+          "candidates": [],
+          "committed": [
+            {
+              "kind": "equation",
+              "source": "căn x",
+              "candidate": {
+                "id": "root",
+                "kind": "direct",
+                "label": "√x",
+                "math": "<msqrt><mi>x</mi></msqrt>"
+              }
+            },
+            {
+              "kind": "text",
+              "text": " "
+            }
+          ],
+          "sourceTranscript": "căn x cộng 1 "
+        }
+      ]
+    },
+    {
+      "policy": "commit",
+      "sample": "2/3x · nhiều cách hiểu",
+      "trace": [
+        {
+          "action": {
+            "type": "insert",
+            "text": "2/3x"
+          },
+          "source": "2/3x",
+          "caretUtf16": 4,
+          "phase": "editing-source",
+          "status": "ambiguous",
+          "candidates": [
+            {
+              "id": "divide-then-multiply",
+              "kind": "direct"
+            },
+            {
+              "id": "implicit-denominator",
+              "kind": "interpretation"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "2/3x"
+        },
+        {
+          "action": {
+            "type": "space"
+          },
+          "source": "2/3x ",
+          "caretUtf16": 5,
+          "phase": "editing-source",
+          "status": "ambiguous",
+          "candidates": [
+            {
+              "id": "divide-then-multiply",
+              "kind": "direct"
+            },
+            {
+              "id": "implicit-denominator",
+              "kind": "interpretation"
+            }
+          ],
+          "committed": [],
+          "sourceTranscript": "2/3x "
+        }
+      ]
+    }
+  ]
+}

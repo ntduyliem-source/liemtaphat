@@ -1,0 +1,1018 @@
+{
+  "fixtureVersion": "m0-word-candidates-1",
+  "scope": "Fixed candidates for Word COM discovery; no natural-language parser claim.",
+  "cases": [
+    {
+      "caseId": "01-arithmetic",
+      "source": "x + 1",
+      "selectedCandidateId": "01-arithmetic:direct",
+      "candidates": [
+        {
+          "candidateId": "01-arithmetic:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "row",
+              "children": [
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "x"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "+"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>x</m:t></m:r><m:r><m:t>+</m:t></m:r><m:r><m:t>1</m:t></m:r></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "02-fraction",
+      "source": "1 tr\u00ean 2",
+      "selectedCandidateId": "02-fraction:direct",
+      "candidates": [
+        {
+          "candidateId": "02-fraction:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "fraction",
+              "children": [
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "1"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:f><m:num><m:r><m:t>1</m:t></m:r></m:num><m:den><m:r><m:t>2</m:t></m:r></m:den></m:f></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "1",
+        "replace": "9"
+      }
+    },
+    {
+      "caseId": "03-precedence",
+      "source": "x+1/2",
+      "selectedCandidateId": "03-precedence:direct",
+      "candidates": [
+        {
+          "candidateId": "03-precedence:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "row",
+              "children": [
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "x"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "+"
+                },
+                {
+                  "kind": "fraction",
+                  "children": [
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "1"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "2"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:r><m:t>x</m:t></m:r><m:r><m:t>+</m:t></m:r><m:f><m:num><m:r><m:t>1</m:t></m:r></m:num><m:den><m:r><m:t>2</m:t></m:r></m:den></m:f></m:oMath>"
+        },
+        {
+          "candidateId": "03-precedence:repair",
+          "kind": "repair",
+          "label": "Put x+1 in the numerator",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "fraction",
+              "children": [
+                {
+                  "kind": "row",
+                  "children": [
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "x"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "+"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "1"
+                    }
+                  ]
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:f><m:num><m:r><m:t>x</m:t></m:r><m:r><m:t>+</m:t></m:r><m:r><m:t>1</m:t></m:r></m:num><m:den><m:r><m:t>2</m:t></m:r></m:den></m:f></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "04-parenthesized-numerator",
+      "source": "(x+1)/2",
+      "selectedCandidateId": "04-parenthesized-numerator:direct",
+      "candidates": [
+        {
+          "candidateId": "04-parenthesized-numerator:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "fraction",
+              "children": [
+                {
+                  "kind": "row",
+                  "children": [
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "x"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "+"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "1"
+                    }
+                  ]
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:f><m:num><m:r><m:t>x</m:t></m:r><m:r><m:t>+</m:t></m:r><m:r><m:t>1</m:t></m:r></m:num><m:den><m:r><m:t>2</m:t></m:r></m:den></m:f></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "05-nested-fraction",
+      "source": "(1/2)/(x+1)",
+      "selectedCandidateId": "05-nested-fraction:direct",
+      "candidates": [
+        {
+          "candidateId": "05-nested-fraction:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "fraction",
+              "children": [
+                {
+                  "kind": "fraction",
+                  "children": [
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "1"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "2"
+                    }
+                  ]
+                },
+                {
+                  "kind": "row",
+                  "children": [
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "x"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "+"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "1"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:f><m:num><m:f><m:num><m:r><m:t>1</m:t></m:r></m:num><m:den><m:r><m:t>2</m:t></m:r></m:den></m:f></m:num><m:den><m:r><m:t>x</m:t></m:r><m:r><m:t>+</m:t></m:r><m:r><m:t>1</m:t></m:r></m:den></m:f></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "06-square-root-number",
+      "source": "can2",
+      "selectedCandidateId": "06-square-root-number:direct",
+      "candidates": [
+        {
+          "candidateId": "06-square-root-number:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "radical",
+              "children": [
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:rad><m:radPr><m:degHide m:val=\"1\"/></m:radPr><m:deg></m:deg><m:e><m:r><m:t>2</m:t></m:r></m:e></m:rad></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "2",
+        "replace": "9"
+      }
+    },
+    {
+      "caseId": "07-square-root-expression",
+      "source": "c\u0103n (x+1)",
+      "selectedCandidateId": "07-square-root-expression:direct",
+      "candidates": [
+        {
+          "candidateId": "07-square-root-expression:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "radical",
+              "children": [
+                {
+                  "kind": "row",
+                  "children": [
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "x"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "+"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "1"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:rad><m:radPr><m:degHide m:val=\"1\"/></m:radPr><m:deg></m:deg><m:e><m:r><m:t>x</m:t></m:r><m:r><m:t>+</m:t></m:r><m:r><m:t>1</m:t></m:r></m:e></m:rad></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "08-cube-root",
+      "source": "c\u0103n b\u1eadc 3 c\u1ee7a x",
+      "selectedCandidateId": "08-cube-root:direct",
+      "candidates": [
+        {
+          "candidateId": "08-cube-root:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "radical",
+              "children": [
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "x"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "3"
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:rad><m:radPr><m:degHide m:val=\"0\"/></m:radPr><m:deg><m:r><m:t>3</m:t></m:r></m:deg><m:e><m:r><m:t>x</m:t></m:r></m:e></m:rad></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "09-superscript",
+      "source": "x m\u0169 2",
+      "selectedCandidateId": "09-superscript:direct",
+      "candidates": [
+        {
+          "candidateId": "09-superscript:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "power",
+              "children": [
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "x"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:sSup><m:e><m:r><m:t>x</m:t></m:r></m:e><m:sup><m:r><m:t>2</m:t></m:r></m:sup></m:sSup></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "10-subscript",
+      "source": "x ch\u1ec9 s\u1ed1 1",
+      "selectedCandidateId": "10-subscript:direct",
+      "candidates": [
+        {
+          "candidateId": "10-subscript:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "subscript",
+              "children": [
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "x"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:sSub><m:e><m:r><m:t>x</m:t></m:r></m:e><m:sub><m:r><m:t>1</m:t></m:r></m:sub></m:sSub></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "11-subsup",
+      "source": "x_i^2",
+      "selectedCandidateId": "11-subsup:direct",
+      "candidates": [
+        {
+          "candidateId": "11-subsup:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "subsup",
+              "children": [
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "x"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "i"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:sSubSup><m:e><m:r><m:t>x</m:t></m:r></m:e><m:sub><m:r><m:t>i</m:t></m:r></m:sub><m:sup><m:r><m:t>2</m:t></m:r></m:sup></m:sSubSup></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "12-delimiter-power",
+      "source": "(-x)^2",
+      "selectedCandidateId": "12-delimiter-power:direct",
+      "candidates": [
+        {
+          "candidateId": "12-delimiter-power:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "power",
+              "children": [
+                {
+                  "kind": "delimiter",
+                  "children": [
+                    {
+                      "kind": "row",
+                      "children": [
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "-"
+                        },
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "x"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:sSup><m:e><m:d><m:dPr><m:begChr m:val=\"(\"/><m:endChr m:val=\")\"/></m:dPr><m:e><m:r><m:t>-</m:t></m:r><m:r><m:t>x</m:t></m:r></m:e></m:d></m:e><m:sup><m:r><m:t>2</m:t></m:r></m:sup></m:sSup></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "13-summation",
+      "source": "sum i=1..n i^2",
+      "selectedCandidateId": "13-summation:direct",
+      "candidates": [
+        {
+          "candidateId": "13-summation:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "nary",
+              "children": [
+                {
+                  "kind": "row",
+                  "children": [
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "i"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "="
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "1"
+                    }
+                  ]
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "n"
+                },
+                {
+                  "kind": "power",
+                  "children": [
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "i"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "2"
+                    }
+                  ]
+                }
+              ],
+              "operator": "\u2211"
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:nary><m:naryPr><m:chr m:val=\"\u2211\"/><m:limLoc m:val=\"undOvr\"/></m:naryPr><m:sub><m:r><m:t>i</m:t></m:r><m:r><m:t>=</m:t></m:r><m:r><m:t>1</m:t></m:r></m:sub><m:sup><m:r><m:t>n</m:t></m:r></m:sup><m:e><m:sSup><m:e><m:r><m:t>i</m:t></m:r></m:e><m:sup><m:r><m:t>2</m:t></m:r></m:sup></m:sSup></m:e></m:nary></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "i",
+        "replace": "j"
+      }
+    },
+    {
+      "caseId": "14-integral",
+      "source": "integral 0..1 x dx",
+      "selectedCandidateId": "14-integral:direct",
+      "candidates": [
+        {
+          "candidateId": "14-integral:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "nary",
+              "children": [
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "0"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "1"
+                },
+                {
+                  "kind": "row",
+                  "children": [
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "x"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "d"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "x"
+                    }
+                  ]
+                }
+              ],
+              "operator": "\u222b",
+              "limits": "subSup"
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:nary><m:naryPr><m:chr m:val=\"\u222b\"/><m:limLoc m:val=\"subSup\"/></m:naryPr><m:sub><m:r><m:t>0</m:t></m:r></m:sub><m:sup><m:r><m:t>1</m:t></m:r></m:sup><m:e><m:r><m:t>x</m:t></m:r><m:r><m:t>d</m:t></m:r><m:r><m:t>x</m:t></m:r></m:e></m:nary></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "15-product",
+      "source": "product k=1..n k",
+      "selectedCandidateId": "15-product:direct",
+      "candidates": [
+        {
+          "candidateId": "15-product:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "nary",
+              "children": [
+                {
+                  "kind": "row",
+                  "children": [
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "k"
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "="
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "1"
+                    }
+                  ]
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "n"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "k"
+                }
+              ],
+              "operator": "\u220f"
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:nary><m:naryPr><m:chr m:val=\"\u220f\"/><m:limLoc m:val=\"undOvr\"/></m:naryPr><m:sub><m:r><m:t>k</m:t></m:r><m:r><m:t>=</m:t></m:r><m:r><m:t>1</m:t></m:r></m:sub><m:sup><m:r><m:t>n</m:t></m:r></m:sup><m:e><m:r><m:t>k</m:t></m:r></m:e></m:nary></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "k",
+        "replace": "j"
+      }
+    },
+    {
+      "caseId": "16-matrix",
+      "source": "matrix[[1,2],[3,4]]",
+      "selectedCandidateId": "16-matrix:direct",
+      "candidates": [
+        {
+          "candidateId": "16-matrix:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "matrix",
+              "children": [
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "1"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "2"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "3"
+                },
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "4"
+                }
+              ],
+              "columns": 2
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:m><m:mr><m:e><m:r><m:t>1</m:t></m:r></m:e><m:e><m:r><m:t>2</m:t></m:r></m:e></m:mr><m:mr><m:e><m:r><m:t>3</m:t></m:r></m:e><m:e><m:r><m:t>4</m:t></m:r></m:e></m:mr></m:m></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "1",
+        "replace": "9"
+      }
+    },
+    {
+      "caseId": "17-function",
+      "source": "sin(x)",
+      "selectedCandidateId": "17-function:direct",
+      "candidates": [
+        {
+          "candidateId": "17-function:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "function",
+              "children": [
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "sin"
+                },
+                {
+                  "kind": "delimiter",
+                  "children": [
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "x"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:func><m:fName><m:r><m:t>sin</m:t></m:r></m:fName><m:e><m:d><m:dPr><m:begChr m:val=\"(\"/><m:endChr m:val=\")\"/></m:dPr><m:e><m:r><m:t>x</m:t></m:r></m:e></m:d></m:e></m:func></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "18-limit",
+      "source": "lim x->0 sin(x)/x",
+      "selectedCandidateId": "18-limit:direct",
+      "candidates": [
+        {
+          "candidateId": "18-limit:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "row",
+              "children": [
+                {
+                  "kind": "limitlow",
+                  "children": [
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "lim"
+                    },
+                    {
+                      "kind": "row",
+                      "children": [
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "x"
+                        },
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "\u2192"
+                        },
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "fraction",
+                  "children": [
+                    {
+                      "kind": "function",
+                      "children": [
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "sin"
+                        },
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "x"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "text",
+                      "children": [],
+                      "value": "x"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:limLow><m:e><m:r><m:t>lim</m:t></m:r></m:e><m:lim><m:r><m:t>x</m:t></m:r><m:r><m:t>\u2192</m:t></m:r><m:r><m:t>0</m:t></m:r></m:lim></m:limLow><m:f><m:num><m:func><m:fName><m:r><m:t>sin</m:t></m:r></m:fName><m:e><m:r><m:t>x</m:t></m:r></m:e></m:func></m:num><m:den><m:r><m:t>x</m:t></m:r></m:den></m:f></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "19-vector",
+      "source": "vector x",
+      "selectedCandidateId": "19-vector:direct",
+      "candidates": [
+        {
+          "candidateId": "19-vector:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "accent",
+              "children": [
+                {
+                  "kind": "text",
+                  "children": [],
+                  "value": "x"
+                }
+              ],
+              "accent": "\u20d7"
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:acc><m:accPr><m:chr m:val=\"\u20d7\"/></m:accPr><m:e><m:r><m:t>x</m:t></m:r></m:e></m:acc></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    },
+    {
+      "caseId": "20-equation-array",
+      "source": "system[[x+y=1],[x-y=0]]",
+      "selectedCandidateId": "20-equation-array:direct",
+      "candidates": [
+        {
+          "candidateId": "20-equation-array:direct",
+          "kind": "direct",
+          "label": "According to the typed source",
+          "mathDocument": {
+            "schemaVersion": "m0-fixed-tree-1",
+            "root": {
+              "kind": "delimiter",
+              "children": [
+                {
+                  "kind": "equationArray",
+                  "children": [
+                    {
+                      "kind": "row",
+                      "children": [
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "x"
+                        },
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "+"
+                        },
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "y"
+                        },
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "="
+                        },
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "1"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "row",
+                      "children": [
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "x"
+                        },
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "-"
+                        },
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "y"
+                        },
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "="
+                        },
+                        {
+                          "kind": "text",
+                          "children": [],
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "begin": "{",
+              "end": ""
+            }
+          },
+          "omml": "<m:oMath xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\"><m:d><m:dPr><m:begChr m:val=\"{\"/><m:endChr m:val=\"\"/></m:dPr><m:e><m:eqArr><m:e><m:r><m:t>x</m:t></m:r><m:r><m:t>+</m:t></m:r><m:r><m:t>y</m:t></m:r><m:r><m:t>=</m:t></m:r><m:r><m:t>1</m:t></m:r></m:e><m:e><m:r><m:t>x</m:t></m:r><m:r><m:t>-</m:t></m:r><m:r><m:t>y</m:t></m:r><m:r><m:t>=</m:t></m:r><m:r><m:t>0</m:t></m:r></m:e></m:eqArr></m:e></m:d></m:oMath>"
+        }
+      ],
+      "nativeEdit": {
+        "find": "x",
+        "replace": "z"
+      }
+    }
+  ]
+}

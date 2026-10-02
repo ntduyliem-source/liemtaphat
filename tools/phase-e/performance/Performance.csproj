@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Locus.Core"><HintPath>$(DeliveryRoot)/Locus.Core.dll</HintPath></Reference>
+    <Reference Include="Locus.Application"><HintPath>$(DeliveryRoot)/Locus.Application.dll</HintPath></Reference>
+  </ItemGroup>
+  <Target Name="RequireDelivery" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(DeliveryRoot)/Locus.Application.dll')" Text="Pass DeliveryRoot for the published Desktop build; do not rebuild product code for this measurement." />
+  </Target>
+</Project>

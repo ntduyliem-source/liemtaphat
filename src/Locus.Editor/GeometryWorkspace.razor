@@ -1,0 +1,76 @@
+@implements IAsyncDisposable
+@inject GeometryWorkspaceModel Model
+@inject IJSRuntime Js
+@inject IEditorFiles Files
+@inject IEditorClipboard Clipboard
+
+<div class="geometry-workspace" @ref="root">
+    <header class="plot-header"><div><strong>Hình học</strong><small>Đặt điểm, nối và kéo trực tiếp trên canvas</small></div><div class="plot-actions">
+        <button class="@(dimension==2?"geo-active":"")" @onclick="()=>SwitchDimension(2)">2D</button><button class="@(dimension==3?"geo-active":"")" @onclick="()=>SwitchDimension(3)">3D</button>
+        <button aria-label="Hoàn tác hình học" disabled="@(!Session.CanUndo)" @onclick="()=>History(false)">↶</button><button aria-label="Làm lại hình học" disabled="@(!Session.CanRedo)" @onclick="()=>History(true)">↷</button><button @onclick="Save">Lưu .locus</button><label class="plot-open">Mở<InputFile OnChange="Open" accept=".locus" /></label>
+        @if(DesktopWindow!=null){<button aria-label="Đổi kích thước cửa sổ" @onclick="DesktopWindow.ToggleSizeAsync">⛶</button>}
+    </div></header>
+    <div class="geo-toolbar" role="toolbar" aria-label="Công cụ hình học">
+        <button class="@(tool=="select"?"geo-active":"")" @onclick='()=>Tool("select")'>↖ Chọn / kéo</button>
+        <details><summary>Điểm</summary><button @onclick='()=>Tool("point")'>Điểm tự do</button><button @onclick='()=>Tool("midpoint")'>Trung điểm</button>@if(dimension==2){<button @onclick='()=>Tool("onCircle")'>Điểm trên đường tròn</button>}</details>
+        <details><summary>Đường</summary>@foreach(var kind in new[]{"segment","line","ray","vector"}){<button @onclick="()=>Tool(kind)">@ToolName(kind)</button>}</details>
+        @if(dimension==2){<details><summary>Tròn / đa giác</summary><button @onclick='()=>Tool("circle")'>Tròn tâm – điểm</button><button @onclick='()=>Tool("triangle")'>Tam giác</button><button @onclick='()=>Tool("polygon")'>Đa giác</button></details>}
+        else{<details><summary>Mặt / khối</summary><button @onclick='()=>Tool("polygon")'>Mặt qua các đỉnh</button><button @onclick='()=>Tool("box")'>Hình hộp</button><button @onclick='()=>Tool("pyramid")'>Hình chóp</button><button @onclick='()=>Tool("prism")'>Lăng trụ tam giác</button></details>}
+        <details><summary>Góc / dựng</summary><button @onclick='()=>Tool("angle")'>Đo góc A–B–C</button><button @onclick='()=>Tool("foot")'>Hình chiếu / đường cao</button><button @onclick='()=>Tool("parallel")'>Đường song song</button>@if(dimension==2){<button @onclick='()=>Tool("fixedAngle")'>Góc cho trước</button><button @onclick='()=>Tool("perpendicular")'>Đường vuông góc</button>}</details>
+        <button class="@(tool=="label"?"geo-active":"")" @onclick='()=>Tool("label")'>T Chữ</button>
+        <label class="geo-snap-toggle"><input type="checkbox" @bind="snapping" /> Bắt điểm</label>
+        <button aria-label="Phóng to hình học" @onclick="()=>Zoom(1.2)">＋</button><button aria-label="Thu nhỏ hình học" @onclick="()=>Zoom(1/1.2)">−</button><button @onclick="ResetView">Về gốc</button>
+    </div>
+    <div class="geo-layout">
+        <main class="geo-main">
+            <div class="geo-instruction"><strong>@ToolName(tool)</strong><span>@Instruction</span>@if(pending.Count>0){<button @onclick="Cancel">Hủy / Esc</button>}@if(tool=="polygon"&&pending.Count>=3){<button @onclick="FinishPolygon">Khép hình / Enter</button>}</div>
+            @if(tool=="fixedAngle"){<div class="geo-tool-options"><label>Số đo °<input type="number" aria-label="Góc cần dựng" @bind="givenAngle" /></label><label>Độ dài cạnh mới<input type="number" aria-label="Độ dài cạnh góc" @bind="givenLength" min="0.01" /></label></div>}
+            @if(tool=="label"){<div class="geo-tool-options"><label>Nội dung chữ<input aria-label="Chữ để đặt lên hình" @bind="labelText" maxlength="512" /></label></div>}
+            @if(tool is "box" or "pyramid" or "prism"){<div class="geo-tool-options"><label>Rộng<input type="number" aria-label="Chiều rộng khối" @bind="solidWidth" min="0.1" /></label><label>Sâu<input type="number" aria-label="Chiều sâu khối" @bind="solidDepth" min="0.1" /></label><label>Cao<input type="number" aria-label="Chiều cao khối" @bind="solidHeight" min="0.1" /></label><small>Đặt khối rồi kéo từng đỉnh tự do.</small></div>}
+            @if(dimension==3){<div class="geo-camera"><label>Mặt phẳng kéo<select aria-label="Mặt phẳng kéo điểm" @bind="plane"><option>XY</option><option>XZ</option><option>YZ</option></select></label><button @onclick='()=>CameraPreset("front")'>Trước</button><button @onclick='()=>CameraPreset("top")'>Trên</button><button @onclick='()=>CameraPreset("side")'>Bên</button><button @onclick='()=>CameraPreset("iso")'>Phối cảnh song song</button><small>Kéo nền để xoay · Shift+kéo để pan</small></div>}
+            <div class="geo-surface" data-geo-surface tabindex="0" aria-label="Canvas hình học" @oncontextmenu="()=>contextMenu=true" @oncontextmenu:preventDefault>
+                @((MarkupString)scene)
+                @if(Doc.Points.Length==0&&Doc.Labels?.Length is null or 0&&tool=="select"){
+                    <div class="plot-start"><span>CANVAS TRỐNG</span><h2>Bạn muốn vẽ gì?</h2><p>Chọn công cụ, sau đó bấm lên canvas để đặt hình.</p><div><button @onclick='()=>Tool("point")'>＋ Điểm</button><button @onclick='()=>Tool("segment")'>╱ Đoạn thẳng</button>@if(dimension==2){<button @onclick='()=>Tool("circle")'>○ Đường tròn</button><button @onclick='()=>Tool("triangle")'>△ Tam giác</button>}else{<button @onclick='()=>Tool("box")'>▱ Hình hộp</button><button @onclick='()=>Tool("pyramid")'>△ Hình chóp</button>}</div></div>
+                }
+            </div>
+            <div class="plot-export"><span>@Doc.Points.Length điểm · @Doc.Segments.Length đường</span><button disabled="@(!CanExport)" @onclick='()=>Export("svg",true)'>Copy SVG</button><button disabled="@(!CanExport)" @onclick='()=>Export("png",true)'>Copy PNG</button><button disabled="@(!CanExport)" @onclick='()=>Export("svg")'>Tải SVG</button><button disabled="@(!CanExport)" @onclick='()=>Export("png")'>Tải PNG</button></div>
+            @if(contextMenu){<div class="plot-context"><button disabled="@(!CanExport)" @onclick='()=>Export("svg",true)'>Copy SVG</button><button disabled="@(!CanExport)" @onclick='()=>Export("png",true)'>Copy PNG</button><button @onclick="()=>contextMenu=false">Đóng</button></div>}
+            @if(notice.Length>0){<p class="plot-notice" role="status">@notice</p>}
+            @foreach(var problem in resolved.Problems){<p class="plot-problem">@problem</p>}
+            @if(retained!=null){<button @onclick="Recover">Tải lại nguyên tệp chưa mở được</button>}
+            <small class="geo-hint">Kéo nhãn để bố trí chữ. Alt bỏ qua bắt điểm; Esc hủy thao tác; Ctrl+Z/Y hoàn tác. Tọa độ và số đo dùng đơn vị của hình.</small>
+        </main>
+        <aside class="geo-sidebar">
+            <strong>Đối tượng</strong><div class="geo-object-list">
+                @foreach(var p in Doc.Points){<button class="@(selected==p.Id?"geo-selected":"")" @onclick="()=>Select(p.Id)">● @p.Label <small>@(p.Relation==null?"tự do":RelationName(p.Relation.Kind))@(!p.Visible?" · ẩn":"")</small></button>}
+                @foreach(var s in Doc.Segments){<button class="@(selected==s.Id?"geo-selected":"")" @onclick="()=>Select(s.Id)">╱ @Label(s.Start)@Label(s.End) <small>@ToolName(s.Kind)@(!s.Visible?" · ẩn":"")</small></button>}
+                @foreach(var c in Doc.Circles??[]){<button class="@(selected==c.Id?"geo-selected":"")" @onclick="()=>Select(c.Id)">○ Tròn @Label(c.Center)</button>}
+                @foreach(var a in Doc.Angles??[]){<button class="@(selected==a.Id?"geo-selected":"")" @onclick="()=>Select(a.Id)">∠ @Label(a.A)@Label(a.Vertex)@Label(a.C)</button>}
+                @foreach(var f in Doc.Faces??[]){<button class="@(selected==f.Id?"geo-selected":"")" @onclick="()=>Select(f.Id)">▱ @string.Join("",f.Vertices.Select(Label))</button>}
+                @foreach(var l in Doc.Labels??[]){<button class="@(selected==l.Id?"geo-selected":"")" @onclick="()=>Select(l.Id)">T @l.Text</button>}
+            </div>
+            @if(SelectedPoint is {} point)
+            {
+                <section class="geo-properties"><h3>Điểm @point.Label</h3><label>Tên<input aria-label="Tên điểm" value="@point.Label" maxlength="64" @onchange='e=>PointProperty(point with{Label=e.Value?.ToString()??""})' /></label><label><input type="checkbox" checked="@point.Visible" @onchange="e=>PointProperty(point with{Visible=e.Value is true})" /> Hiện điểm và tên</label>
+                    @if(resolved.Points[point.Id] is {} p){<p>(@N(p.X), @N(p.Y)@(dimension==3?", "+N(p.Z):""))</p>}
+                    @if(point.Relation!=null){<p>@RelationName(point.Relation.Kind): @string.Join(", ",point.Relation.Parents.Select(Label))</p><button @onclick="()=>Detach(point)">Tách thành điểm tự do</button>}
+                    <small>Kéo trực tiếp trên canvas để di chuyển.</small>
+                </section>
+            }
+            @if(SelectedSegment is {} edge)
+            {
+                <section class="geo-properties"><h3>@ToolName(edge.Kind) @Label(edge.Start)@Label(edge.End)</h3><label>Màu<input type="color" aria-label="Màu đoạn" value="@edge.Color" @onchange='e=>EdgeProperty(edge with{Color=e.Value!.ToString()!})' /></label><label>Nét<select aria-label="Nét đoạn" value="@edge.LineStyle" @onchange='e=>EdgeProperty(edge with{LineStyle=e.Value!.ToString()!})'><option value="solid">Liền</option><option value="dashed">Đứt</option><option value="dotted">Chấm</option></select></label><label>Độ dày<input type="number" min="0.5" max="12" step="0.5" aria-label="Độ dày đoạn" value="@N(edge.Width)" @onchange="e=>EdgeNumber(edge,e)" /></label><label>Vạch bằng nhau<select aria-label="Vạch ký hiệu đoạn" value="@edge.Marks" @onchange="e=>EdgeProperty(edge with{Marks=int.Parse(e.Value!.ToString()!)})">@for(int i=0;i<=3;i++){<option value="@i">@i</option>}</select></label><small>Vạch là ký hiệu trình bày.</small><label><input type="checkbox" checked="@edge.Visible" @onchange="e=>EdgeProperty(edge with{Visible=e.Value is true})" /> Hiện đường</label>
+                    @if(dimension==3){<label>Nét khuất<select aria-label="Quy tắc nét khuất" value="@edge.Hidden" @onchange='e=>EdgeProperty(edge with{Hidden=e.Value!.ToString()!})'><option value="auto">Tự tính theo mặt</option><option value="visible">Giữ nét đã chọn</option><option value="hidden">Luôn nét khuất</option></select></label>}
+                    @if(Length(edge) is {} length){<p>Độ dài: @N(length)</p>}
+                </section>
+            }
+            @if(SelectedCircle is {} circle){<section class="geo-properties"><h3>Đường tròn</h3><label>Màu<input type="color" aria-label="Màu đường tròn" value="@circle.Color" @onchange='e=>CircleProperty(circle with{Color=e.Value!.ToString()!})' /></label><label>Nét<select aria-label="Nét đường tròn" value="@circle.LineStyle" @onchange='e=>CircleProperty(circle with{LineStyle=e.Value!.ToString()!})'><option value="solid">Liền</option><option value="dashed">Đứt</option><option value="dotted">Chấm</option></select></label><label><input type="checkbox" checked="@circle.Visible" @onchange="e=>CircleProperty(circle with{Visible=e.Value is true})" /> Hiện đường tròn</label><small>Kéo tâm hoặc điểm trên vành để sửa hình.</small></section>}
+            @if(SelectedAngle is {} angle){<section class="geo-properties"><h3>Góc @Label(angle.A)@Label(angle.Vertex)@Label(angle.C)</h3><label><input type="checkbox" checked="@angle.Reflex" @onchange="e=>AngleProperty(angle with{Reflex=e.Value is true})" /> Góc lớn</label><label>Đơn vị<select aria-label="Đơn vị góc" value="@angle.Unit" @onchange='e=>AngleProperty(angle with{Unit=e.Value!.ToString()!})'><option value="degree">Độ</option><option value="radian">Radian</option></select></label><label>Số cung<select aria-label="Số cung góc" value="@angle.Arcs" @onchange="e=>AngleProperty(angle with{Arcs=int.Parse(e.Value!.ToString()!)})">@for(int i=1;i<=3;i++){<option value="@i">@i</option>}</select></label><label>Bán kính cung<input aria-label="Bán kính cung góc" type="number" min="10" max="160" value="@N(angle.Radius)" @onchange="e=>AngleRadius(angle,e)" /></label><label>Nhãn<input aria-label="Nhãn góc" value="@angle.Label" maxlength="64" @onchange='e=>AngleProperty(angle with{Label=e.Value?.ToString()??""})' /></label><label>Màu<input type="color" aria-label="Màu góc" value="@angle.Color" @onchange='e=>AngleProperty(angle with{Color=e.Value!.ToString()!})' /></label><label><input type="checkbox" checked="@angle.ShowValue" @onchange="e=>AngleProperty(angle with{ShowValue=e.Value is true})" /> Hiện số đo</label><small>Số đo tính theo hình. Nhãn chữ không tạo ràng buộc.</small></section>}
+            @if(SelectedFace is {} face){<section class="geo-properties"><h3>Mặt / đa giác</h3><label>Màu tô<input type="color" aria-label="Màu mặt" value="@face.Color" @onchange='e=>FaceProperty(face with{Color=e.Value!.ToString()!})' /></label><label>Độ trong<input type="number" min="0" max="1" step="0.1" aria-label="Độ đậm mặt" value="@N(face.Opacity)" @onchange="e=>FaceOpacity(face,e)" /></label><label><input type="checkbox" checked="@face.Visible" @onchange="e=>FaceProperty(face with{Visible=e.Value is true})" /> Hiện mặt và tính che khuất</label></section>}
+            @if(SelectedLabel is {} text){<section class="geo-properties"><h3>Chữ</h3><label>Nội dung<input aria-label="Nội dung nhãn" value="@text.Text" maxlength="512" @onchange='e=>LabelProperty(text with{Text=e.Value?.ToString()??""})' /></label><small>Kéo chữ để đổi vị trí.</small></section>}
+            @if(selected!=null){<button class="geo-delete" @onclick="Delete">Xóa đối tượng và phần phụ thuộc</button>}
+            <label class="plot-autosave"><input type="checkbox" checked="@autoSave" @onchange="AutoSaveChanged" /> Tự lưu nháp hình học</label><small class="plot-draft">@draftStatus</small>
+        </aside>
+    </div>
+</div>

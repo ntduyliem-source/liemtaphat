@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Locus · Thử nghiệm gõ nối tiếp</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">LOCUS / M0 / S-05</div>
+      <h1>Sau Space, gõ tiếp vào đâu?</h1>
+      <p class="intro">So sánh hai hành vi nhập bằng cùng một chuỗi thao tác.</p>
+      <p class="scope"><strong>Mô phỏng UX trong trình duyệt.</strong> Không kết nối Word; không chứng minh native equation, Undo của Word hay bộ gõ hệ thống. Chỉ dựng 7 mẫu cố định, không phải parser Locus.</p>
+      <p><a href="markers.html">Thử vùng tự chuyển lc[…] và dấu tùy chỉnh →</a></p>
+    </header>
+    <section class="scenario" aria-label="Chọn bài thử">
+      <div>
+        <label for="sample">Bài thử</label>
+        <select id="sample"></select>
+      </div>
+      <button id="next" class="primary">Bước tiếp</button>
+      <button id="run">Chạy hết mẫu</button>
+      <button id="reset">Làm lại</button>
+      <output id="progress" aria-live="polite"></output>
+      <div id="steps" aria-label="Chuỗi thao tác"></div>
+      <p class="hint">Mỗi bước chữ là một cụm nhập tổng hợp; Space là một sự kiện riêng. Đây không phải ghi lại phím thật.</p>
+    </section>
+    <div id="comparison" class="comparison"></div>
+    <aside class="decision">
+      <strong>D-01 còn mở.</strong> Đề xuất đem phương án A sang thử Word: Space cập nhật preview trong phiên; Enter chốt và ra văn bản; Esc giữ nguồn. Cần thử thực tế việc gõ, sửa giữa biểu thức, bộ gõ tiếng Việt và Undo trước khi chọn hành vi sản phẩm.
+    </aside>
+    <footer>Mọi dữ liệu ở trong bộ nhớ tab. Không gửi mạng, không lưu tài liệu. Tải lại trang sẽ xóa phiên thử.</footer>
+  </main>
+  <template id="panel">
+    <section class="panel">
+      <div class="panel-heading"><span class="policy-letter"></span><div><h2></h2><p class="policy-description"></p></div></div>
+      <label class="source-label">Nguồn đang nhập <textarea rows="2" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Gõ mẫu ở đây, hoặc dùng Bước tiếp…"></textarea></label>
+      <div class="actions">
+        <button data-action="space">Space</button>
+        <button data-action="backspace">⌫ Backspace</button>
+        <button data-action="undo">↶ Undo</button>
+        <button data-action="finish">Kết thúc · Enter</button>
+        <button data-action="escape">Giữ văn bản · Esc</button>
+      </div>
+      <div class="state"><span class="status"></span><span class="caret"></span></div>
+      <div class="preview" aria-label="Tài liệu mô phỏng"><span class="empty">Kết quả sẽ xuất hiện ở đây.</span></div>
+      <p class="message" aria-live="polite"></p>
+      <div class="candidates"></div>
+      <div class="composition-control"><label><input type="checkbox" class="composition-toggle"> Mô phỏng đang ghép ký tự</label><small>Checkbox phát sự kiện tổng hợp; DOM composition thật cũng được chặn.</small></div>
+      <details><summary>Trạng thái và nhật ký tổng hợp</summary><pre class="debug"></pre><ol class="log"></ol></details>
+    </section>
+  </template>
+  <script src="state-machine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<div id="locus-ux1-review" aria-label="Locus — thiết kế đợt A">
+  <div class="ux-review-head"><span>Bản thiết kế UX1 · Ví dụ cố định</span><span class="ux-secondary">A / v1</span></div>
+  <div class="ux-review-controls">
+    <label>Khung<select id="ux-layout"><option value="web-wide">Web rộng</option><option value="web-narrow">Web hẹp · 360</option><option value="desktop-compact">Desktop gọn · 420</option><option value="desktop-expanded">Desktop bung</option></select></label>
+    <label>Luồng<select id="ux-flow"><option value="single">1 · Một phương trình</option><option value="mixed">2 · Ba phương trình</option><option value="paste">3 · Dán cả đoạn</option><option value="ghost">4 · Nhận sản phẩm</option><option value="states">Các trạng thái phụ</option></select></label>
+  </div>
+  <div class="ux-storybar"><button id="ux-prev" aria-label="Bước trước"><i data-lucide="chevron-left" aria-hidden="true"></i></button><label>Bước<select id="ux-step"></select></label><button id="ux-next" aria-label="Bước sau"><i data-lucide="chevron-right" aria-hidden="true"></i></button></div>
+  <div class="ux-stage" data-layout="web-wide">
+    <section class="ux-window" aria-label="Wireframe Locus">
+      <header class="ux-titlebar"><span class="ux-brand">Locus <span class="ux-secondary">Local</span></span><div class="ux-window-actions"><button id="ux-expand" hidden aria-label="Bung cửa sổ" data-tooltip="Bung cửa sổ"><i data-lucide="maximize-2" aria-hidden="true"></i></button><button id="ux-hide" hidden aria-label="Ẩn về khay hệ thống" data-tooltip="Ẩn về khay hệ thống"><i data-lucide="x" aria-hidden="true"></i></button></div></header>
+      <nav class="ux-tabs" aria-label="Không gian làm việc"><button aria-current="page">Công thức</button><button id="ux-graph" disabled>Biểu đồ <span class="ux-secondary">sắp có</span></button><button id="ux-geometry" disabled>Hình học <span class="ux-secondary">2D/3D · sắp có</span></button></nav>
+      <div class="ux-workspace">
+        <section class="ux-input-section"><div class="ux-section-label"><label for="ux-source">Nội dung</label><span class="ux-secondary">Nguồn gốc</span></div><textarea id="ux-source" rows="6" readonly spellcheck="false" aria-describedby="ux-fixture-label"></textarea><span id="ux-fixture-label" class="ux-secondary">Gõ công thức hoặc dán cả đoạn</span><div id="ux-ghost" class="ux-ghost" hidden></div></section>
+        <section class="ux-result-section"><div class="ux-section-label"><span>Kết quả</span><div><button class="ux-text-button" id="ux-select">Chọn tất cả</button><button class="ux-text-button" id="ux-clear">Bỏ chọn</button></div></div><div id="ux-result" class="ux-result" aria-label="Kết quả và vùng công thức"></div><div id="ux-scope" class="ux-scope" aria-live="polite"></div><div class="ux-actionline"><div class="ux-wand-group"><button id="ux-wand" class="ux-primary"></button><button id="ux-arrow" class="ux-primary" aria-label="Cân bằng hàng loạt trong vùng chọn" aria-expanded="false" aria-controls="ux-batch-menu" hidden><i data-lucide="chevron-down" aria-hidden="true"></i></button></div><button id="ux-undo" aria-label="Hoàn tác thao tác vừa làm" data-tooltip="Hoàn tác thao tác vừa làm"><i data-lucide="undo-2" aria-hidden="true"></i></button></div><div id="ux-batch-menu" class="ux-menu" hidden></div><div id="ux-status" class="ux-status" aria-live="polite"></div><div id="ux-assist" class="ux-assist" hidden></div></section>
+      </div>
+      <div class="ux-export"><div id="ux-export-scope" class="ux-secondary"></div><div class="ux-export-buttons"><button id="ux-copy"><i data-lucide="copy" aria-hidden="true"></i><span>Copy</span></button><button id="ux-png"><i data-lucide="image" aria-hidden="true"></i><span>PNG</span></button><button id="ux-svg"><i data-lucide="file-code-2" aria-hidden="true"></i><span>SVG</span></button><button id="ux-download"><i data-lucide="download" aria-hidden="true"></i><span>Tải</span></button></div></div>
+      <footer class="ux-options"><div class="ux-detect"><span class="ux-secondary">Nhận diện</span><label><input type="checkbox" checked disabled>Toán</label><label><input type="checkbox" checked disabled>Lý</label><label><input type="checkbox" checked disabled>Hóa</label></div><div class="ux-auto-row"><label><input id="ux-auto" type="checkbox">Tự cân bằng</label><button id="ux-options" class="ux-text-button"><i data-lucide="sliders-horizontal" aria-hidden="true"></i>Tùy chọn</button></div></footer>
+      <div id="ux-detail" class="ux-detail" hidden></div>
+    </section>
+    <div id="ux-tray" class="ux-tray" hidden><span>Locus đang ở khay hệ thống</span><button id="ux-reopen">Mở Locus</button><button id="ux-exit" disabled>Thoát Locus</button></div>
+  </div>
+  <div class="ux-review-key" aria-live="polite"><span id="ux-step-count"></span><span id="ux-checkpoint"></span></div>
+</div>
+<style>
+  #locus-ux1-review{--locus-bg:light-dark(#fff,#202225);--locus-soft:light-dark(#f4f5f6,#292c30);--locus-ink:light-dark(#20252b,#edf0f3);--locus-muted:light-dark(#59636e,#b3bbc6);--locus-line:light-dark(#d4d9df,#505761);--locus-action:light-dark(#3158b8,#b5c8ff);--locus-action-ink:light-dark(#fff,#172747);--locus-selected:light-dark(#eaf0ff,#263c66);--locus-warn:light-dark(#77521d,#ebc17f);--locus-ok:light-dark(#216144,#93d5b0);--locus-gap:12px;color:var(--locus-ink);font-family:"Segoe UI",Arial,sans-serif;font-size:14px;line-height:1.5;width:100%;background:transparent}
+  #locus-ux1-review *{box-sizing:border-box}#locus-ux1-review [hidden]{display:none!important}
+  #locus-ux1-review button,#locus-ux1-review input,#locus-ux1-review select,#locus-ux1-review textarea{font:inherit;accent-color:var(--locus-action)}
+  #locus-ux1-review button{display:inline-flex;justify-content:center;align-items:center;gap:6px;min-height:34px;padding:6px 10px;border:1px solid var(--locus-line);border-radius:6px;background:var(--locus-bg);color:var(--locus-ink);cursor:pointer;line-height:1.4}
+  #locus-ux1-review button:hover:not(:disabled){background:var(--locus-soft)}#locus-ux1-review button:disabled{cursor:default;color:var(--locus-muted);background:var(--locus-soft)}
+  #locus-ux1-review select{max-width:100%;min-width:0;min-height:34px;border:1px solid var(--locus-line);border-radius:6px;background:var(--locus-bg);color:var(--locus-ink);padding:5px 8px}
+  #locus-ux1-review .ux-secondary{font-size:12px;color:var(--locus-muted)}#locus-ux1-review .ux-review-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-bottom:12px}
+  #locus-ux1-review .ux-review-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}#locus-ux1-review .ux-review-controls label{display:flex;flex-direction:column;gap:4px;min-width:0}
+  #locus-ux1-review .ux-storybar{display:flex;align-items:end;gap:8px;margin-bottom:16px}#locus-ux1-review .ux-storybar label{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}#locus-ux1-review .ux-storybar button{flex-shrink:0}
+  #locus-ux1-review .ux-stage{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}#locus-ux1-review .ux-window{width:100%;max-width:960px;border:1px solid var(--locus-line);border-radius:10px;background:var(--locus-bg);overflow:visible;container-type:inline-size}
+  #locus-ux1-review [data-layout="web-narrow"] .ux-window{max-width:360px}#locus-ux1-review [data-layout="desktop-compact"] .ux-window{max-width:420px;align-self:flex-end}#locus-ux1-review [data-layout="desktop-expanded"] .ux-window{max-width:900px}
+  #locus-ux1-review .ux-titlebar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px var(--locus-gap) 7px}#locus-ux1-review .ux-brand{font-weight:500;font-size:18px}#locus-ux1-review .ux-brand span{margin-left:8px;font-weight:400}#locus-ux1-review .ux-window-actions{display:flex;gap:4px}
+  #locus-ux1-review .ux-window-actions button{border:0;padding:4px 8px;min-height:28px}#locus-ux1-review .ux-tabs{display:flex;gap:4px;padding:0 var(--locus-gap);border-bottom:1px solid var(--locus-line);flex-wrap:wrap}
+  #locus-ux1-review .ux-tabs button{border:0;border-radius:0;border-bottom:2px solid transparent;padding:8px 6px;flex-wrap:wrap;column-gap:4px;row-gap:0}#locus-ux1-review .ux-tabs [aria-current="page"]{border-bottom-color:var(--locus-action);font-weight:500}#locus-ux1-review .ux-tabs [aria-disabled="true"]{color:var(--locus-muted)}
+  #locus-ux1-review .ux-workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;padding:var(--locus-gap)}#locus-ux1-review .ux-input-section,#locus-ux1-review .ux-result-section{min-width:0}
+  #locus-ux1-review .ux-section-label{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:6px;font-weight:500}#locus-ux1-review .ux-section-label>div{display:flex;gap:4px}
+  #locus-ux1-review .ux-text-button{border:0;padding:2px 4px;min-height:28px;font-size:12px;color:var(--locus-action);background:transparent;font-weight:400}
+  #locus-ux1-review textarea{width:100%;resize:none;min-height:142px;border:1px solid var(--locus-line);border-radius:6px;background:var(--locus-bg);padding:10px;color:var(--locus-ink);font-size:16px;line-height:1.55}
+  #locus-ux1-review .ux-result{min-height:142px;padding:8px 10px;border:1px solid var(--locus-line);border-radius:6px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9}
+  #locus-ux1-review .ux-result p{margin:0 0 8px}#locus-ux1-review .ux-result p:last-child{margin-bottom:0}
+  #locus-ux1-review .ux-formula{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px;max-width:100%;border-radius:4px;padding:2px 4px;vertical-align:middle}#locus-ux1-review .ux-formula.ux-selected{background:var(--locus-selected)}
+  #locus-ux1-review .ux-equation{border:0;background:transparent;padding:0 2px;font-family:"Cambria Math",Cambria,serif;font-size:18px;line-height:1.5;min-height:30px;flex-wrap:wrap;text-align:left;justify-content:start;white-space:pre-wrap}
+  #locus-ux1-review .ux-equation span{display:inline}#locus-ux1-review .ux-equation sub{font-size:.72em;vertical-align:sub}#locus-ux1-review .ux-equation sup{font-size:.72em;vertical-align:super}
+  #locus-ux1-review .ux-fx{font-size:12px;font-style:italic;padding:0 4px;border:0;background:transparent;min-height:24px;color:var(--locus-action)}
+  #locus-ux1-review .ux-next-mark{font-size:12px;color:var(--locus-action);font-family:"Segoe UI",Arial,sans-serif;white-space:nowrap}#locus-ux1-review .ux-keep{font-size:12px;color:var(--locus-muted);line-height:1.4}
+  #locus-ux1-review .ux-scope{font-size:12px;color:var(--locus-muted);margin-top:6px;min-height:18px}#locus-ux1-review .ux-actionline{display:flex;justify-content:space-between;gap:6px;margin-top:8px;align-items:start}#locus-ux1-review .ux-wand-group{display:flex;max-width:calc(100% - 44px)}
+  #locus-ux1-review .ux-primary{background:var(--locus-action);color:var(--locus-action-ink);border-color:var(--locus-action)}#locus-ux1-review .ux-primary:hover:not(:disabled){background:var(--locus-action);filter:brightness(.95)}
+  #locus-ux1-review .ux-primary:disabled{background:var(--locus-soft);border-color:var(--locus-line);color:var(--locus-muted)}#locus-ux1-review .ux-wand-group:has(#ux-arrow:not([hidden])) #ux-wand{border-radius:6px 0 0 6px}#locus-ux1-review #ux-arrow{border-radius:0 6px 6px 0;border-left-color:var(--locus-action-ink);padding:6px;flex-shrink:0}
+  #locus-ux1-review .ux-status{font-size:12px;color:var(--locus-muted);margin-top:6px;min-height:18px;overflow-wrap:anywhere}#locus-ux1-review .ux-status[data-tone="warning"]{color:var(--locus-warn)}#locus-ux1-review .ux-status[data-tone="success"]{color:var(--locus-ok)}
+  #locus-ux1-review .ux-menu{display:flex;flex-direction:column;gap:3px;margin-top:6px;padding:6px;background:var(--locus-bg);border:1px solid var(--locus-line);border-radius:6px;position:relative;z-index:2}#locus-ux1-review .ux-menu button{justify-content:start;text-align:left;border:0;width:100%}
+  #locus-ux1-review .ux-export{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:10px var(--locus-gap);border-top:1px solid var(--locus-line)}#locus-ux1-review .ux-export-buttons{display:flex;flex-wrap:wrap;gap:6px}
+  #locus-ux1-review .ux-options{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px var(--locus-gap);border-top:1px solid var(--locus-line)}#locus-ux1-review .ux-detect,#locus-ux1-review .ux-auto-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}#locus-ux1-review .ux-options label{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}#locus-ux1-review input[type="checkbox"]{width:15px;height:15px;margin:0}
+  #locus-ux1-review .ux-detail{padding:var(--locus-gap);border-top:1px solid var(--locus-line);background:var(--locus-soft);border-radius:0 0 10px 10px;overflow-wrap:anywhere}#locus-ux1-review .ux-detail p{margin:0 0 8px}#locus-ux1-review .ux-detail button{margin:4px 4px 0 0}#locus-ux1-review .ux-detail pre{margin:6px 0;white-space:pre-wrap;color:var(--locus-ink);font-size:13px;background:transparent}
+  #locus-ux1-review .ux-ghost{margin-top:8px;padding:8px;border-left:2px solid var(--locus-line);color:var(--locus-muted)}#locus-ux1-review .ux-ghost button{margin-top:6px}#locus-ux1-review .ux-assist{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}#locus-ux1-review .ux-assist button{font-size:12px}
+  #locus-ux1-review .ux-review-key{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;margin-top:12px;font-size:12px;color:var(--locus-muted)}#locus-ux1-review .ux-review-key span:first-child{font-weight:500;color:var(--locus-ink)}#locus-ux1-review .ux-tray{display:flex;flex-wrap:wrap;gap:8px;padding:12px;background:var(--locus-bg);border:1px solid var(--locus-line);border-radius:8px}
+  #locus-ux1-review .ux-partial-mark{background:var(--locus-selected)}
+  @container (max-width:620px){#locus-ux1-review .ux-workspace{grid-template-columns:minmax(0,1fr);gap:14px}#locus-ux1-review .ux-export{align-items:start}#locus-ux1-review .ux-export-scope{width:100%}#locus-ux1-review .ux-options{display:block}#locus-ux1-review .ux-auto-row{margin-top:8px;justify-content:space-between}#locus-ux1-review .ux-tabs button{padding-left:3px;padding-right:3px;flex:1 1 0;min-width:0}#locus-ux1-review .ux-tabs .ux-secondary{display:block;width:100%}#locus-ux1-review[data-document-size="short"] textarea{min-height:96px;height:96px}#locus-ux1-review[data-document-size="short"] .ux-result{min-height:96px}}
+  #locus-ux1-review[data-wide-layout="stacked"] .ux-workspace{grid-template-columns:minmax(0,1fr)}
+  @media(max-width:380px){#locus-ux1-review .ux-review-controls{grid-template-columns:minmax(0,1fr)}#locus-ux1-review .ux-review-head{font-size:12px}}
+  @media(pointer:coarse){#locus-ux1-review button,#locus-ux1-review select{min-height:44px}#locus-ux1-review .ux-options label{min-height:44px}#locus-ux1-review .ux-formula{gap:6px}#locus-ux1-review .ux-equation,#locus-ux1-review .ux-fx{min-height:44px}}
+</style>
+<script>
+(() => {
+  const root = document.getElementById('locus-ux1-review');
+  const el = id => root.querySelector('#ux-' + id);
+  const copy = value => JSON.parse(JSON.stringify(value));
+  const escape = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const chemistry = value => escape(value).replace(/([A-Za-z)])(\d+)/g, '$1<sub>$2</sub>');
+  const equation = (id, before, balanced, extras = {}) => ({id, before, balanced, shown:before, owned:false, keep:false, type:'reaction', ...extras});
+  const hydrogen = () => equation('A', '3H2 + O2 → H2O', '2H2 + O2 → 2H2O');
+  const iron = () => equation('B', 'Fe + O2 → Fe2O3', '4Fe + 3O2 → 2Fe2O3');
+  const aluminium = () => equation('C', 'Al + O2 → Al2O3', '4Al + 3O2 → 2Al2O3');
+  const balanced = region => ({...region, shown:region.balanced, owned:true});
+  const single = {source:'hoa-[3h2+o2=h2o]', template:'{A}', regions:[hydrogen()], selected:[], scope:'document', auto:false, note:'Chọn một phương trình ở ô kết quả để cân bằng.'};
+  const mixRegions = [balanced(hydrogen()), iron(), aluminium()];
+  const mixed = {source:'A. hoa-[3h2+o2=h2o]\nB. hoa-[Fe+O2=Fe2O3]\nC. hoa-[Al+O2=Al2O3]', template:'A. {A}\nB. {B}\nC. {C}', regions:mixRegions, selected:['A','B','C'], scope:'document', auto:false, note:'A đã được Locus cân bằng từ trước. B và C giữ hệ số đã nhập.'};
+  const pasteRegions = [equation('M','x² + 1','x² + 1',{type:'math'}),equation('A','H2 + O2 → H2O','2H2 + O2 → 2H2O'),iron()];
+  const pasted = {source:'Ôn tập hôm nay 🧪\nCho lc[x mũ 2 + 1]. Xét hoa-[H2+O2=H2O].\nTiếp theo: hoa-[Fe+O2=Fe2O3].\nTài liệu: https://example.org/bai-1\nGiữ nguyên câu này.', template:'Ôn tập hôm nay 🧪\nCho {M}. Xét {A}.\nTiếp theo: {B}.\nTài liệu: https://example.org/bai-1\nGiữ nguyên câu này.', regions:pasteRegions, selected:[], scope:'document', auto:false, note:'Đã dựng công thức. Chưa thay hệ số; câu chữ và xuống dòng giữ nguyên.'};
+  const ghostBase = {source:'hoa-[h2+o2=]', template:'{A}', regions:[equation('A','H2 + O2 =','2H2 + O2 → 2H2O',{type:'draft'})], selected:[], scope:'document', auto:false, ghost:true, note:'Chưa nhận sản phẩm. Bật Tự cân bằng cũng không nhận thay bạn.'};
+  const ghostAccepted = {...ghostBase, ghost:false, regions:[equation('A','H2 + O2 → H2O','2H2 + O2 → 2H2O',{shown:'2H2 + O2 → 2H2O', owned:true, products:true})], selected:['A'], scope:'formula', note:'Đã nhận H2O và hệ số trong một thao tác. Nguồn gốc vẫn được giữ.'};
+  const frame = (name, base, changes = {}) => ({name, ...copy(base), ...copy(changes)});
+  const flows = {
+    single:[
+      frame('Chưa chọn công thức',single),
+      frame('Bôi chọn dở công thức',single,{selected:['A'],partial:true,note:'Chọn trọn phương trình để cân bằng.',scope:'partial'}),
+      frame('Chọn trọn công thức',single,{selected:['A'],scope:'formula',note:'Chỉ thay hệ số của phương trình đang chọn.'}),
+      frame('Đã cân bằng',single,{regions:[balanced(hydrogen())],selected:['A'],scope:'formula',note:'3, 1, 1 → 2, 1, 2. Có thể hủy để trả đúng hệ số ban đầu.'}),
+      frame('Hủy — trả đúng hệ số đã gõ',single,{regions:[{...hydrogen(),keep:true}],selected:['A'],scope:'formula',note:'Đã trả 3, 1, 1. Giữ lựa chọn này khi Tự cân bằng bật.'})
+    ],
+    mixed:[
+      frame('Trạng thái trộn · A đã cân bằng',mixed),
+      frame('Bấm một lần · chỉ B đổi',mixed,{regions:[mixRegions[0],balanced(iron()),aluminium()],note:'B đã đổi. Công thức kế tiếp là C.',cycle:{kind:'balance',ids:['B','C'],index:1}}),
+      frame('Hết lượt cân bằng · đến lượt hủy',mixed,{regions:mixRegions.map(balanced),note:'Lượt hủy bắt đầu ở A, kể cả A được cân bằng từ trước.'}),
+      frame('Hủy A · tiếp theo là B',mixed,{regions:[{...hydrogen(),keep:true},balanced(iron()),balanced(aluminium())],note:'Chưa quay sang cân bằng A. Tiếp tục lượt hủy từ trên xuống.',cycle:{kind:'restore',ids:['A','B','C'],index:1}}),
+      frame('Hủy B · tiếp theo là C',mixed,{regions:[{...hydrogen(),keep:true},{...iron(),keep:true},balanced(aluminium())],note:'Mỗi bấm đổi đúng một phương trình.',cycle:{kind:'restore',ids:['A','B','C'],index:2}}),
+      frame('Hết lượt hủy · bắt đầu vòng mới',mixed,{regions:[hydrogen(),iron(),aluminium()].map(r=>({...r,keep:true})),note:'Vòng tuần tự không khôi phục trạng thái trộn ban đầu. Menu Hoàn tác trả đúng trước lệnh batch.'})
+    ],
+    paste:[
+      frame('Trước khi dán · auto tắt',{source:'',template:'',regions:[],selected:[],scope:'document',auto:false,note:'Một ô nhập dùng cho công thức đơn và đoạn dài.'}),
+      frame('Dán đoạn · auto tắt',pasted),
+      frame('Bật auto sau khi dán',pasted,{auto:true,note:'Bật auto không sửa lại đoạn đã có. Lần nhập hoặc dán tiếp theo mới được xét.'}),
+      frame('Dán mới khi auto đã bật',pasted,{auto:true,regions:pasteRegions.map(r=>r.type==='reaction'?balanced(r):r),note:'Đã tự cân bằng 2 phương trình. Undo lần dán trở về trước khi dán.',pasteUndo:true}),
+      frame('Hủy một phương trình · auto vẫn bật',pasted,{auto:true,regions:[pasteRegions[0],{...pasteRegions[1],keep:true},balanced(pasteRegions[2])],selected:['A'],scope:'formula',note:'A giữ hệ số đã gõ; B vẫn cân bằng. Tải lại hoặc sửa câu bên cạnh không cân bằng lại A.'})
+    ],
+    ghost:[
+      frame('Ghost chưa được nhận',ghostBase),
+      frame('Nhận sản phẩm và cân bằng',ghostAccepted,{ghostUndo:true}),
+      frame('Hủy riêng cân bằng · giữ H2O',ghostAccepted,{regions:[{...ghostAccepted.regions[0],shown:'H2 + O2 → H2O',owned:false,keep:true}],note:'Hệ số về 1, 1, 1. H2O là sản phẩm đã nhận nên vẫn được giữ.'}),
+      frame('Bỏ sản phẩm · về trước hỗ trợ',ghostBase,{ghost:false,note:'Đã bỏ cả sản phẩm và hệ số hỗ trợ. Nguồn vẫn là hoa-[h2+o2=].'})
+    ],
+    states:[
+      frame('Chất riêng · không phải phương trình',single,{source:'H2SO4',regions:[equation('A','H2SO4','H2SO4',{type:'compound'})],selected:['A'],scope:'formula',note:'Đây là công thức của một chất. Không có hai vế để cân bằng.'}),
+      frame('Toán · không áp dụng cân bằng',single,{source:'lc[x mũ 2 + 1]',regions:[equation('A','x² + 1','x² + 1',{type:'math'})],selected:['A'],scope:'formula',note:'Cân bằng chỉ áp dụng cho phương trình Hóa.'}),
+      frame('Thiếu vế phải',ghostBase,{ghost:false,selected:['A'],scope:'formula',note:'Thiếu vế phải. Bạn vẫn có thể copy nguyên văn.'}),
+      frame('Mơ hồ · h20 có số 0',single,{source:'hoa-[h2+o2=h20]',regions:[equation('A','h2+o2=h20','',{type:'text',blocked:'Cần bạn chọn cách đọc hoặc sửa nguồn.'})],selected:['A'],scope:'formula',note:'Không tự đổi số 0 thành chữ O. fx mở cách đọc/sửa đề xuất.'}),
+      frame('Lỗi cú pháp · giữ text',single,{source:'lc[(x+1]',regions:[equation('A','lc[(x+1]','',{type:'text',blocked:'Thiếu ngoặc đóng.'})],selected:['A'],scope:'formula',note:'Giữ nguyên văn bản. Gợi ý thêm ngoặc cần bạn xác nhận.'}),
+      frame('Không cân bằng được · vẫn copy',single,{source:'hoa-[H2+O2=CO2]',regions:[equation('A','H2 + O2 → CO2','',{blocked:'Không cân bằng được với các chất hiện tại.'})],selected:['A'],scope:'formula',note:'Giữ kết quả hiện tại; không đổi chất hoặc chặn copy.'}),
+      frame('Người dùng đã cân bằng sẵn',single,{source:'hoa-[2H2+O2=2H2O]',regions:[equation('A','2H2 + O2 → 2H2O','2H2 + O2 → 2H2O')],selected:['A'],scope:'formula',note:'Đã cân bằng từ lúc nhập. Locus chưa thay đổi nên không có Hủy cân bằng.'}),
+      frame('Đang tính batch · chưa ghi thay đổi',mixed,{busy:true,note:'Đang xét 2/3 · chưa đổi công thức nào.'}),
+      frame('Đã hủy batch',mixed,{note:'Đã hủy · chưa đổi công thức nào.'}),
+      frame('Vùng chọn đổi trong lúc chờ',mixed,{selected:['B'],scope:'formula',note:'Vùng chọn đã đổi · thao tác cũ đã dừng.'}),
+      frame('Sửa sau hỗ trợ · lịch sử cũ hết hiệu lực',single,{source:'hoa-[5H2+O2=H2O]',regions:[equation('A','5H2 + O2 → H2O','2H2 + O2 → 2H2O')],selected:['A'],scope:'formula',note:'Đã sửa công thức. Lần cân bằng mới dùng bản hiện tại; lịch sử cũ không ghi đè bản sửa.'}),
+      frame('File cũ · chỉ khôi phục gộp',ghostAccepted,{legacy:true,regions:[{...ghostAccepted.regions[0],owned:false,blocked:'File này chỉ lưu trạng thái trước toàn bộ hỗ trợ.'}],note:'fx có “Về trước hỗ trợ”. Không dựng lại hệ số trung gian chưa được lưu.'}),
+      frame('Vượt giới hạn xử lý',pasted,{limited:true,note:'Chưa xử lý hết đoạn này. Giữ toàn bộ nguồn; chọn đoạn ngắn hơn để tiếp tục.'}),
+      frame('Cách đọc trực tiếp và gợi ý sửa',single,{source:'lc[x+1/2]',regions:[equation('A','x + ½','x + ½',{type:'math',alternatives:true})],selected:['A'],scope:'formula',note:'Đang dùng cách đọc trực tiếp. Mở fx để xem gợi ý thay phạm vi phân số.'})
+    ]
+  };
+  let flowName = 'single', stepIndex = 2, view = copy(flows.single[2]), history = [], batch = null, explored = false;
+  const design = {wideLayout:'columns',spacing:12};
+  const eligible = (r,kind) => r.type==='reaction' && !r.blocked && (kind==='balance'?r.shown!==r.balanced:r.owned);
+  const selectedRegions = () => view.partial?[]:view.regions.filter(r=>view.selected.includes(r.id));
+  function renewCycle(){const rows=selectedRegions();const kind=rows.some(r=>eligible(r,'balance'))?'balance':'restore';view.cycle={kind,ids:rows.filter(r=>eligible(r,kind)).map(r=>r.id),index:0};}
+  function nextAction(){if(!view.cycle)renewCycle();const c=view.cycle;return {kind:c.kind,id:c.ids[c.index],index:c.index,total:c.ids.length};}
+  function plainResult(){return view.template.replace(/\{(\w+)\}/g,(_,id)=>view.regions.find(r=>r.id===id)?.shown??'');}
+  function regionName(id){return view.regions.length===1?'phương trình đang chọn':'công thức '+(view.regions.findIndex(r=>r.id===id)+1)+'/'+view.regions.length;}
+  function exportScope(){if(view.partial)return 'Văn bản đang chọn · một phần công thức';if(view.scope==='formula'&&view.selected.length===1)return 'Một công thức đang chọn';return 'Toàn bộ đoạn kết quả';}
+  function explain(content){el('detail').hidden=false;el('detail').innerHTML=content+'<button data-close-detail>Đóng</button>';}
+  function loadFrame(){view=copy(flows[flowName][stepIndex]);history=[];batch=null;explored=false;render();}
+  function pushHistory(){history.push(copy(view));explored=true;}
+  function select(ids,scope,partial=false){view.selected=ids;view.scope=scope;view.partial=partial;view.busy=false;batch=null;explored=true;delete view.cycle;view.note=partial?'Chọn trọn phương trình để cân bằng.':'Phạm vi đã chọn; chỉ công thức chọn trọn được cân bằng.';render();}
+  function updateRegion(r,kind){if(kind==='balance'){r.shown=r.balanced;r.owned=true;r.keep=false;}else{r.shown=r.before;r.owned=false;r.keep=true;}}
+  function act(){const a=nextAction();if(!a.id||view.busy||view.limited)return;pushHistory();batch=null;const r=view.regions.find(r=>r.id===a.id);updateRegion(r,a.kind);view.cycle.index++;if(view.cycle.index>=view.cycle.ids.length)renewCycle();view.note=(a.kind==='balance'?'Đã cân bằng ':'Đã hủy cân bằng ')+regionName(r.id)+'. '+(a.kind==='balance'?'Nguồn gốc giữ nguyên.':'Trả đúng hệ số trước hỗ trợ; giữ lựa chọn này khỏi auto.');render();}
+  function applyBatch(kind){
+    if(batch?.kind===kind){const before=copy(batch.before);pushHistory();view=before;batch=null;delete view.cycle;view.note='Đã hoàn tác lệnh hàng loạt · trả đúng trạng thái trước lệnh, kể cả lựa chọn giữ nguyên.';render();return;}
+    const rows=selectedRegions().filter(r=>eligible(r,kind));if(!rows.length)return;
+    const before=copy(view);pushHistory();rows.forEach(r=>updateRegion(r,kind));delete view.cycle;batch={kind,before};view.note=(kind==='balance'?'Đã cân bằng ':'Đã hủy cân bằng ')+rows.length+' phương trình · '+(selectedRegions().length-rows.length)+' giữ nguyên.';render();openBatch();
+  }
+  function openBatch(){const menu=el('batch-menu');menu.hidden=false;el('arrow').setAttribute('aria-expanded','true');menu.innerHTML=['balance','restore'].map(kind=>{const undo=batch?.kind===kind;const count=selectedRegions().filter(r=>eligible(r,kind)).length;const label=undo?(kind==='balance'?'Hoàn tác cân bằng tất cả':'Hoàn tác hủy cân bằng tất cả'):(kind==='balance'?'Cân bằng tất cả trong vùng chọn':'Hủy cân bằng tất cả trong vùng chọn');return '<button data-batch="'+kind+'" '+(!undo&&!count?'disabled':'')+'>'+label+(undo?'':' · '+count)+'</button>';}).join('');}
+  function showFormula(id){const r=view.regions.find(r=>r.id===id);let content='<p><span class="ux-secondary">Nguồn đã gõ · toàn bộ ví dụ</span></p><pre>'+escape(view.source)+'</pre><p><span class="ux-secondary">Trước cân bằng · '+regionName(id)+'</span><br>'+chemistry(r.before)+'</p><p><span class="ux-secondary">Đang dùng</span><br>'+chemistry(r.shown)+'</p>';
+    if(r.type==='text')content+='<p>Chưa có cách đọc được chốt. Giữ text hoặc sửa nguồn; gợi ý sửa không tự áp dụng.</p>';
+    if(r.alternatives)content+='<p><span class="ux-secondary">Cách đọc trực tiếp</span><br>x + ½</p><button data-reading="direct">Dùng cách đọc trực tiếp</button><p><span class="ux-secondary">Gợi ý sửa · thay phạm vi phân số</span><br>(x + 1) / 2</p><button data-reading="repair">Dùng gợi ý sửa</button><p class="ux-secondary">Có 2 phương án. Gợi ý sửa không dùng cho chuyển đổi tự động.</p>';
+    if(r.owned)content+='<p>Hủy cân bằng → '+chemistry(r.before)+'</p>';
+    if(r.products&&!view.legacy)content+='<p>Bỏ sản phẩm → H2 + O2 =</p><button data-remove-products>Bỏ sản phẩm đã nhận</button>';
+    if(view.legacy)content+='<p>Về trước hỗ trợ → '+escape(view.source)+'</p><button data-remove-products>Về trước hỗ trợ</button>';
+    explain(content);
+  }
+  function render(){
+    root.dataset.wideLayout=design.wideLayout;root.dataset.documentSize=view.source.includes('\n')?'long':'short';root.style.setProperty('--locus-gap',design.spacing+'px');
+    el('flow').value=flowName;el('step').innerHTML=flows[flowName].map((f,i)=>'<option value="'+i+'">'+escape(f.name)+'</option>').join('');el('step').value=String(stepIndex);el('prev').disabled=stepIndex===0;el('next').disabled=stepIndex===flows[flowName].length-1;
+    el('source').value=view.source;el('source').rows=view.source.includes('\n')?7:4;
+    const a=nextAction();
+    el('result').innerHTML=escape(view.template).replace(/\{(\w+)\}/g,(_,id)=>{const r=view.regions.find(r=>r.id===id);const isSelected=view.selected.includes(id)&&!view.partial;const formula=view.partial&&id==='A'?'<span class="ux-partial-mark">'+chemistry('3H2 +')+'</span>'+chemistry(' O2 → H2O'):r.type==='text'?escape(r.shown):chemistry(r.shown);return '<span class="ux-formula '+(isSelected?'ux-selected':'')+'"><button class="ux-equation" data-region="'+id+'" aria-label="Chọn trọn '+escape(r.shown)+'" aria-pressed="'+isSelected+'"><span>'+formula+'</span></button><button class="ux-fx" data-fx="'+id+'" aria-label="Chi tiết công thức '+id+'">fx</button>'+(a.id===id&&view.regions.length>1&&!view.busy&&!view.partial?'<span class="ux-next-mark">← tiếp theo</span>':'')+(r.keep?'<span class="ux-keep">Giữ hệ số đã nhập</span>':'')+'</span>';}).replace(/\n/g,'<br>');
+    if(!view.regions.length)el('result').innerHTML='<span class="ux-secondary">Kết quả sẽ xuất hiện tại đây</span>';
+    el('select').disabled=!view.regions.length;el('clear').disabled=!view.selected.length;
+    const selected=selectedRegions();el('scope').textContent=view.partial?'Chọn dở · 0 phương trình chọn trọn':selected.length?'Đang chọn '+selected.length+' công thức'+(a.id&&view.regions.length>1?' · tiếp theo '+regionName(a.id):''):'Chưa chọn công thức';
+    const verb=a.kind==='balance'?'Cân bằng':'Hủy cân bằng';
+    let label=a.id?verb+(selected.length>1?' tiếp · '+(a.index+1)+'/'+a.total:''):'Cân bằng';
+    if(selected.length===1&&!a.id&&selected[0].type==='reaction'&&!selected[0].blocked&&selected[0].shown===selected[0].balanced)label='Đã cân bằng';
+    if(view.busy)label='Đang xét 2/3';
+    el('wand').innerHTML='<i data-lucide="'+(a.kind==='restore'&&a.id?'undo-2':'wand-sparkles')+'" aria-hidden="true"></i><span>'+label+'</span>';el('wand').disabled=!a.id||view.busy||view.limited;el('wand').setAttribute('aria-describedby','ux-status');
+    el('arrow').hidden=selected.length<2;el('arrow').disabled=view.busy||view.limited;el('arrow').setAttribute('aria-expanded','false');el('batch-menu').hidden=true;
+    el('undo').disabled=!(history.length||view.pasteUndo||view.ghostUndo)||view.busy;
+    el('status').textContent=view.note;el('status').dataset.tone=(view.partial||view.limited||selected.some(r=>r.blocked))?'warning':'normal';
+    const onlyFormula=view.scope==='formula'||/^\{\w+\}$/.test(view.template);
+    const singleFormula=onlyFormula&&selected.length===1&&selected[0].type!=='text'&&selected[0].type!=='draft';
+    el('export-scope').textContent='Xuất: '+exportScope();el('copy').disabled=!view.source;el('png').disabled=!singleFormula;el('svg').disabled=!singleFormula;el('download').disabled=!view.source;
+    el('png').setAttribute('data-tooltip',singleFormula?'Copy PNG công thức đang chọn':'Chọn trọn một công thức để copy PNG');el('svg').setAttribute('data-tooltip',singleFormula?'Copy SVG công thức đang chọn':'Chọn trọn một công thức để copy SVG');
+    el('auto').checked=view.auto;
+    el('ghost').hidden=!view.ghost;el('ghost').innerHTML=view.ghost?'<span>Gợi ý: '+chemistry('2H2 + O2 → 2H2O')+'</span><br><span class="ux-secondary">Điều kiện của ví dụ: đốt cháy</span><br><button data-accept>Nhận gợi ý · Enter</button>':'';
+    el('assist').hidden=!(view.busy||view.partial);el('assist').innerHTML=view.busy?'<button data-cancel>Dừng xử lý</button>':view.partial?'<button data-select-whole>Chọn trọn phương trình</button>':'';
+    el('detail').hidden=true;el('detail').innerHTML='';
+    el('step-count').textContent=(stepIndex+1)+' / '+flows[flowName].length;el('checkpoint').textContent=(explored?'Đang thử từ mẫu: ':'')+flows[flowName][stepIndex].name+' · Dữ liệu minh họa.';
+    setLayout();if(globalThis.lucide)lucide.createIcons({attrs:{width:16,height:16}});
+  }
+  function setLayout(){const layout=el('layout').value;root.querySelector('.ux-stage').dataset.layout=layout;const desktop=layout.startsWith('desktop');el('expand').hidden=!desktop;el('hide').hidden=!desktop;const expanded=layout==='desktop-expanded';el('expand').setAttribute('aria-label',expanded?'Thu về cửa sổ gọn':'Bung cửa sổ');el('expand').setAttribute('data-tooltip',expanded?'Thu về cửa sổ gọn':'Bung cửa sổ');}
+  el('layout').addEventListener('change',()=>{setLayout();root.querySelector('.ux-window').hidden=false;el('tray').hidden=true;});
+  el('flow').addEventListener('change',()=>{flowName=el('flow').value;stepIndex=0;loadFrame();});
+  el('step').addEventListener('change',()=>{stepIndex=Number(el('step').value);loadFrame();});
+  el('prev').addEventListener('click',()=>{if(stepIndex>0){stepIndex--;loadFrame();}});el('next').addEventListener('click',()=>{if(stepIndex<flows[flowName].length-1){stepIndex++;loadFrame();}});
+  el('select').addEventListener('click',()=>select(view.regions.map(r=>r.id),/^\{\w+\}$/.test(view.template)?'formula':'document'));el('clear').addEventListener('click',()=>select([],'document'));
+  el('wand').addEventListener('click',act);el('arrow').addEventListener('click',()=>{if(el('batch-menu').hidden)openBatch();else{el('batch-menu').hidden=true;el('arrow').setAttribute('aria-expanded','false');}});
+  el('undo').addEventListener('click',()=>{if(history.length){view=history.pop();delete view.cycle;batch=null;render();}else if(view.pasteUndo){flowName='paste';stepIndex=0;loadFrame();}else if(view.ghostUndo){flowName='ghost';stepIndex=0;loadFrame();}});
+  el('auto').addEventListener('change',()=>{view.auto=el('auto').checked;batch=null;explored=true;delete view.cycle;view.note=view.auto?'Tự cân bằng bật cho lần nhập/dán tiếp theo. Đoạn hiện tại giữ nguyên.':'Đã tắt tự cân bằng. Những kết quả đã nhận vẫn giữ nguyên.';render();});
+  el('expand').addEventListener('click',()=>{el('layout').value=el('layout').value==='desktop-expanded'?'desktop-compact':'desktop-expanded';setLayout();});
+  el('hide').addEventListener('click',()=>{root.querySelector('.ux-window').hidden=true;el('tray').hidden=false;});el('reopen').addEventListener('click',()=>{root.querySelector('.ux-window').hidden=false;el('tray').hidden=true;});
+  el('copy').addEventListener('click',()=>{const body=view.scope==='formula'&&view.selected.length===1?view.regions.find(r=>r.id===view.selected[0]).shown:plainResult();explain('<p>Bản copy dự kiến · '+exportScope()+'</p><pre>'+escape(view.partial?'3H2 +':body)+'</pre><span class="ux-secondary">Bản thiết kế: chỉ xem phạm vi, chưa ghi clipboard.</span>');});
+  ['png','svg'].forEach(format=>el(format).addEventListener('click',()=>explain('<p>Copy '+format.toUpperCase()+' · '+exportScope()+'</p><p>'+chemistry(selectedRegions()[0].shown)+'</p><span class="ux-secondary">Bản thiết kế: dùng đúng kết quả đang thấy, chưa tạo ảnh.</span>')));
+  el('download').addEventListener('click',()=>explain('<p>Tải · '+exportScope()+'</p><button disabled>Tệp Locus</button><button disabled>Văn bản</button><button disabled>Word .docx · dự kiến</button><p class="ux-secondary">Bản thiết kế chưa tạo tệp. PNG/SVG dành cho một công thức chọn trọn.</p>'));
+  el('options').addEventListener('click',()=>explain('<p>Tùy chọn</p><p>Cặp chung <code>lc[ … ]</code> · có thể đổi<br>Toán / Lý / Hóa: cặp riêng trong mục Cặp bọc</p><label><input type="checkbox" disabled> Dùng Space nhận gợi ý sản phẩm</label><p class="ux-secondary">Tách khỏi Nhận diện Hóa và Tự cân bằng.</p><button data-copy-source>Copy nguồn gốc</button>'));
+  el('graph').addEventListener('click',()=>explain('<p>Biểu đồ · giai đoạn E1</p><p>Nhập hàm → đồ thị; tham số có thanh trượt.</p>'));
+  el('geometry').addEventListener('click',()=>explain('<p>Hình học · giai đoạn E2</p><button disabled>2D</button><button disabled>3D</button><p>Kéo trực tiếp, chọn nét và copy SVG.</p>'));
+  root.addEventListener('click',event=>{const button=event.target.closest('button');if(!button||button.disabled)return;
+    if(button.dataset.region)select([button.dataset.region],'formula');
+    if(button.dataset.fx)showFormula(button.dataset.fx);
+    if(button.dataset.batch)applyBatch(button.dataset.batch);
+    if(button.hasAttribute('data-close-detail'))el('detail').hidden=true;
+    if(button.hasAttribute('data-select-whole'))select(['A'],'formula');
+    if(button.hasAttribute('data-cancel')){view.busy=false;view.note='Đã hủy · chưa đổi công thức nào.';render();}
+    if(button.hasAttribute('data-accept')){const auto=view.auto;pushHistory();batch=null;flowName='ghost';stepIndex=1;view=copy(ghostAccepted);view.auto=auto;render();}
+    if(button.hasAttribute('data-remove-products')){const auto=view.auto;pushHistory();batch=null;flowName='ghost';stepIndex=3;view=copy(flows.ghost[3]);view.auto=auto;render();}
+    if(button.dataset.reading){pushHistory();batch=null;delete view.cycle;view.regions[0].shown=button.dataset.reading==='repair'?'(x + 1) / 2':'x + ½';view.note=button.dataset.reading==='repair'?'Đã dùng gợi ý sửa do bạn chọn; nguồn gốc vẫn được giữ.':'Đã dùng cách đọc trực tiếp.';render();}
+    if(button.hasAttribute('data-copy-source'))explain('<p>Nguồn gốc · toàn bộ ô nhập</p><pre>'+escape(view.source)+'</pre><span class="ux-secondary">Bản thiết kế: chưa ghi clipboard.</span>');
+  });
+  root.addEventListener('keydown',event=>{if(event.key==='Escape'){el('detail').hidden=true;el('batch-menu').hidden=true;el('arrow').setAttribute('aria-expanded','false');}});
+  render();
+  if(globalThis.Tweak){const tweak=new Tweak({container:root,onChange:render});tweak.addSelect(design,'wideLayout',{label:'Bố cục ở khung rộng',options:[{label:'Hai ô cạnh nhau',value:'columns'},{label:'Hai ô xếp dọc',value:'stacked'}]});tweak.addSlider(design,'spacing',{label:'Khoảng cách trong cửa sổ',min:10,max:16,step:2,unit:'px'});}
+})();
+</script>

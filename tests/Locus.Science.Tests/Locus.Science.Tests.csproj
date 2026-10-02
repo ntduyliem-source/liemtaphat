@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><OutputType>Exe</OutputType><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><TreatWarningsAsErrors>true</TreatWarningsAsErrors><RestorePackagesWithLockFile>true</RestorePackagesWithLockFile></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../Locus.Core.Tests/Locus.Core.Tests.csproj" /><ProjectReference Include="../../src/Locus.Application/Locus.Application.csproj" /></ItemGroup>
+</Project>

@@ -1,0 +1,116 @@
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+
+<div class="locus-app" data-host="@Host" data-ready="@ready.ToString().ToLowerInvariant()">
+    <aside class="sidebar">
+        <a class="brand" href="./" aria-label="Locus"><span class="brand-mark">lc</span>Locus<span class="beta">LAB</span></a>
+        <div class="nav-title">KHÔNG GIAN LÀM VIỆC</div>
+        <button class="nav-item @(space=="formula"?"active":"")" @onclick='()=>space="formula"'><span>ƒ</span> Công thức</button>
+        <button class="nav-item @(space=="canvas"?"active":"")" @onclick='()=>space="canvas"'><span>△</span> Mặt phẳng thử</button>
+        <div class="sidebar-bottom"><span class="local-dot"></span> Xử lý trên thiết bị<br /><small>Bản thử nền tảng Web · WEB0</small></div>
+    </aside>
+    <main>
+        <header><span>Locus / @(space=="formula"?"Công thức":"Mặt phẳng thử")</span><span class="host-tag">@(Host=="browser"?"Trình duyệt":"Desktop · Hybrid")</span></header>
+        @if(space=="formula") {
+            <section class="intro"><span class="eyebrow">GÕ THEO CÁCH BẠN NGHĨ</span><h1>Từ ý nghĩ đến công thức.</h1><p>Gõ tự nhiên bằng tiếng Việt, rồi chọn cách hiểu đúng ý bạn.</p></section>
+            <div class="workspace">
+                <section class="card input-card">
+                    <div class="card-heading"><h2>Nguồn công thức</h2><span>01</span></div>
+                    <label class="sr-only" for="source">Nhập công thức</label>
+                    <textarea id="source" @ref="sourceElement" value="@raw" spellcheck="false" placeholder="Thử x mũ 2 + 1…"></textarea>
+                    <div class="input-foot"><span>@(composing?"Đang ghép dấu…":"Giữ nguyên nội dung bạn gõ")</span><span id="source-count">@raw.Length ký tự</span></div>
+                    <div class="samples"><span>Thử nhanh</span>@foreach(var sample in samples){<button @onclick="()=>SetSample(sample)">@sample</button>}</div>
+                    <div class="mode-row"><label for="mode">Cách đọc</label><select id="mode" value="@mode" @onchange="ChangeMode"><option value="Explicit">Một công thức</option><option value="Markers">Các vùng có cặp bọc</option></select></div>
+                    @if(mode=="Markers") {
+                        <div class="markers"><label>Dấu mở<input id="marker-open" @bind="markerOpen" @bind:after="Refresh" /></label><label>Dấu đóng<input id="marker-close" @bind="markerClose" @bind:after="Refresh" /></label></div>
+                    }
+                </section>
+                <section class="card result-card" aria-live="polite">
+                    <div class="card-heading"><h2>Xem trước</h2><span>02</span></div>
+                    @if(candidate!=null && !composing){
+                        <div id="formula-preview" class="formula-preview" data-candidate="@candidate.Id">@((MarkupString)CandidateExporter.ToMathMl(candidate))</div>
+                        <div class="candidate-label @(candidate.Kind=="repair"?"repair":"")">@Kind(candidate)</div>
+                        @if(candidate.Kind=="repair"){<p class="repair-note">Phương án này có sửa nguồn. Chỉ chọn nếu đây là ý bạn muốn viết.</p>}
+                        @if(region!.Candidates.Count>1){<button id="show-candidates" class="subtle" @onclick="()=>alternatives=!alternatives">ƒx · @(alternatives?"Ẩn":"Xem") các phương án</button>}
+                        @if(alternatives){<div class="candidate-list">@foreach(var choice in region!.Candidates){<button class="@(candidate.Id==choice.Id?"selected":"")" @onclick="()=>Choose(choice)">@((MarkupString)CandidateExporter.ToMathMl(choice))<small>@Kind(choice)</small></button>}</div>}
+                        @if(analysis!.Regions.Count>1){<div class="regions">@for(int i=0;i<analysis.Regions.Count;i++){int n=i;<button @onclick="()=>SelectRegion(n)">Vùng @(n+1)</button>}</div>}
+                        <div class="export-row"><button class="primary" id="copy-latex" @onclick="()=>CopyText(CandidateExporter.ToLatex(candidate))">Sao chép LaTeX</button><button @onclick="DownloadSnapshot">Tải snapshot</button></div>
+                    } else {<div id="formula-empty" class="formula-empty"><span>ƒx</span><p>@(composing?"Hoàn tất dấu tiếng Việt để xem công thức.":error.Length>0?error:"Nhập một công thức để bắt đầu.")</p></div>}
+                    @if(notice.Length>0){<p class="notice" role="status">@notice</p>}
+                </section>
+            </div>
+            <details class="technical"><summary>Dữ liệu của bản thử</summary><p>@Versions.Core · @Versions.Grammar · phiên @revision</p>
+                @if(analysis!=null){<p>Nhận diện: @analysis.Detection · @analysis.Regions.Count vùng</p><pre>@string.Join("\n",analysis.Diagnostics.Select(d=>d.Code+": "+d.Message))</pre>}
+                @if(candidate!=null){<label>Candidate ID</label><pre>@candidate.Id</pre><label>LaTeX</label><pre id="latex-output">@CandidateExporter.ToLatex(candidate)</pre><label>MathML</label><pre>@CandidateExporter.ToMathMl(candidate)</pre><label>OMML</label><pre>@CandidateExporter.ToOmml(candidate)</pre>}
+                <p>Snapshot và MathML đang dùng core hiện tại. SVG/PNG công thức và editor đầy đủ tiếp tục ở SH/WEB1.</p>
+            </details>
+        } else {
+            <section class="intro"><span class="eyebrow">CÙNG MỘT EDITOR TRÊN HAI HOST</span><h1>Kéo một điểm. Đổi cả hình.</h1><p>Thử kéo A, B hoặc C. Một lần kéo là một bước hoàn tác.</p></section>
+            <section class="card canvas-card">
+                <div class="card-heading"><h2>Tam giác tự do</h2><div class="toolbar"><button id="undo-scene" disabled="@(!scene.CanUndo)" @onclick="scene.Undo">↶ Hoàn tác</button><button id="redo-scene" disabled="@(!scene.CanRedo)" @onclick="scene.Redo">↷ Làm lại</button></div></div>
+                <svg id="scene" @ref="sceneElement" viewBox="0 0 560 340" tabindex="0" role="img" aria-label="Tam giác với ba điểm có thể kéo" @oncontextmenu:preventDefault @oncontextmenu="CopySvg">
+                    <defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".8" fill="#c9d8d1" /></pattern></defs>
+                    <rect width="560" height="340" fill="url(#grid)" />
+                    <polygon points="@string.Join(" ",scene.Points.Select(p=>N(p.X)+","+N(p.Y)))" fill="#e4f0ec" stroke="#28705c" stroke-width="2" />
+                    @foreach(var point in scene.Points){<g data-point="@point.Id" data-x="@N(point.X)" data-y="@N(point.Y)"><circle cx="@N(point.X)" cy="@N(point.Y)" r="8" fill="#28705c" tabindex="0" role="button" aria-label="Kéo điểm @point.Id" /><text x="@N(point.X+14)" y="@N(point.Y-12)" font-size="18">@point.Id</text></g>}
+                </svg>
+                <div class="canvas-footer"><span>Esc hủy kéo · Chuột phải sao chép SVG</span><button id="download-svg" class="primary" @onclick="DownloadSvg">Tải SVG</button></div>
+                <p id="scene-state" class="point-values">@string.Join(" · ",scene.Points.Select(p=>$"{p.Id} ({N(p.X)}, {N(p.Y)})"))</p>
+                @if(notice.Length>0){<p class="notice">@notice</p>}
+            </section>
+            <details class="technical"><summary>Đối chiếu JSXGraph</summary><p>Đường cong nhận các điểm số được C# tính sẵn. Chưa phải editor hàm số E1.</p><button id="jsxgraph-start" @onclick="StartGraph">Mở bản thử JSXGraph</button><div id="jsxgraph" class="jxgbox"></div></details>
+        }
+        <footer>Gõ tự nhiên. Giữ quyền lựa chọn.<span>Không cần Word để sử dụng bản Web.</span></footer>
+    </main>
+</div>
+
+@code {
+    [Parameter] public string Host {get;set;}="browser";
+    private readonly string[] samples=["x mũ 2","1 trên 2","x+1/2","căn(x+1)"];
+    private string raw="x mũ 2 + 1",mode="Explicit",markerOpen="lc[",markerClose="]",error="",notice="",space="formula";
+    private long revision;private bool composing,alternatives,ready;
+    private AnalysisResult? analysis;private CandidateSet? region;private Candidate? candidate;
+    private ElementReference sourceElement,sceneElement;
+    private IJSObjectReference? module;private DotNetObjectReference<Editor>? reference;
+    private readonly Scene scene=new();
+    private string wired="";
+    protected override void OnInitialized()=>Refresh();
+    protected override async Task OnAfterRenderAsync(bool first)
+    {
+        if(first){module=await Js.InvokeAsync<IJSObjectReference>("import","./_content/Locus.WebProbe.Shared/editor.js");reference=DotNetObjectReference.Create(this);ready=true;}
+        if(module!=null&&wired!=space){wired=space;await module.InvokeVoidAsync("wire",space=="formula"?sourceElement:sceneElement,reference,space);}
+        if(first)StateHasChanged();
+    }
+    [JSInvokable] public Task SourceInput(string value,bool isComposing)
+    { raw=value;composing=isComposing;revision++;notice="";Refresh();StateHasChanged();return Task.CompletedTask; }
+    private void Refresh()
+    {
+        analysis=null;region=null;candidate=null;error="";alternatives=false;
+        if(composing||string.IsNullOrWhiteSpace(raw))return;
+        if(raw.Length>4096){error="Bản thử xử lý tối đa 4.096 ký tự mỗi lần. Nội dung của bạn vẫn được giữ.";return;}
+        try {
+            analysis=new AnalysisEngine().Analyze(new SourceSnapshot(raw,revision),new AnalysisOptions(Enum.Parse<InputMode>(mode),markers:new MarkerConfiguration(markerOpen,markerClose)));
+            if(analysis.Regions.Count>0)SelectRegion(0);
+            if(candidate==null)error="Chưa nhận ra công thức được hỗ trợ. Thử một ví dụ bên trái.";
+        }catch(Exception){error="Không thể đọc nguồn hoặc cặp bọc này. Nội dung bạn gõ vẫn được giữ.";}
+    }
+    private async Task SetSample(string value){raw=value;revision++;composing=false;Refresh();if(module!=null)await module.InvokeVoidAsync("setSource",sourceElement,raw);}
+    private void ChangeMode(ChangeEventArgs e){mode=e.Value?.ToString()??"Explicit";revision++;Refresh();}
+    private void SelectRegion(int index){region=analysis!.Regions[index];candidate=region.Candidates.FirstOrDefault();alternatives=false;}
+    private void Choose(Candidate value){candidate=value;notice="";}
+    private static string Kind(Candidate value)=>value.Kind=="direct"?"Theo cú pháp đã gõ":value.Kind=="repair"?"Đề nghị sửa":"Cách hiểu khác";
+    private async Task CopyText(string value){try{await module!.InvokeVoidAsync("copyText",value);notice="Đã sao chép.";}catch{notice="Trình duyệt chưa cho phép clipboard. Mở dữ liệu của bản thử để sao chép hoặc tải tệp.";}}
+    private async Task DownloadSnapshot()=>await module!.InvokeVoidAsync("download","locus-snapshot.json","application/json",CandidateSetSerializer.Serialize(region!.Select(candidate!.Id)));
+    private async Task DownloadSvg()=>await module!.InvokeVoidAsync("download","locus-triangle.svg","image/svg+xml",scene.Svg());
+    private async Task CopySvg(){await CopyText(scene.Svg());}
+    [JSInvokable] public Task MovePoint(string id,double x,double y){scene.Move(id,x,y);StateHasChanged();return Task.CompletedTask;}
+    private async Task StartGraph(){var xs=Enumerable.Range(-40,81).Select(i=>i/10d).ToArray();await module!.InvokeVoidAsync("graph",xs,xs.Select(x=>x*x).ToArray());}
+    private static string N(double value)=>value.ToString("0.##",System.Globalization.CultureInfo.InvariantCulture);
+    public async ValueTask DisposeAsync()
+    {
+        reference?.Dispose();
+        // DOM cleanup belongs to the JS removal observer. On WebView reload the old
+        // JS object no longer exists, so invoking a method on it can crash the host.
+        if(module!=null){try{await module.DisposeAsync();}catch(JSDisconnectedException){}}
+    }
+}

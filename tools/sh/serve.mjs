@@ -1,0 +1,6 @@
+// Read the current build pointer for each request, so a preview never needs to merge old fingerprinted files.
+import http from 'node:http';
+import {readFile,stat} from 'node:fs/promises';
+import {resolve,relative,extname} from 'node:path';
+const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json','.wasm':'application/wasm','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.dat':'application/octet-stream','.woff2':'font/woff2'};
+http.createServer(async(req,res)=>{try{const build=JSON.parse(await readFile('artifacts/sh/current-build.json','utf8'));const root=resolve(build.web);const route=decodeURIComponent(new URL(req.url,'http://localhost').pathname);const path=resolve(root,'.'+route+(route.endsWith('/')?'index.html':''));if(relative(root,path).startsWith('..')){res.writeHead(403).end();return;}const file=await stat(path);if(!file.isFile()){res.writeHead(404).end();return;}res.writeHead(200,{'Content-Type':types[extname(path)]??'application/octet-stream','Content-Length':file.size,'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff'});res.end(await readFile(path));}catch{res.writeHead(404).end('Not found');}}).listen(4182,'127.0.0.1',()=>console.log('Locus SH: http://127.0.0.1:4182/ (current verified build)'));

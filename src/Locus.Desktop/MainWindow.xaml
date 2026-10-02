@@ -1,0 +1,63 @@
+<Window x:Class="Locus.Desktop.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Locus — Công thức" Width="1180" Height="860" MinWidth="900" MinHeight="680" WindowStartupLocation="CenterScreen" Background="#F3F5EF" Foreground="#20382F" FontFamily="Segoe UI" FontSize="14">
+  <Grid Margin="28,18,28,14">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <DockPanel Margin="0,0,0,16"><TextBlock Text="locus." FontSize="30" FontWeight="Bold"/><TextBlock Text="DESKTOP ALPHA  ·  0.2" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource Muted}" FontSize="11"/></DockPanel>
+    <StackPanel Grid.Row="1" Margin="0,0,0,20"><TextBlock Text="Công thức, theo cách bạn gõ." FontSize="30" FontWeight="SemiBold"/><TextBlock Text="Nhập ý tưởng. Chọn cách hiểu. Mang công thức đến nơi bạn cần." Foreground="{StaticResource Muted}" Margin="0,7,0,0"/></StackPanel>
+    <Grid Grid.Row="2">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="0.95*"/><ColumnDefinition Width="20"/><ColumnDefinition Width="1.15*"/></Grid.ColumnDefinitions>
+      <Border Background="White" BorderBrush="#DCE3DA" BorderThickness="1" CornerRadius="14" Padding="20">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
+            <DockPanel Margin="0,0,0,12"><TextBlock Text="Bạn muốn viết gì?" FontSize="17" FontWeight="SemiBold"/><TextBlock x:Name="InputCount" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource Muted}" FontSize="11"/></DockPanel>
+            <TextBox x:Name="Editor" AutomationProperties.AutomationId="FormulaEditor" AutomationProperties.Name="Nhập công thức" AcceptsReturn="True" AcceptsTab="False" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Height="175" FontSize="22" VerticalContentAlignment="Top" Background="#F8FAF6" SpellCheck.IsEnabled="False" IsUndoEnabled="True" UndoLimit="100" TextChanged="SourceChanged"/>
+            <TextBlock Text="Ví dụ" Style="{StaticResource Caption}" Margin="0,12,0,6"/>
+            <WrapPanel><Button Content="Căn và lũy thừa" Tag="can2 + x mũ 2" Click="SampleClick"/><Button Content="Phân số" Tag="x+1/2" Click="SampleClick"/><Button Content="Cặp dấu lc[ ]" Tag="marker" Click="SampleClick"/></WrapPanel>
+            <TextBlock Text="Cách nhận diện" Margin="0,10,0,7"/>
+            <ComboBox x:Name="ModeBox" AutomationProperties.Name="Cách nhận diện" SelectionChanged="ConfigurationChanged">
+              <ComboBoxItem Content="Cả vùng này là công thức"/><ComboBoxItem Content="Tìm công thức trong đoạn văn"/><ComboBoxItem Content="Chỉ vùng nằm trong cặp dấu"/>
+            </ComboBox>
+            <Grid x:Name="MarkerFields" Margin="0,0,0,12" Visibility="Collapsed">
+              <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions>
+              <StackPanel><TextBlock Text="Dấu mở" Style="{StaticResource Caption}"/><TextBox x:Name="OpenMarker" AutomationProperties.Name="Dấu mở" TextChanged="SourceChanged"/></StackPanel>
+              <StackPanel Grid.Column="2"><TextBlock Text="Dấu đóng" Style="{StaticResource Caption}"/><TextBox x:Name="CloseMarker" AutomationProperties.Name="Dấu đóng" TextChanged="SourceChanged"/></StackPanel>
+            </Grid>
+            <Button x:Name="AnalyzeButton" Content="Xem công thức   ↗" Style="{StaticResource Primary}" HorizontalAlignment="Stretch" Margin="0,0,0,8" Click="AnalyzeClick" ToolTip="Ctrl+Enter"/>
+            <TextBlock x:Name="InputStatus" AutomationProperties.LiveSetting="Polite" Style="{StaticResource Caption}" Text="Phân tích trên máy, không cần mạng."/>
+            <Expander Header="Bàn phím và định dạng" Margin="0,12,0,8"><TextBlock Style="{StaticResource Caption}" Text="Ctrl+L: về ô nhập. Ctrl+Enter: phân tích. Alt+1/2/3: chọn phương án. Ctrl+Z / Ctrl+Y: hoàn tác / làm lại khi nhập.&#10;Ctrl+Shift+C: copy PNG. Ctrl+Shift+S: copy SVG. Ctrl+Shift+T: copy LaTeX. Ctrl+S: lưu SVG. Ctrl+Shift+P: lưu PNG.&#10;SVG là hình vector. PNG có bản bitmap nền trắng cho ứng dụng không nhận PNG trong clipboard. LaTeX, MathML và OMML được copy dưới dạng văn bản."/></Expander>
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+      <Border Grid.Column="2" Background="#FCFDF9" BorderBrush="#DCE3DA" BorderThickness="1" CornerRadius="14" Padding="20">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
+            <DockPanel Margin="0,0,0,12"><TextBlock Text="Công thức của bạn" FontSize="17" FontWeight="SemiBold"/><TextBlock x:Name="ResultCount" Foreground="{StaticResource Muted}" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center"/></DockPanel>
+            <ComboBox x:Name="RegionBox" Visibility="Collapsed" AutomationProperties.Name="Vùng công thức" SelectionChanged="RegionChanged"/>
+            <StackPanel x:Name="CandidatePanel"/>
+            <Border x:Name="PreviewFrame" Background="White" BorderBrush="#DFE7DE" BorderThickness="1" CornerRadius="10" Height="180" Margin="0,4,0,8" Padding="18">
+              <Grid><Image x:Name="Preview" Stretch="Uniform" AutomationProperties.Name="Xem trước công thức đang chọn"/><TextBlock x:Name="EmptyPreview" Text="Công thức sẽ xuất hiện ở đây" Foreground="{StaticResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/></Grid>
+            </Border>
+            <TextBlock x:Name="SelectionNote" Style="{StaticResource Caption}"/>
+            <Grid Margin="0,4,0,4"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions>
+              <StackPanel><TextBlock Text="Cỡ chữ" Style="{StaticResource Caption}"/><ComboBox x:Name="FontBox" AutomationProperties.Name="Cỡ chữ" SelectionChanged="RenderChanged"><ComboBoxItem Content="18 pt"/><ComboBoxItem Content="24 pt"/><ComboBoxItem Content="36 pt"/><ComboBoxItem Content="48 pt"/></ComboBox></StackPanel>
+              <StackPanel Grid.Column="2"><TextBlock Text="Độ nét PNG" Style="{StaticResource Caption}"/><ComboBox x:Name="ScaleBox" AutomationProperties.Name="Độ nét PNG" SelectionChanged="RenderChanged"><ComboBoxItem Content="1× · 96 dpi"/><ComboBoxItem Content="2× · 192 dpi"/><ComboBoxItem Content="3× · 288 dpi"/></ComboBox></StackPanel>
+            </Grid>
+            <CheckBox x:Name="WhiteBackground" Content="Nền trắng khi xuất ảnh" Margin="0,0,0,14" Checked="BackgroundChanged" Unchecked="BackgroundChanged"/>
+            <WrapPanel x:Name="ExportButtons" IsEnabled="False">
+              <Button Content="Copy PNG" Style="{StaticResource Primary}" Tag="Png" Click="CopyClick"/>
+              <Button Content="Copy SVG" Tag="Svg" Click="CopyClick"/>
+              <Button Content="Copy LaTeX" Tag="Latex" Click="CopyClick"/>
+              <Button Content="Lưu SVG…" Tag="svg" Click="SaveClick"/>
+              <Button Content="Lưu PNG…" Tag="png" Click="SaveClick"/>
+              <Button Content="Copy nguồn" Tag="Source" Click="CopyClick"/>
+            </WrapPanel>
+            <TextBlock x:Name="ExportStatus" Style="{StaticResource Caption}" AutomationProperties.LiveSetting="Polite"/>
+            <Expander Header="Nguồn và định dạng văn bản" Margin="0,8,0,0">
+              <StackPanel><TextBox x:Name="SourcePreview" IsReadOnly="True" TextWrapping="Wrap" MaxHeight="100" VerticalScrollBarVisibility="Auto" Margin="0,8,0,8"/><WrapPanel x:Name="TextExportButtons" IsEnabled="False"><Button Content="Copy MathML" Tag="MathMl" Click="CopyClick"/><Button Content="Copy OMML" Tag="Omml" Click="CopyClick"/></WrapPanel><TextBlock Text="OMML ở đây là mã XML; chèn công thức native cần connector Word." Style="{StaticResource Caption}"/></StackPanel>
+            </Expander>
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+    <DockPanel Grid.Row="3" Margin="0,14,0,0"><TextBlock Text="●  Xử lý cục bộ · nội dung không được lưu" FontSize="11" Foreground="{StaticResource Muted}"/><Button Content="Word: chưa kết nối" Margin="0" Padding="8,3" HorizontalAlignment="Right" FontSize="11" Click="WordStatusClick"/></DockPanel>
+  </Grid>
+</Window>

@@ -1,0 +1,56 @@
+@using Locus.Application
+@using Locus.Core.Detection
+
+<details class="marker-settings" open="@(Settings.Mode==InputMode.Markers)">
+    <summary>Cặp bọc theo môn</summary>
+    <p>Cặp chung dùng các mục Nhận diện đang bật. Cặp riêng chỉ định môn cho vùng đó.</p>
+    @foreach(var row in rows)
+    {
+        <div class="marker-profile-row">
+            <label class="marker-profile-name">@if(row.Id!="common"){<input type="checkbox" id="@($"marker-{row.Id}-enabled")" @bind="row.Enabled" disabled="@Disabled" />}@row.Label</label>
+            <label>Dấu mở<input id="@(row.Id=="common"?"marker-open":$"marker-{row.Id}-open")" @bind="row.Open" disabled="@Disabled" maxlength="64" spellcheck="false" /></label>
+            <label>Dấu đóng<input id="@(row.Id=="common"?"marker-close":$"marker-{row.Id}-close")" @bind="row.Close" disabled="@Disabled" maxlength="64" spellcheck="false" /></label>
+        </div>
+    }
+    @if(message.Length>0){<p role="status" class="marker-message">@message</p>}
+    <button id="apply-markers" disabled="@Disabled" @onclick="Apply">Lưu cặp bọc</button>
+</details>
+
+@code {
+    [Parameter, EditorRequired] public FormulaSettings Settings { get; set; } = new();
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<FormulaSettings> OnApply { get; set; }
+    private FormulaSettings? previous;
+    private string message="";
+    private List<Row> rows=[];
+    private sealed class Row(string id,string label,string open,string close,bool enabled=true)
+    {
+        public string Id=id, Label=label, Open=open, Close=close;
+        public bool Enabled=enabled;
+        public MarkerLiteral Literal()=>new(Open,Close,Enabled);
+    }
+    protected override void OnParametersSet()
+    {
+        if(previous==Settings)return;
+        previous=Settings;message="";
+        var profiles=Settings.MarkerProfiles;
+        if(profiles==null)
+        {
+            try { var migration=MarkerPreferences.Migrate(Settings.Open,Settings.Close); profiles=migration.Profiles;message=migration.Notice; }
+            catch(ArgumentException ex){profiles=MarkerPreferences.Default;message=ex.Message;}
+        }
+        rows=[new("common","Chung",Settings.Open,Settings.Close),new("math","Toán",profiles.Math.Open,profiles.Math.Close,profiles.Math.Enabled),
+            new("physics","Lý",profiles.Physics.Open,profiles.Physics.Close,profiles.Physics.Enabled),new("chemistry","Hóa",profiles.Chemistry.Open,profiles.Chemistry.Close,profiles.Chemistry.Enabled)];
+    }
+    private async Task Apply()
+    {
+        var settings=Settings with {Open=rows[0].Open,Close=rows[0].Close,MarkerProfiles=new(1,rows[1].Literal(),rows[2].Literal(),rows[3].Literal())};
+        try
+        {
+            var error=settings.MarkerProfiles!.ToProfiles(settings.Open,settings.Close).ValidationError;
+            if(error!=null){message=error+" Cài đặt trước đó được giữ.";return;}
+            await OnApply.InvokeAsync(settings); message="Đã lưu cặp bọc. Nguồn vẫn được giữ.";
+        }
+        catch(ArgumentException){message="Cặp bọc chưa hợp lệ. Cài đặt trước đó được giữ.";}
+    }
+}

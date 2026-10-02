@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "locus.application": {
+        "type": "Project",
+        "dependencies": {
+          "Locus.Core": "[0.1.0, )"
+        }
+      },
+      "locus.core": {
+        "type": "Project"
+      },
+      "locus.core.tests": {
+        "type": "Project",
+        "dependencies": {
+          "Locus.Core": "[0.1.0, )"
+        }
+      }
+    }
+  }
+}

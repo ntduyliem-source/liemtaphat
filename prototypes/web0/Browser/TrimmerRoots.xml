@@ -1,0 +1,5 @@
+<linker>
+  <!-- Preserve snapshot contracts and explicit test entry points; no alternative browser parser. -->
+  <assembly fullname="Locus.Core" preserve="all" />
+  <assembly fullname="Locus.WebProbe.Shared" preserve="all" />
+</linker>

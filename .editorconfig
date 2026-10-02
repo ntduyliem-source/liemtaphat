@@ -1,0 +1,10 @@
+root = true
+
+[*.{cs,csproj,json,md}]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+[*.cs]
+indent_style = space
+indent_size = 4

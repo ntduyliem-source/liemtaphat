@@ -1,0 +1,468 @@
+{
+  "version": "sc1-contract/0.1",
+  "scope": "Expected requirements; actual evidence is reported separately",
+  "cases": [
+    {
+      "id": "MR-01",
+      "phase": "MR",
+      "inputOrAction": "Nâng preferences có cặp chung tùy chỉnh",
+      "expected": "Giữ nguyên mở/đóng; không tự đổi `lc[` thành `lc-[`",
+      "status": "specified"
+    },
+    {
+      "id": "MR-02",
+      "phase": "MR",
+      "inputOrAction": "`lc[x mũ 2]`, Toán bật",
+      "expected": "Đọc x² theo cặp chung; giữ raw và đúng hai span",
+      "status": "specified"
+    },
+    {
+      "id": "MR-03",
+      "phase": "MR",
+      "inputOrAction": "Cấu hình chung `lc-[` / `]`, nhập `lc-[x mũ 2]`",
+      "expected": "Chỉ cấu hình mới khớp; không có alias `lc[` ẩn",
+      "status": "specified"
+    },
+    {
+      "id": "MR-04",
+      "phase": "MR",
+      "inputOrAction": "`toan-[x+1=2]`, chỉ Hóa bật",
+      "expected": "Đọc Toán đúng vùng; checkbox giữ nguyên",
+      "status": "specified"
+    },
+    {
+      "id": "MR-05",
+      "phase": "MR",
+      "inputOrAction": "`ly-[v=10 m/s]`, tắt tất cả checkbox",
+      "expected": "Đọc Lý do chỉ định tường minh; nguồn ngoài cặp không tự nhận diện",
+      "status": "specified"
+    },
+    {
+      "id": "MR-06",
+      "phase": "MR",
+      "inputOrAction": "`hoa-[H2SO4]`, Hóa tắt",
+      "expected": "Đọc Hóa trong vùng; không bật Hóa toàn cục",
+      "status": "specified"
+    },
+    {
+      "id": "MR-07",
+      "phase": "MR",
+      "inputOrAction": "Tắt cả ba, nhập cặp chung hoặc chuỗi thường",
+      "expected": "Không nhận diện nguồn mới; snapshot cũ vẫn xuất được",
+      "status": "specified"
+    },
+    {
+      "id": "MR-08",
+      "phase": "MR",
+      "inputOrAction": "Một đoạn có ba loại cặp riêng, emoji/NFD và câu văn xen giữa",
+      "expected": "Vùng không chồng nhau; giữ nguyên văn bản ngoài vùng và offset UTF-16",
+      "status": "specified"
+    },
+    {
+      "id": "MR-09",
+      "phase": "MR",
+      "inputOrAction": "`hoa-[K4[Fe(CN)6]]`",
+      "expected": "Ngoặc nhóm trong công thức không đóng nhầm cặp ngoài",
+      "status": "specified"
+    },
+    {
+      "id": "MR-10",
+      "phase": "MR",
+      "inputOrAction": "Cặp chung lồng cặp riêng và ngược lại",
+      "expected": "Từ chối toàn vùng lồng; không chuyển riêng vùng con",
+      "status": "specified"
+    },
+    {
+      "id": "MR-11",
+      "phase": "MR",
+      "inputOrAction": "Dấu mở trùng/prefix nhau; cặp rỗng, CR/LF, Unicode lỗi",
+      "expected": "Cài đặt bị từ chối toàn bộ; giữ cấu hình hợp lệ trước đó",
+      "status": "specified"
+    },
+    {
+      "id": "MR-12",
+      "phase": "MR",
+      "inputOrAction": "Bốn cặp khác dấu mở cùng dấu đóng `]`",
+      "expected": "Cấu hình hợp lệ; mỗi closer đóng đúng mục đang mở",
+      "status": "specified"
+    },
+    {
+      "id": "MR-13",
+      "phase": "MR",
+      "inputOrAction": "URL/email/path chứa hình giống cặp",
+      "expected": "Không chuyển phần bên trong nội dung được bảo vệ",
+      "status": "specified"
+    },
+    {
+      "id": "MR-14",
+      "phase": "MR",
+      "inputOrAction": "Đổi cặp/checkbox trong lúc chờ, caret đi sang vùng khác",
+      "expected": "Kết quả cũ hết hiệu lực; không chạm nguồn mới",
+      "status": "specified"
+    },
+    {
+      "id": "MR-15",
+      "phase": "MR",
+      "inputOrAction": "Cặp cũ tùy chỉnh trùng preset mới khi nâng cấp",
+      "expected": "Giữ cặp cũ; báo mục mới chưa thể kích hoạt, không ghi đè",
+      "status": "specified"
+    },
+    {
+      "id": "MR-16",
+      "phase": "MR",
+      "inputOrAction": "Cặp chưa đóng hoặc đã đóng nhưng rỗng",
+      "expected": "Không auto; vùng đang gõ chỉ được dùng cho preview thích hợp",
+      "status": "specified"
+    },
+    {
+      "id": "MR-17",
+      "phase": "MR",
+      "inputOrAction": "Cùng cặp qua ba Cách đọc; cặp lỗi trong câu",
+      "expected": "Một công thức chỉ nhận một vùng toàn nguồn; Markers quét cặp; Passive không nhận lại đoạn con của cặp lỗi",
+      "status": "specified"
+    },
+    {
+      "id": "CH-01",
+      "phase": "CH",
+      "inputOrAction": "`hoa-[h2+o2=h2o]`",
+      "expected": "Hiểu alias chữ thường đơn nghĩa; đề xuất `2H2+O2->2H2O`, không âm thầm thay nguồn",
+      "status": "specified"
+    },
+    {
+      "id": "CH-02",
+      "phase": "CH",
+      "inputOrAction": "`hoa-[h2+o2=h20]`",
+      "expected": "Không đổi 0 thành O tự động; repair nếu có phải được chọn rõ trước hỗ trợ tiếp",
+      "status": "specified"
+    },
+    {
+      "id": "CH-03",
+      "phase": "CH",
+      "inputOrAction": "`Co`, `CO`, `No`, `NO` trong cặp Hóa",
+      "expected": "Ký hiệu chuẩn giữ đúng nghĩa và hoa/thường",
+      "status": "specified"
+    },
+    {
+      "id": "CH-04",
+      "phase": "CH",
+      "inputOrAction": "`co`, `co2`, `no` trong cặp Hóa",
+      "expected": "Báo mơ hồ hoặc yêu cầu viết rõ; không nhận ghost một phím",
+      "status": "specified"
+    },
+    {
+      "id": "CH-05",
+      "phase": "CH",
+      "inputOrAction": "`toan-[x+1=2]`, `ly-[v=10 m/s]`",
+      "expected": "`=` không trở thành mũi tên, không suy sản phẩm",
+      "status": "specified"
+    },
+    {
+      "id": "CH-06",
+      "phase": "CH",
+      "inputOrAction": "Vế trái thiếu chất/dấu cộng cuối/hai dấu phân cách",
+      "expected": "Chờ hoặc báo lỗi; không bỏ đoạn lỗi để đoán một phản ứng con",
+      "status": "specified"
+    },
+    {
+      "id": "BL-01",
+      "phase": "BL",
+      "inputOrAction": "`H2+O2->H2O`",
+      "expected": "Hệ số 2,1,2; giữ công thức chất",
+      "status": "specified"
+    },
+    {
+      "id": "BL-02",
+      "phase": "BL",
+      "inputOrAction": "`Ca(OH)2+HCl->CaCl2+H2O`",
+      "expected": "Hệ số 1,2,1,2; đếm đúng nhóm",
+      "status": "specified"
+    },
+    {
+      "id": "BL-03",
+      "phase": "BL",
+      "inputOrAction": "`Fe^2++Ce^4+->Fe^3++Ce^3+`",
+      "expected": "Hệ số 1,1,1,1; bảo toàn điện tích",
+      "status": "specified"
+    },
+    {
+      "id": "BL-04",
+      "phase": "BL",
+      "inputOrAction": "`Na^+->Na`",
+      "expected": "Không có nghiệm bảo toàn điện tích; không tự thêm electron",
+      "status": "specified"
+    },
+    {
+      "id": "BL-05",
+      "phase": "BL",
+      "inputOrAction": "`H2->H2O`",
+      "expected": "Không có nghiệm với các chất đã nêu; không tự thêm O2",
+      "status": "specified"
+    },
+    {
+      "id": "BL-06",
+      "phase": "BL",
+      "inputOrAction": "`C+O2->CO+CO2`",
+      "expected": "Nhiều tỉ lệ nghiệm; không báo một kết quả chắc chắn từ mục tiêu số nhỏ nhất",
+      "status": "specified"
+    },
+    {
+      "id": "BL-07",
+      "phase": "BL",
+      "inputOrAction": "Phương trình đã tối giản; hoặc các hệ số cùng nhân đôi",
+      "expected": "Không sinh đề xuất trùng; nếu rút gọn thì ghi đúng thao tác đề nghị",
+      "status": "specified"
+    },
+    {
+      "id": "BL-08",
+      "phase": "BL",
+      "inputOrAction": "Hai species trùng nhau ở cùng vế hoặc hai vế",
+      "expected": "Phát hiện suy biến/không duy nhất; không lén gộp hoặc bỏ chất",
+      "status": "specified"
+    },
+    {
+      "id": "BL-09",
+      "phase": "BL",
+      "inputOrAction": "Ion, ngoặc lồng, hệ số lớn và nguồn vượt ngân sách",
+      "expected": "Tính chính xác trong phạm vi; vượt giới hạn phải dừng có kiểm soát",
+      "status": "specified"
+    },
+    {
+      "id": "BL-10",
+      "phase": "BL",
+      "inputOrAction": "`⇌` hoặc `<->` đã có đủ vế",
+      "expected": "Giữ loại mũi tên; không tuyên bố đã tính cân bằng nhiệt động",
+      "status": "specified"
+    },
+    {
+      "id": "PR-01",
+      "phase": "PR",
+      "inputOrAction": "`HCl+NaOH=` với điều kiện dung dịch đã chọn",
+      "expected": "Quy tắc được kiểm cho sản phẩm NaCl/H2O; cân bằng và có provenance",
+      "status": "specified"
+    },
+    {
+      "id": "PR-02",
+      "phase": "PR",
+      "inputOrAction": "Cùng nguồn nhưng thiếu điều kiện bắt buộc của quy tắc",
+      "expected": "Báo cần điều kiện; không xem giả định của chương trình là dữ kiện người dùng",
+      "status": "specified"
+    },
+    {
+      "id": "PR-03",
+      "phase": "PR",
+      "inputOrAction": "`CO2+NaOH=` thiếu tỉ lệ/chất dư",
+      "expected": "Không tự chọn carbonate hoặc bicarbonate; yêu cầu điều kiện phù hợp",
+      "status": "specified"
+    },
+    {
+      "id": "PR-04",
+      "phase": "PR",
+      "inputOrAction": "Đổi điều kiện của PR-03 trong lúc kết quả trước đang chạy",
+      "expected": "Chỉ kết quả ứng với điều kiện mới được nhận",
+      "status": "specified"
+    },
+    {
+      "id": "PR-05",
+      "phase": "PR",
+      "inputOrAction": "`H2+O2=`",
+      "expected": "Chỉ có ghost nhận được khi quy tắc và điều kiện đủ; kết quả đã qua cân bằng",
+      "status": "specified"
+    },
+    {
+      "id": "PR-06",
+      "phase": "PR",
+      "inputOrAction": "Nguồn hợp lệ nhưng ngoài danh mục",
+      "expected": "“Chưa hỗ trợ/chưa có dữ liệu”; không trả “Không phản ứng”",
+      "status": "specified"
+    },
+    {
+      "id": "PR-07",
+      "phase": "PR",
+      "inputOrAction": "Một quy tắc có ngoại lệ cụ thể",
+      "expected": "Ngoại lệ chặn khớp; bộ kiểm có case ngoài phạm vi gần giống",
+      "status": "specified"
+    },
+    {
+      "id": "PR-08",
+      "phase": "PR",
+      "inputOrAction": "Kho chứa bản ghi tạo sản phẩm không bảo toàn",
+      "expected": "Kiểm độc lập từ chối; không đưa ra preview có thể nhận",
+      "status": "specified"
+    },
+    {
+      "id": "PR-09",
+      "phase": "PR",
+      "inputOrAction": "Nhiều hơn ba khả năng hoặc miền đầu vào còn mơ hồ",
+      "expected": "Không coi danh sách bị cắt là đủ chắc chắn; yêu cầu thu hẹp điều kiện",
+      "status": "specified"
+    },
+    {
+      "id": "PR-10",
+      "phase": "PR",
+      "inputOrAction": "Phản ứng đảo thứ tự chất ban đầu hoặc khác cách viết chỉ số Unicode",
+      "expected": "Cùng kết quả hóa học khi dữ kiện tương đương; giữ nguồn/ID phiên của từng lần gõ",
+      "status": "specified"
+    },
+    {
+      "id": "PR-11",
+      "phase": "PR",
+      "inputOrAction": "Điều kiện đã biết thay đổi bản chất phản ứng",
+      "expected": "Bài kiểm giữ riêng xác minh engine xét điều kiện, không chỉ tra cặp tên chất",
+      "status": "specified"
+    },
+    {
+      "id": "PR-12",
+      "phase": "PR",
+      "inputOrAction": "Máy offline, bộ quy tắc đã cài",
+      "expected": "Phân tích/suy/cân bằng được trong phạm vi kho; không gọi dịch vụ bên ngoài",
+      "status": "specified"
+    },
+    {
+      "id": "UX-01",
+      "phase": "UX",
+      "inputOrAction": "Ghost hiện cho nguồn `h2+o2=` trong ngữ cảnh đủ điều kiện",
+      "expected": "Thấy sản phẩm mờ và toàn phương trình sẽ nhận, gồm hệ số vế trái",
+      "status": "specified"
+    },
+    {
+      "id": "UX-02",
+      "phase": "UX",
+      "inputOrAction": "Enter khi ghost hợp lệ đã hiện",
+      "expected": "Nhận đúng kết quả và hệ số; không xuống dòng thêm; một Undo",
+      "status": "specified"
+    },
+    {
+      "id": "UX-03",
+      "phase": "UX",
+      "inputOrAction": "Enter trước khi ghost hiện, rồi kết quả đến muộn",
+      "expected": "Phím không bị dùng lại để nhận; nguồn mới giữ nguyên",
+      "status": "specified"
+    },
+    {
+      "id": "UX-04",
+      "phase": "UX",
+      "inputOrAction": "Space mặc định ngay sau `=`",
+      "expected": "Chỉ thêm khoảng trắng; tiếp tục gõ sản phẩm được",
+      "status": "specified"
+    },
+    {
+      "id": "UX-05",
+      "phase": "UX",
+      "inputOrAction": "Bật Space nhận; ghost hợp lệ đã hiện",
+      "expected": "Nhận và thêm một khoảng trắng trong một Undo; caret sau dấu đóng nếu cặp đã đóng, cuối thân nếu chưa đóng; không có ghost thì Space thường",
+      "status": "specified"
+    },
+    {
+      "id": "UX-06",
+      "phase": "UX",
+      "inputOrAction": "Esc rồi chờ, không sửa nguồn/điều kiện",
+      "expected": "Ghost đã bỏ không tự bật lại; fx có thể yêu cầu lại",
+      "status": "specified"
+    },
+    {
+      "id": "UX-07",
+      "phase": "UX",
+      "inputOrAction": "Gõ sản phẩm, sửa hệ số, dán, chọn hoặc di chuyển caret",
+      "expected": "Đề xuất cũ không ghi đè nội dung; không che phần đang sửa",
+      "status": "specified"
+    },
+    {
+      "id": "UX-08",
+      "phase": "UX",
+      "inputOrAction": "`hoa-[h2+o2=` chưa có dấu đóng, rồi nhận",
+      "expected": "Chỉ thay phần thân; không tự thêm `]` hoặc chuyển native",
+      "status": "specified"
+    },
+    {
+      "id": "UX-09",
+      "phase": "UX",
+      "inputOrAction": "Nguồn có cặp đã đóng, nhận rồi Undo/Redo/restore",
+      "expected": "Cặp, raw trước nhận, selection và kết quả đúng; không ăn chữ ngoài cặp",
+      "status": "specified"
+    },
+    {
+      "id": "UX-10",
+      "phase": "UX",
+      "inputOrAction": "Copy/lưu/nháp khi ghost chưa nhận",
+      "expected": "Không có ghost trong dữ liệu; không xuất kết quả suy như thể đã chọn",
+      "status": "specified"
+    },
+    {
+      "id": "UX-11",
+      "phase": "UX",
+      "inputOrAction": "Copy/lưu sau nhận, mở chéo Web/Desktop và tắt detector",
+      "expected": "Snapshot và nguồn trước hỗ trợ còn đủ; không cần suy lại bằng kho mới",
+      "status": "specified"
+    },
+    {
+      "id": "UX-12",
+      "phase": "UX",
+      "inputOrAction": "Tab, Shift+Enter, Ctrl+Enter và screen reader",
+      "expected": "Giữ các phím theo hợp đồng; thông báo gợi ý không giành focus",
+      "status": "specified"
+    },
+    {
+      "id": "UX-13",
+      "phase": "UX",
+      "inputOrAction": "Telex/VNI đang sửa dấu, Backspace, Enter/Space trong quá trình ghép chữ",
+      "expected": "Không chốt giữa thao tác bộ gõ; có bằng chứng OS riêng, không chỉ composition mô phỏng",
+      "status": "specified"
+    },
+    {
+      "id": "UX-14",
+      "phase": "UX",
+      "inputOrAction": "Key repeat, blur, đổi tab/tài liệu/cấu hình, worker chậm",
+      "expected": "Không nhận lặp hoặc áp kết quả stale",
+      "status": "specified"
+    },
+    {
+      "id": "DATA-01",
+      "phase": "DATA",
+      "inputOrAction": "Tệp v1/v2, snapshot Math/E3 và cặp tùy chỉnh cũ",
+      "expected": "Đọc nguyên nghĩa, không chạy lại parser/solver lên snapshot",
+      "status": "specified"
+    },
+    {
+      "id": "DATA-02",
+      "phase": "DATA",
+      "inputOrAction": "Tệp có schema mới hơn, checksum sai, ID/span/provenance bị sửa",
+      "expected": "Từ chối có kiểm soát, không ghi đè tài liệu đang mở",
+      "status": "specified"
+    },
+    {
+      "id": "DATA-03",
+      "phase": "DATA",
+      "inputOrAction": "Nâng phiên bản kho sau khi đã lưu một kết quả",
+      "expected": "Mở lại bản đã nhận nguyên vẹn, gồm điều kiện và nguồn gốc cũ",
+      "status": "specified"
+    },
+    {
+      "id": "WD-01",
+      "phase": "WD",
+      "inputOrAction": "Chọn vùng Word → xem đề xuất → xác nhận → Undo/Redo",
+      "expected": "Native và metadata cùng kết quả đã preview, một giao dịch trên UI thread",
+      "status": "specified"
+    },
+    {
+      "id": "WD-02",
+      "phase": "WD",
+      "inputOrAction": "Save/reopen, sửa native, restore nguồn có cặp tùy chỉnh",
+      "expected": "Không ghi đè sửa native từ metadata cũ; restore tường minh khôi phục đúng nguồn trước hỗ trợ",
+      "status": "specified"
+    },
+    {
+      "id": "WD-03",
+      "phase": "WD",
+      "inputOrAction": "Focus Find/Ribbon/dialog, đổi tài liệu hoặc sửa nguồn lúc chờ",
+      "expected": "Hủy ghi; không dựa vào riêng cửa sổ Word đang foreground",
+      "status": "specified"
+    },
+    {
+      "id": "WD-04",
+      "phase": "WD",
+      "inputOrAction": "Đóng cặp hoặc gõ `=`/Space trong Word hiện tại",
+      "expected": "SC1 thủ công không tự mở G2/G3 hoặc bật ghost inline",
+      "status": "specified"
+    }
+  ]
+}

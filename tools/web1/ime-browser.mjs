@@ -1,0 +1,15 @@
+import {chromium,firefox} from '../sh/node_modules/playwright/index.mjs';
+import {writeFile,mkdir} from 'node:fs/promises';
+await mkdir('artifacts/web1/ime',{recursive:true});
+const kind=process.argv[2]??'chromium';
+const browser=await(kind==='firefox'?firefox.launch({headless:false}):chromium.launch({headless:false,args:['--remote-debugging-port=9334','--remote-debugging-address=127.0.0.1']}));
+const context=await browser.newContext({viewport:{width:1220,height:900}});const page=await context.newPage();
+await page.goto('http://127.0.0.1:4183/');await page.locator('.locus-app[data-ready=true]').waitFor({timeout:45000});
+await page.evaluate(()=>document.title='Locus WEB1 — kiểm bộ gõ');await page.locator('#source').fill('');await page.locator('#source').focus();
+const events=[];await page.exposeFunction('recordIme',event=>{events.push(event);return writeFile('artifacts/web1/ime/events.json',JSON.stringify(events,null,2));});
+await page.locator('#source').evaluate(el=>{for(const type of ['keydown','keyup','input','compositionstart','compositionend'])el.addEventListener(type,e=>globalThis.recordIme({type,key:e.key??null,inputType:e.inputType??null,composing:e.isComposing??false,trusted:e.isTrusted,raw:el.value,time:Date.now()}));});
+let sampling=false;
+const timer=setInterval(async()=>{if(sampling)return;sampling=true;try{const state=await page.evaluate(()=>({raw:document.querySelector('#source')?.value,latex:document.querySelector('#latex-output')?.textContent,rendered:document.querySelector('#formula-preview')?.dataset.rendered,focus:document.activeElement?.id,version:document.querySelector('.locus-app')?.dataset.version}));await writeFile(`artifacts/web1/ime/${kind}-current.json`,JSON.stringify(state,null,2));}catch{}finally{sampling=false;}},600);
+console.log('Owned IME browser ready: '+kind);
+await new Promise(resolve=>browser.on('disconnected',resolve));
+clearInterval(timer);

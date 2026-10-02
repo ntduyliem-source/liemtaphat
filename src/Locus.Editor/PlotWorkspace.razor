@@ -1,0 +1,95 @@
+@implements IAsyncDisposable
+@inject PlotSession Session
+@inject IAnalysisScheduler Scheduler
+@inject IJSRuntime Js
+@inject IEditorFiles Files
+@inject IEditorClipboard Clipboard
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+
+<div class="plot-workspace @(Doc.Curves.Length==0?"is-empty":"")" @ref="root">
+    <header class="plot-header"><div><strong>Đồ thị</strong><small>Nhập hàm → chỉnh tham số → xuất hình</small></div><div class="plot-actions">
+        <button @onclick="AddCurve" disabled="@composing">＋ Vẽ mới</button>
+        <button aria-label="Hoàn tác đồ thị" disabled="@((!Session.CanUndo&&invalidNumbers.Count==0)||composing)" @onclick="()=>History(false)">↶</button><button aria-label="Làm lại đồ thị" disabled="@(!Session.CanRedo||composing)" @onclick="()=>History(true)">↷</button>
+        <button @onclick="Save" disabled="@composing">Lưu .locus</button><label class="plot-open">Mở<InputFile OnChange="Open" accept=".locus" disabled="@composing" /></label>
+        @if(DesktopWindow!=null){<button aria-label="Đổi kích thước cửa sổ" @onclick="DesktopWindow.ToggleSizeAsync">⛶</button>}
+    </div></header>
+    <div class="plot-layout">
+        <aside class="plot-sidebar">
+            <div class="plot-source-list">
+            @foreach(var curve in Doc.Curves)
+            {
+                var result=ResultFor(curve.Id);
+                <article class="plot-source @(selected==curve.Id?"selected":"")" @key="curve.Id">
+                    <div class="plot-curve-heading"><button class="curve-select" style="color:@curve.Color" @onclick="()=>selected=curve.Id">● Hàm @(Array.IndexOf(Doc.Curves,curve)+1)</button><label><input type="checkbox" checked="@curve.Visible" @onchange="e=>CurveChange(curve with{Visible=e.Value is true})" /> Hiện</label><button aria-label="Xóa hàm @(Array.IndexOf(Doc.Curves,curve)+1)" @onclick="()=>Remove(curve.Id)">×</button></div>
+                    <textarea aria-label="Nhập hàm @(Array.IndexOf(Doc.Curves,curve)+1)" data-plot-source="@curve.Id" value="@curve.Raw" maxlength="32768" placeholder="y = a*x mũ 2 + b" rows="2" spellcheck="false"></textarea>
+                    @if(result?.MathMl.Length>0){<div class="plot-result-row"><div class="plot-math">@((MarkupString)result.MathMl)</div>@if(result.Readings.Length>1||result.Readings.Any(r=>r.Kind!="direct")){<button class="plot-fx" aria-label="Xem các cách hiểu của hàm @(Array.IndexOf(Doc.Curves,curve)+1)" aria-expanded="@ShowReadings(result)" @onclick="()=>ToggleReadings(curve.Id)">Cách hiểu</button>}</div>}
+                    @if(result!=null&&(result.Readings.Length>1||result.Readings.Any(r=>r.Kind!="direct"))&&ShowReadings(result))
+                    {
+                        <div class="plot-readings" aria-label="Các cách hiểu của hàm @(Array.IndexOf(Doc.Curves,curve)+1)">
+                        @foreach(var reading in result.Readings)
+                        {
+                            <button class="plot-reading @(reading.Id==result.SelectedReadingId?"selected":"") @(reading.Kind=="repair"?"repair":"")" aria-pressed="@(reading.Id==result.SelectedReadingId)" @onclick="()=>ChooseReading(curve,reading)">
+                                <span>@ReadingLabel(reading.Kind)</span><span class="plot-reading-math">@((MarkupString)reading.MathMl)</span>
+                                @if(reading.Raw!=curve.Raw){<code>@reading.Raw</code>}
+                            </button>
+                        }
+                        <small>Chọn phương án chỉ đổi cách dựng; ô nguồn phía trên vẫn giữ nguyên.</small>
+                        </div>
+                    }
+                    @if(result?.Problem is {} problem){<p class="plot-problem">@problem</p>}
+                    @if(result?.Limited==true){<p class="plot-problem">Đường quá phức tạp ở khung này; đã dừng theo giới hạn tính. Hãy thu hẹp miền vẽ.</p>}
+                </article>
+            }
+            </div>
+            @if(Doc.Curves.Length==0){<p class="plot-empty-input">Bắt đầu bằng <strong>Vẽ mới</strong> hoặc chọn một loại hàm trên canvas.</p>}
+            <section class="plot-parameters" aria-label="Tham số">
+                <div class="plot-section-heading"><strong>Tham số <small>@ActiveParameters.Count</small></strong><label><input type="checkbox" @bind="onlyMissing" /> Còn thiếu</label></div>
+                <input class="plot-search" type="search" aria-label="Tìm tham số" placeholder="Tìm tên tham số…" @bind="search" @bind:event="oninput" />
+                <label class="plot-parameter-filter"><input type="checkbox" @bind="onlySelected" /> Của hàm đang chọn</label>
+                @if(ActiveParameters.Count==0){<p class="plot-help">Nhập a, b hoặc a_100 trong hàm để tạo tham số. Giá trị ban đầu để trống.</p>}
+                else
+                {
+                    <div class="plot-parameter-head"><span>Tên / giá trị</span><span>Min — thanh trượt — Max</span></div>
+                    <div class="plot-parameter-scroll" style="height:@(Math.Min(224,FilteredParameters.Count*44+2))px">
+                        <Virtualize Items="@FilteredParameters" Context="p" ItemSize="44">
+                            <div class="plot-parameter-row" @key="(p.Name,parameterRender)" title="@UsedBy(p.Name)">
+                                <button class="parameter-pin" title="@(p.Pinned?"Bỏ ghim":"Ghim lên đầu")" @onclick="()=>Parameter(p with{Pinned=!p.Pinned})">@(p.Pinned?"◆":"◇")</button><label title="@p.Name" for="value-@p.Name">@p.Name</label>
+                                <input id="value-@p.Name" type="number" step="any" aria-label="Giá trị @p.Name" value="@N(p.Value)" placeholder="?" @oninput='e=>ParameterNumber(p,"value",e)' />
+                                <span class="parameter-divider"></span><input type="number" step="any" aria-label="Min @p.Name" value="@N(p.Min)" @oninput='e=>ParameterNumber(p,"min",e)' />
+                                <input type="range" aria-label="Thanh trượt @p.Name" min="@N(p.Min)" max="@N(p.Max)" step="@N(p.Step)" value="@N(Math.Clamp(p.Value??p.Min,p.Min,p.Max))" @onpointerdown="BeginParameterGesture" @onpointerup="EndParameterGesture" @onpointercancel="CancelGesture" @onblur="EndParameterGesture" @oninput='e=>ParameterNumber(p,"value",e,true)' @onkeydown="ParameterKey" @onkeyup="EndParameterGesture" />
+                                <input type="number" step="any" aria-label="Max @p.Name" value="@N(p.Max)" @oninput='e=>ParameterNumber(p,"max",e)' />
+                            </div>
+                        </Virtualize>
+                    </div>
+                    @if(ActiveParameters.Any(p=>p.Value<p.Min||p.Value>p.Max)){<p class="plot-help">Giá trị ngoài khoảng slider vẫn được giữ và dùng để vẽ.</p>}
+                    <details><summary>Gán nhóm và bước nhảy</summary><textarea aria-label="Giá trị nhiều tham số" placeholder="a=1; b=0; c=2" @bind="batchValues" @bind:event="oninput"></textarea><button @onclick="AssignBatch">Áp dụng nhóm</button><p>Một lần Undo khôi phục cả nhóm. Chỉ dùng các tên trong hàm.</p><select aria-label="Tham số cần đổi bước" @bind="stepParameter"><option value="">Chọn tham số</option>@foreach(var p in ActiveParameters){<option value="@p.Name">@p.Name</option>}</select>@if(ActiveParameters.FirstOrDefault(p=>p.Name==stepParameter) is {} step){<input @key="parameterRender" type="number" step="any" aria-label="Bước thanh trượt" value="@N(step.Step)" @onchange='e=>ParameterNumber(step,"step",e)' />}</details>
+                }
+            </section>
+            @if(Doc.Curves.FirstOrDefault(c=>c.Id==selected) is {} chosen)
+            {
+                <section class="plot-properties"><strong>Đường đang chọn</strong><div class="plot-property-row"><label>Màu<input type="color" aria-label="Màu đường" value="@chosen.Color" @onchange='e=>CurveChange(chosen with{Color=e.Value!.ToString()!})' /></label><label>Nét<select aria-label="Nét đường" value="@chosen.LineStyle" @onchange='e=>CurveChange(chosen with{LineStyle=e.Value!.ToString()!})'><option value="solid">Liền</option><option value="dashed">Đứt</option><option value="dotted">Chấm</option></select></label><label>Độ dày<input aria-label="Độ dày đường" type="number" min="0.5" max="12" step="0.5" value="@N(chosen.Width)" @onchange='e=>CurveNumber(chosen,"width",e)' /></label></div>
+                <div class="plot-property-row"><label>Miền x từ<input aria-label="Đầu miền vẽ" type="number" step="any" placeholder="−∞" value="@N(chosen.DomainMin)" @onchange='e=>CurveNumber(chosen,"min",e)' /></label><label>đến<input aria-label="Cuối miền vẽ" type="number" step="any" placeholder="+∞" value="@N(chosen.DomainMax)" @onchange='e=>CurveNumber(chosen,"max",e)' /></label></div><small>Miền của hàm độc lập với khung nhìn.</small></section>
+            }
+            <details class="plot-options"><summary>Trục, lưới và khung nhìn</summary>
+                <label><input type="checkbox" checked="@Axes.Grid" @onchange="e=>Apply(Doc with{Axes=Axes with{Grid=e.Value is true}})" /> Lưới</label><label><input type="checkbox" checked="@Axes.Axes" @onchange="e=>Apply(Doc with{Axes=Axes with{Axes=e.Value is true}})" /> Trục và số</label>
+                <div class="plot-property-row"><label>Nhãn x<input aria-label="Nhãn trục x" value="@Axes.XLabel" maxlength="64" @onchange='e=>Apply(Doc with{Axes=Axes with{XLabel=e.Value?.ToString()??""}})' /></label><label>Nhãn y<input aria-label="Nhãn trục y" value="@Axes.YLabel" maxlength="64" @onchange='e=>Apply(Doc with{Axes=Axes with{YLabel=e.Value?.ToString()??""}})' /></label></div>
+                @foreach(var field in new[]{"Left","Right","Bottom","Top"}){<label>@ViewLabel(field)<input type="number" step="any" aria-label="@ViewLabel(field)" value="@N(ViewValue(field))" @onchange="e=>ViewportNumber(field,e)" /></label>}
+            </details>
+            <details class="plot-options"><summary>Mở mẫu</summary><button @onclick='()=>Sample("x mũ 2")'>Parabol</button><button @onclick='()=>Sample("a*sin(b*x+c)")'>Sóng có tham số</button><button @onclick='()=>Sample("1/x")'>Hàm phân thức</button><p>Mẫu thêm một dòng; giữ các hàm đang có.</p></details>
+            <label class="plot-autosave"><input type="checkbox" checked="@autoSave" @onchange="AutoSaveChanged" /> Tự lưu nháp đồ thị</label><small class="plot-draft">@draftStatus</small>
+        </aside>
+        <main class="plot-main">
+            <div class="plot-canvas-tools"><span>Kéo nền để di chuyển</span><button aria-label="Phóng to đồ thị" @onclick="()=>Zoom(0.8)">＋</button><button aria-label="Thu nhỏ đồ thị" @onclick="()=>Zoom(1.25)">−</button><button @onclick="()=>Apply(Doc with{Viewport=new()})">Về gốc</button><button @onclick="Refresh">Dựng lại</button></div>
+            <div class="plot-surface" data-plot-surface tabindex="0" aria-label="Canvas đồ thị, kéo để di chuyển" @oncontextmenu="()=>contextMenu=true" @oncontextmenu:preventDefault>
+                @((MarkupString)(result?.Svg??PlotSvg.Render(Doc,[])))
+                @if(Doc.Curves.Length==0){<div class="plot-start"><span>CANVAS TRỐNG</span><h2>Bạn muốn vẽ gì?</h2><p>Chọn để mở ô nhập, đồ thị xuất hiện khi hàm hợp lệ.</p><div><button @onclick="AddCurve">ƒ Hàm số y = f(x)</button><button @onclick="AddCurve">a Hàm có tham số</button></div><small>Đa thức, phân thức, căn, sin, cos, tan, ln, exp.</small></div>}
+                @if(busy){<span class="plot-busy" role="status">Đang dựng…</span>}
+            </div>
+            <footer class="plot-export"><span>@(Doc.Curves.Length==0?"Chưa có hàm":$"{Doc.Curves.Length} hàm · {ActiveParameters.Count} tham số")</span><button disabled="@(!CanExport)" @onclick='()=>Export("png",true)'>Copy PNG</button><button disabled="@(!CanExport)" @onclick='()=>Export("svg",true)'>Copy SVG</button><button disabled="@(!CanExport)" @onclick='()=>Export("svg")'>Tải SVG</button><button disabled="@(!CanExport)" @onclick='()=>Export("png")'>Tải PNG</button></footer>
+            @if(contextMenu){<div class="plot-context"><button disabled="@(!CanExport)" @onclick='()=>Export("svg",true)'>Copy SVG</button><button disabled="@(!CanExport)" @onclick='()=>Export("png",true)'>Copy PNG</button><button @onclick="()=>contextMenu=false">Đóng</button></div>}
+            @if(notice.Length>0){<p class="plot-notice" role="status">@notice</p>}
+            @if(retained!=null){<button @onclick="Recover">Tải lại nguyên tệp chưa mở được</button>}
+            <p class="plot-scope">Hàm thực y=f(x) · Góc lượng giác tính bằng radian. Phương trình ẩn và các dạng đồ thị khác sẽ có công cụ riêng.</p>
+        </main>
+    </div>
+</div>

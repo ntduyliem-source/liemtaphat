@@ -1,0 +1,10 @@
+import {chromium} from '../sh/node_modules/playwright/index.mjs';
+import {writeFile,mkdir} from 'node:fs/promises';
+await mkdir('artifacts/web1/ime',{recursive:true});
+const browser=await chromium.connectOverCDP('http://127.0.0.1:9335');const page=browser.contexts()[0].pages()[0];
+await page.goto('http://127.0.0.1:4183/');await page.locator('.locus-app[data-ready=true]').waitFor({timeout:45000});
+await page.locator('#source').fill('');await page.locator('#source').focus();
+const events=[];await page.exposeFunction('recordWeb1Os',event=>{events.push(event);return writeFile('artifacts/web1/ime/wasm-events.json',JSON.stringify(events,null,2));});
+await page.locator('#source').evaluate(el=>{for(const type of ['keydown','keyup','input','compositionstart','compositionend'])el.addEventListener(type,e=>globalThis.recordWeb1Os({type,key:e.key??null,inputType:e.inputType??null,composing:e.isComposing??false,trusted:e.isTrusted,raw:el.value,time:Date.now()}));});
+let sampling=false;const timer=setInterval(async()=>{if(sampling)return;sampling=true;try{const state=await page.evaluate(()=>({url:location.href,host:document.querySelector('.locus-app')?.dataset.host,raw:document.querySelector('#source')?.value,latex:document.querySelector('#latex-output')?.textContent,rendered:document.querySelector('#formula-preview')?.dataset.rendered,focus:document.activeElement?.id}));await writeFile('artifacts/web1/ime/wasm-current.json',JSON.stringify(state,null,2));}catch{}finally{sampling=false;}},500);
+console.log('WEB1 WASM on WebView2 ready.');await new Promise(resolve=>browser.on('disconnected',resolve));clearInterval(timer);

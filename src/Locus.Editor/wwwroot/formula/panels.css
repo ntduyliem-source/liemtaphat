@@ -1,0 +1,36 @@
+.formula-studio .studio-editor-frame { position: relative; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: stretch; gap: 0; padding: 0; margin: 0; border: 1px solid var(--studio-line); border-top: 2px solid var(--studio-accent); border-bottom: 0; }
+.formula-studio .studio-editor-frame::before { content: ''; position: absolute; top: -2px; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,var(--studio-accent),var(--studio-gradient-mid),var(--studio-accent)); }
+.formula-studio .input-card, .formula-studio .result-card { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: var(--studio-pane-height); overflow: hidden; border: 0; border-radius: 0; background: var(--studio-surface); }
+.formula-studio .result-card { border-left: 1px solid var(--studio-line); background: var(--studio-result); }
+.formula-studio .card-heading { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; flex-wrap: nowrap; gap: var(--studio-space-2); height: var(--studio-panel-heading); padding: 0 16px; margin: 0; border-bottom: 1px solid var(--studio-line); background: var(--studio-paper); }
+.formula-studio .card-heading h2, .formula-studio .card-heading h3 { display: flex; align-items: center; gap: 6px; font: 700 var(--studio-size-label)/1.5 var(--studio-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--studio-ink); }
+.formula-studio .card-heading .subtle { font-weight: 400; text-transform: uppercase; }
+.section-dot { display: inline-block; width: 6px; height: 6px; background: var(--studio-accent); flex-shrink: 0; }
+.result-dot { background: var(--studio-success); }
+.formula-studio .card-heading .studio-result-status { font: 400 var(--studio-size-caption)/1.5 var(--studio-mono); text-transform: uppercase; letter-spacing: .05em; color: var(--studio-muted); }
+.formula-studio .source-shell { position: relative; display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.formula-studio #source { display: block; flex: 1; width: 100%; height: 0; min-height: 0; max-height: none; padding: 16px; resize: none; border: 0; border-radius: 0; background: transparent; color: var(--studio-ink); font: 400 var(--studio-size-input)/1.625 var(--studio-mono); }
+.formula-studio #source:focus-visible { outline: 1px solid var(--studio-action); outline-offset: -1px; }
+.formula-studio #source::placeholder { color: var(--studio-muted); }
+.formula-studio .mixed-result { flex: 1; min-height: 0; height: 0; padding: 20px; overflow: auto; border: 0; border-radius: 0; background: var(--studio-result); color: var(--studio-ink); font: 400 var(--studio-size-result)/1.625 var(--studio-serif); }
+.formula-studio .mixed-result:focus-visible { outline: 1px solid var(--studio-action); outline-offset: -1px; }
+.formula-studio .mixed-result .result-region { display: inline; padding: 0; margin: 0; border-radius: 0; background: transparent; outline: none; }
+.formula-studio .mixed-result .region-content { display: inline-block; padding: 1px 5px; margin: 1px 2px; border: 1px dashed transparent; border-radius: 2px; background: var(--studio-token-rest); }
+.formula-studio .mixed-result .region-content:hover { border-color: var(--studio-accent); background: var(--studio-token-hover); }
+.formula-studio .mixed-result .is-selected .region-content { border-color: var(--studio-accent); background: var(--studio-token-active); box-shadow: 0 0 0 1px var(--studio-accent); }
+.formula-studio .mixed-result.whole-document-selected { box-shadow: 0 0 0 2px var(--studio-accent) inset; background: var(--studio-token-article); }
+.formula-studio .mixed-result math { color: var(--studio-ink); font-size: var(--studio-size-formula); }
+.formula-studio .empty-result { color: var(--studio-muted); font: var(--studio-size-result)/1.625 var(--studio-serif); }
+.formula-studio .input-foot, .formula-studio .studio-suggestions { display: flex; flex-shrink: 0; align-items: center; gap: var(--studio-space-2); height: var(--studio-control); min-height: var(--studio-control); padding: 0 16px; border-top: 1px solid var(--studio-line); background: var(--studio-paper); color: var(--studio-muted); font: 400 var(--studio-size-control)/1.5 var(--studio-mono); }
+.formula-studio .input-foot { justify-content: space-between; flex-wrap: nowrap; }
+.formula-studio .input-foot > span:last-child { font-size: var(--studio-size-caption); }
+.formula-studio .studio-suggestions { overflow: hidden; background: var(--studio-surface); }
+.suggestion-label { flex-shrink: 0; color: var(--studio-action); font-size: var(--studio-size-caption); font-weight: 700; }
+.formula-studio .suggestion-chips.candidate-list { display: flex; align-items: center; flex-direction: row; gap: 6px; overflow-x: auto; padding: 2px; min-width: 0; scrollbar-width: thin; }
+.formula-studio .suggestion-chips button { flex-shrink: 0; display: inline-flex; flex-direction: row; align-items: center; justify-content: center; gap: var(--studio-space-1); margin: 0; padding: 2px 6px; white-space: nowrap; min-height: 0; font: 400 var(--studio-size-control)/1.5 var(--studio-mono); }
+.formula-studio .suggestion-chips math { font-size: 15px; }
+.formula-studio .ghost-equation, .formula-studio .ghost-hint { padding: 8px 16px; margin: 0; background: var(--studio-tint); color: var(--studio-action); }
+.formula-studio .ghost-equation p { color: var(--studio-muted); }
+.formula-studio .ghost-products { background: var(--studio-tint); color: var(--studio-muted); border-color: var(--studio-action); }
+.suggestion-context-actions { display: inline-flex; flex-wrap: wrap; gap: var(--studio-space-1); margin-left: auto; }
+.suggestion-empty { color: var(--studio-muted); font: 400 var(--studio-size-control)/1.5 var(--studio-sans); }

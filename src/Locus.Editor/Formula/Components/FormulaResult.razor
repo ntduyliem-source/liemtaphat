@@ -1,0 +1,24 @@
+<div id="mixed-result" class="mixed-result @(WholeDocumentSelected?"whole-document-selected":"")" @ref="Element" data-revision="@Revision" tabindex="0" role="region" aria-label="Kết quả và công thức">
+                    @if(Content is {} content && !IsBusy && !IsComposing){
+                        @foreach(var block in content.Blocks()){
+                            @if(block.Region is {} region){
+                                <span @key="region.Id" class="result-region @((SelectedIds?.Contains(region.Id)==true)?"is-selected":"")" data-region-id="@region.Id" data-source-start="@region.Start" data-source-end="@region.End">
+                                    <span class="region-content" data-formula="@(region.Display!=null?"true":"false")" tabindex="0" role="button" aria-label="Chọn công thức @(content.Regions.ToList().IndexOf(region)+1)" @onclick="()=>OnSelect.InvokeAsync(region.Id)">@if(region.Display is {} candidate){@((MarkupString)CandidateExporter.ToMathMl(candidate))}else{@region.Raw}</span>
+                                </span>
+                            }else{<span data-text-start="@block.Start" data-source-end="@block.End">@content.Raw.Substring(block.Start,block.End-block.Start)</span>}
+                        }
+                    }else{<span data-text-start="0" data-source-end="@Raw.Length">@Raw</span>}
+                    @if(Raw.Length==0){<span class="empty-result" data-ignore-selection="true">Kết quả sẽ xuất hiện tại đây.</span>}
+                </div>
+
+@code {
+    public ElementReference Element { get; private set; }
+    [Parameter] public ContentDocument? Content { get; set; }
+    [Parameter] public string Raw { get; set; } = "";
+    [Parameter] public long Revision { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public bool IsComposing { get; set; }
+    [Parameter] public bool WholeDocumentSelected { get; set; }
+    [Parameter] public IReadOnlyCollection<Guid>? SelectedIds { get; set; }
+    [Parameter] public EventCallback<Guid> OnSelect { get; set; }
+}

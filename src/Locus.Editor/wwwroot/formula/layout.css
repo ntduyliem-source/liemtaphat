@@ -1,0 +1,8 @@
+.locus-app.formula-studio { max-width: var(--studio-width); margin: 0 auto; padding: 20px 24px 0; }
+.formula-studio .studio-main { display: block; margin: 0; padding: 0; width: 100%; max-width: none; border: 0; border-radius: 0; background: transparent; }
+.formula-studio .studio-intro { padding: 8px 0 24px; }
+.formula-studio .studio-intro h1 { margin: 0 0 8px; color: var(--studio-ink); font: 400 var(--studio-size-hero)/1.25 var(--studio-serif); letter-spacing: -.025em; }
+.formula-studio .studio-intro h1 span { text-decoration: underline; text-decoration-color: var(--studio-accent); text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.formula-studio .studio-intro p { max-width: 576px; margin: 0; color: var(--studio-muted); font: 400 var(--studio-size-input)/1.5 var(--studio-sans); }
+
+.formula-studio summary:focus-visible { outline: var(--studio-focus-width) solid var(--studio-action); outline-offset: 2px; }

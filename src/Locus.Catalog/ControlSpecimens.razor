@@ -1,0 +1,15 @@
+<section class="control-specimens" aria-label="Thử component thật">
+    <div class="specimen-row"><StudioButton OnClick="Notify" title="Tooltip native — bấm để hiện toast">Button</StudioButton><StudioButton Class="studio-primary" OnClick="Notify">Primary</StudioButton><StudioButton Class="subtle" OnClick="Notify">Subtle</StudioButton><StudioButton Disabled="true">Disabled</StudioButton><StudioIconButton Label="Hoàn tác mẫu" Icon="undo" OnClick="Notify" /><StudioIconButton Label="Làm lại mẫu" Icon="redo" Disabled="true" /></div>
+    <div class="specimen-row">@foreach(var icon in icons){<span class="icon-specimen"><StudioIcon Name="@icon" /><code>@icon</code></span>}</div>
+    <div class="specimen-row"><label>TextField<StudioField @bind-Value="value" /></label><label>Invalid<StudioField Value="lc[" aria-invalid="true" /></label><label>Disabled<StudioField Value="lc[" Disabled="true" /></label><label><StudioCheckbox @bind-Value="checkedValue" /> Checkbox</label><label>Select<StudioSelect Value="@option" OnChange="e=>option=e.Value?.ToString()??string.Empty"><option>Chưa chọn</option><option>Có điều kiện</option></StudioSelect></label></div>
+    <div class="formula-studio catalog-inline"><FormulaDetectionBar Ready="true" CanBalance="true" IsSelected="m=>m==mode" OnDetect="m=>mode=m" OnBalance="Notify" /></div>
+    <p role="status">Field: @value · Checkbox: @checkedValue · Select: @option · Nhận diện: @mode</p>
+    <StudioNotice Message="@message" Revision="revision" />
+</section>
+@code {
+    private string value="lc[",option="Chưa chọn",mode="all",message="";
+    private bool checkedValue=true;
+    private long revision;
+    private static readonly string[] icons=["undo","redo","copy","download","save","file","wand","sun","moon","close","image"];
+    private void Notify(){message="Đã thực hiện lệnh trong catalog. Phiên sản phẩm không thay đổi.";revision++;}
+}

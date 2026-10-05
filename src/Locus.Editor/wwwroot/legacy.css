@@ -1,0 +1,7 @@
+/* Graph/geometry only. Do not use these selectors in Formula. */
+@import url('./legacy/editor.css');
+@import url('./legacy/web1.css');
+@import url('./legacy/ux1.css');
+@import url('./legacy/plot.css');
+@import url('./legacy/geometry.css');
+.legacy-editors{--lc-bg:var(--studio-surface);--lc-soft:var(--studio-subtle);--lc-text:var(--studio-ink);--lc-muted:var(--studio-muted);--lc-line:var(--studio-line);--lc-action:var(--studio-action);--lc-selection:var(--studio-tint);font:14px/1.5 var(--studio-sans);min-height:calc(100vh - 50px)}

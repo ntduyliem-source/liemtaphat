@@ -8,7 +8,9 @@ using Locus.Core.Detection;
 using Locus.Core.Export;
 
 if(args.FirstOrDefault()=="--content-only")return await ContentVerification.Run(Path.GetFullPath(args.ElementAtOrDefault(1)??"artifacts/ux1/verification"));
+if(args.FirstOrDefault()=="--ct4-only")return await Ct4Verification.Run(Path.GetFullPath(args.ElementAtOrDefault(1)??"artifacts/design-system/ct4/verification"));
 if(args.FirstOrDefault()=="--balance-only")return await BalanceVerification.Run(Path.GetFullPath(args.ElementAtOrDefault(1)??"artifacts/bal1/verification"));
+if(args.FirstOrDefault()=="--studio-balance-only")return await StudioBalanceVerification.Run(Path.GetFullPath(args.ElementAtOrDefault(1)??"artifacts/ui-design/balance-command"));
 if(args.FirstOrDefault()=="--document-export-only")return await DocumentExportVerification.Run(Path.GetFullPath(args.ElementAtOrDefault(1)??"artifacts/doc1/verification"));
 if(args.FirstOrDefault()=="--plot-only")return PlotVerification.Run(Path.GetFullPath(args.ElementAtOrDefault(1)??"artifacts/phase-g/verification"));
 if(args.FirstOrDefault()=="--geometry-only")return GeometryVerification.Run(Path.GetFullPath(args.ElementAtOrDefault(1)??"artifacts/phase-g/verification"));

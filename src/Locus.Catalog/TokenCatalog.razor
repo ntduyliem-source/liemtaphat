@@ -1,0 +1,27 @@
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+<div class="token-grid">
+@foreach(var token in tokens.Where(Matches)){
+    <article class="token-card">
+        @if(token.IsColor){<div class="swatch" style="background:var(@token.Name)" aria-label="@token.Name"></div>}
+        else if(token.Name.Contains("space-")){<div class="space-swatch" style="width:var(@token.Name)"></div>}
+        <code>@token.Name</code><strong>@token.Value</strong>
+        <small>Định nghĩa: @token.Raw</small>
+        @if(token.IsColor){<small>Tương phản / paper: @token.Contrast:1</small>}
+        <details><summary>Nguồn &amp; nơi dùng</summary><p><code>src/Locus.DesignSystem/wwwroot/styles/tokens.css</code></p><p>@token.Uses</p></details>
+    </article>
+}
+</div>
+@if(tokens.Length==0){<p role="status">Đang đọc tokens…</p>}
+@code {
+    [Parameter] public string Theme {get;set;}="light";
+    [Parameter] public string Query {get;set;}="";
+    [Parameter] public bool FoundationsOnly {get;set;}
+    private TokenValue[] tokens=[];
+    private string? loadedTheme;
+    private IJSObjectReference? module;
+    private bool Matches(TokenValue t)=> (!FoundationsOnly||!t.IsColor) && (t.Name+t.Value+t.Uses).Contains(Query,StringComparison.OrdinalIgnoreCase);
+    protected override async Task OnAfterRenderAsync(bool first){if(loadedTheme==Theme)return;loadedTheme=Theme;module??=await Js.InvokeAsync<IJSObjectReference>("import","./tokens.js");tokens=await module.InvokeAsync<TokenValue[]>("readTokens");StateHasChanged();}
+    public async ValueTask DisposeAsync(){if(module!=null)await module.DisposeAsync();}
+    public sealed record TokenValue(string Name,string Value,string Raw,bool IsColor,string Contrast,string Uses);
+}

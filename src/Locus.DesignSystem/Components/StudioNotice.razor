@@ -1,0 +1,21 @@
+@implements IDisposable
+<div id="notice" class="studio-toast @(visible?"is-visible":"")" role="status" aria-live="polite" aria-hidden="@((!visible).ToString().ToLowerInvariant())"><span class="section-dot" aria-hidden="true"></span>@Message</div>
+@code {
+    [Parameter] public string Message {get;set;}="";
+    [Parameter] public long Revision {get;set;}
+    private string previous="";
+    private long previousRevision=-1;
+    private bool visible;
+    private CancellationTokenSource? delay;
+    protected override void OnParametersSet()
+    {
+        if(Message==previous&&Revision==previousRevision)return;
+        previous=Message;previousRevision=Revision;delay?.Cancel();delay?.Dispose();delay=new();visible=Message.Length>0;
+        if(visible)_=HideLater(delay.Token);
+    }
+    private async Task HideLater(CancellationToken token)
+    {
+        try{await Task.Delay(4500,token);await InvokeAsync(()=>{visible=false;StateHasChanged();});}catch(OperationCanceledException){}
+    }
+    public void Dispose(){delay?.Cancel();delay?.Dispose();}
+}

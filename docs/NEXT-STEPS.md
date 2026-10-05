@@ -1,5 +1,7 @@
 # Kế hoạch thực hiện từ baseline hiện tại
 
+**Ưu tiên cập nhật 05/10/2026:** CT0–CT4 đã triển khai và kiểm Công thức Web local; [biên bản CT4](design-system/CT4-VERIFICATION.md) ghi build, bằng chứng và giới hạn. [Catalog 0.2.0 và source](design-system/README.md). Tiếp theo review bản này, chọn đợt bổ sung core từ C01–C08 trong [audit](design-system/CT4-CORE-AUDIT.md), và nghiệm thu/phát hành Desktop riêng khi mở đợt đó. Web/Desktop có shell, tích hợp và phát hành riêng; chưa tạo bộ cài mới từ lượt kiểm Web. Thứ tự H/WEB2 và các chi tiết UI lịch sử bên dưới không ghi đè ưu tiên này.
+
 Cập nhật 2026-09-30. **G đã đạt alpha local 14/14**; Web/Desktop và connector Word đã có gói riêng. Bước sản phẩm kế tiếp là H/WEB2 khi được yêu cầu. D-FILE còn download IAB; SC1/UX1 còn ma trận IME; WD1 còn highlight nhiều vùng và đa DPI/màn hình. [Biên bản hiện tại](host-review/20260930.md), [roadmap](ROADMAP.md), [backlog](BACKLOG.md). Các phần dưới giữ chi tiết thứ tự A–H; không phải mọi đoạn lịch sử đều là trạng thái hiện tại.
 
 ## 1. Đầu vào đã có và phần cần làm tiếp

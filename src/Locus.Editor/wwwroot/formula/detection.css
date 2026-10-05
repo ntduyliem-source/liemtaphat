@@ -1,0 +1,18 @@
+.formula-studio .studio-shelf { position: relative; z-index: var(--studio-layer-shelf); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--studio-space-4); padding: 10px 16px; border: 1px solid var(--studio-line); border-bottom: 0; background: var(--studio-surface); }
+.formula-studio .detection-options { display: inline-flex; align-items: stretch; flex-wrap: nowrap; gap: 0; padding: 2px; border: 1px solid var(--studio-line); background: var(--studio-subtle); }
+.formula-studio .detection-options button { padding: 6px 14px; border: 0; border-left: 1px solid var(--studio-line); background: transparent; color: var(--studio-muted); font-size: var(--studio-size-control); letter-spacing: .05em; white-space: nowrap; }
+.formula-studio .detection-options button:first-child { border-left: 0; }
+.formula-studio .detection-options button[aria-pressed='true'] { background: var(--studio-accent); color: var(--studio-on-action); font-weight: 700; }
+.manual-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--studio-muted); }
+.formula-studio [aria-pressed='true'] .manual-dot { background: var(--studio-on-action); }
+.studio-balance-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.formula-studio .balance-toolbar { margin: 0; padding: 0; border: 0; }
+.formula-studio .balance-actions { display: flex; align-items: center; gap: var(--studio-space-1); flex-wrap: nowrap; }
+.formula-studio #balance-step { padding: 6px 14px; background: var(--studio-tint); border-color: var(--studio-accent); color: var(--studio-action); font: 700 var(--studio-size-control)/1.5 var(--studio-mono); letter-spacing: .05em; text-transform: uppercase; }
+.formula-studio #balance-step:disabled { border-color: var(--studio-line); background: transparent; color: var(--studio-muted); }
+.formula-studio #balance-step:hover:not(:disabled) { color: var(--studio-on-action); background: var(--studio-accent); }
+.formula-studio #clear-source:hover:not(:disabled) { color: var(--studio-danger); background: transparent; }
+.balance-hint { color: var(--studio-muted); font: italic var(--studio-size-control)/1.5 var(--studio-mono); }
+.studio-balance-tools { min-width: 0; }
+.formula-studio .balance-actions { flex-wrap: wrap; }
+.balance-hint { max-width: 48ch; }

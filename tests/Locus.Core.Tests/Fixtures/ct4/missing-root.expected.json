@@ -1,0 +1,9 @@
+[
+  {
+    "Id": "b13b9b1208116fb95014bb4d29d3658647684c309b949953a0f6b5ff590bc595",
+    "Kind": "repair",
+    "Latex": "\\sqrt{x\u002B1}",
+    "MathMl": "\u003Cmath xmlns=\u0022http://www.w3.org/1998/Math/MathML\u0022 display=\u0022inline\u0022\u003E\u003Cmsqrt\u003E\u003Cmrow\u003E\u003Cmi\u003Ex\u003C/mi\u003E\u003Cmo\u003E\u002B\u003C/mo\u003E\u003Cmn\u003E1\u003C/mn\u003E\u003C/mrow\u003E\u003C/msqrt\u003E\u003C/math\u003E",
+    "Omml": "\u003Cm:oMath xmlns:m=\u0022http://schemas.openxmlformats.org/officeDocument/2006/math\u0022\u003E\u003Cm:rad\u003E\u003Cm:radPr\u003E\u003Cm:degHide m:val=\u00221\u0022/\u003E\u003C/m:radPr\u003E\u003Cm:deg/\u003E\u003Cm:e\u003E\u003Cm:r\u003E\u003Cm:t\u003Ex\u003C/m:t\u003E\u003C/m:r\u003E\u003Cm:r\u003E\u003Cm:t\u003E\u002B\u003C/m:t\u003E\u003C/m:r\u003E\u003Cm:r\u003E\u003Cm:t\u003E1\u003C/m:t\u003E\u003C/m:r\u003E\u003C/m:e\u003E\u003C/m:rad\u003E\u003C/m:oMath\u003E"
+  }
+]

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile><TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders><BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault><WasmBuildNative>false</WasmBuildNative><RuntimeFrameworkVersion>10.0.11</RuntimeFrameworkVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.11" />
+    <ProjectReference Include="../Locus.Editor/Locus.Editor.csproj" />
+    <TrimmerRootAssembly Include="Locus.Catalog" /><TrimmerRootAssembly Include="Locus.DesignSystem" />
+    <TrimmerRootAssembly Include="Locus.Core" /><TrimmerRootAssembly Include="Locus.Application" /><TrimmerRootAssembly Include="Locus.Editor" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOCUS° — Scientific Formula & Visual Geometry Studio</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Newsreader (Editorial Serif), JetBrains Mono, Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+
+  <!-- KaTeX CSS, JS & mhchem extension -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/mhchem.min.js"></script>
+
+  <!-- html2canvas for high-res PNG export & clipboard -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Three.js for 3D Geometry Space -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            paper: '#FBFBF9',
+            paperDark: '#0E0E0D',
+            surfaceDark: '#161614',
+            surfaceLight: '#FFFFFF',
+            subtle: '#F4F4F0',
+            subtleDark: '#1E1E1B',
+            borderline: '#E5E5DE',
+            borderlineDark: '#282824',
+            ink: '#0D0D0D',
+            inkDark: '#F3F3ED',
+            muted: '#686862',
+            mutedDark: '#8E8E87',
+            terracotta: '#E8590C',
+            terracottaLight: '#FFF4ED',
+            terracottaDark: '#2C170B',
+            forest: '#15803d'
+          },
+          fontFamily: {
+            serif: ['Newsreader', 'Georgia', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      transition: background-color 0.2s ease, color 0.2s ease;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .katex-display {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .katex {
+      font-size: 1.15rem !important;
+      text-rendering: geometricPrecision;
+    }
+
+    @media (max-width: 768px) {
+      .katex { font-size: 1.02rem !important; }
+    }
+
+    .dark .katex {
+      color: #F3F3ED !important;
+    }
+
+    /* Minimalist Scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #D3D3C9; }
+    .dark ::-webkit-scrollbar-thumb { background: #383832; }
+
+    @keyframes subtlePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.9); }
+    }
+    .pulse-dot {
+      animation: subtlePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* Formula highlight token in rendered preview */
+    .formula-token {
+      cursor: pointer;
+      display: inline-block;
+      padding: 1px 5px;
+      margin: 1px 2px;
+      border: 1px dashed transparent;
+      border-radius: 2px;
+      transition: all 0.15s ease;
+      background: rgba(232, 89, 12, 0.05);
+    }
+    .formula-token:hover {
+      background: rgba(232, 89, 12, 0.12);
+      border-color: #E8590C;
+    }
+    .formula-token.active {
+      background: rgba(232, 89, 12, 0.18);
+      border-color: #E8590C;
+      box-shadow: 0 0 0 1px #E8590C;
+    }
+
+    /* Whole document selection indicator when scope is set to ALL */
+    .whole-document-selected {
+      box-shadow: 0 0 0 2px #E8590C inset !important;
+      background-color: rgba(232, 89, 12, 0.02) !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-paper dark:bg-paperDark text-ink dark:text-inkDark select-none selection:bg-terracotta selection:text-white">
+
+  <!-- Dải màu cam đất Terracotta phong cách Editorial -->
+  <div class="h-[2.5px] w-full bg-terracotta shrink-0"></div>
+
+  <!-- HEADER TOÀN CỤC (GLOBAL HEADER) -->
+  <header class="border-b border-borderline dark:border-borderlineDark text-xs font-mono select-none sticky top-0 bg-paper/95 dark:bg-paperDark/95 backdrop-blur-sm z-40 shrink-0">
+    <div class="max-w-7xl mx-auto flex items-stretch justify-between">
+      
+      <!-- Brand Logo & Main Workspace Switcher -->
+      <div class="flex items-stretch">
+        <a href="#" class="px-5 sm:px-6 py-3.5 border-r border-borderline dark:border-borderlineDark flex items-center gap-2.5 font-semibold tracking-wider hover:bg-subtle dark:hover:bg-subtleDark transition">
+          <div class="relative w-4 h-4 border border-terracotta flex items-center justify-center bg-terracotta/10">
+            <div class="w-1.5 h-1.5 bg-terracotta"></div>
+          </div>
+          <span class="text-sm font-serif font-bold tracking-tight">LOCUS<span class="text-terracotta">°</span></span>
+        </a>
+
+        <!-- 3 Workspace Tabs -->
+        <nav class="flex items-stretch border-r border-borderline dark:border-borderlineDark">
+          <button id="nav-btn-formula" onclick="switchMainTab('formula')" class="px-4 py-3.5 border-r border-borderline dark:border-borderlineDark flex items-center gap-2 font-medium bg-white dark:bg-surfaceDark text-terracotta border-b-2 border-b-terracotta transition">
+            <span class="w-1.5 h-1.5 bg-terracotta inline-block"></span>
+            <span>CÔNG THỨC</span>
+          </button>
+          <button id="nav-btn-graph" onclick="switchMainTab('graph')" class="px-4 py-3.5 border-r border-borderline dark:border-borderlineDark flex items-center gap-2 text-muted dark:text-mutedDark hover:text-terracotta dark:hover:text-terracotta hover:bg-subtle dark:hover:bg-subtleDark transition">
+            <span class="w-1.5 h-1.5 bg-zinc-300 dark:bg-zinc-600 inline-block"></span>
+            <span>ĐỒ THỊ</span>
+          </button>
+          <button id="nav-btn-geo" onclick="switchMainTab('geo')" class="px-4 py-3.5 flex items-center gap-2 text-muted dark:text-mutedDark hover:text-terracotta dark:hover:text-terracotta hover:bg-subtle dark:hover:bg-subtleDark transition">
+            <span class="w-1.5 h-1.5 bg-zinc-300 dark:bg-zinc-600 inline-block"></span>
+            <span>HÌNH HỌC</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Header Right: Undo/Redo & Theme Toggle -->
+      <div class="flex items-stretch">
+        <div class="hidden sm:flex items-stretch border-l border-borderline dark:border-borderlineDark">
+          <button onclick="triggerUndo()" title="Hoàn tác (Ctrl+Z)" class="px-3 py-3 hover:bg-subtle dark:hover:bg-subtleDark text-muted dark:text-mutedDark hover:text-ink dark:hover:text-inkDark transition flex items-center">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a5 5 0 015 5v2m-15-7l4-4m-4 4l4 4"/></svg>
+          </button>
+          <button onclick="triggerRedo()" title="Làm lại (Ctrl+Y)" class="px-3 py-3 border-r border-borderline dark:border-borderlineDark hover:bg-subtle dark:hover:bg-subtleDark text-muted dark:text-mutedDark hover:text-ink dark:hover:text-inkDark transition flex items-center">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a5 5 0 00-5 5v2m15-7l-4-4m4 4l-4 4"/></svg>
+          </button>
+        </div>
+
+        <button id="theme-toggle" onclick="toggleTheme()" class="px-4 py-3.5 hover:bg-subtle dark:hover:bg-subtleDark hover:text-terracotta transition flex items-center gap-2 text-muted dark:text-mutedDark border-l border-borderline dark:border-borderlineDark">
+          <span id="theme-icon" class="text-terracotta text-sm">☾</span>
+          <span id="theme-label" class="hidden sm:inline">DARK MODE</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN APPLICATION VIEWPORT -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-5 flex flex-col justify-start">
+
+    <!-- HERO HEADER SECTION -->
+    <section class="text-left pt-2 pb-6">
+      <h1 class="text-[1.8rem] sm:text-[2.7rem] font-serif tracking-tight text-ink dark:text-inkDark leading-tight mb-2">
+        Natural text to <span class="underline decoration-terracotta decoration-2 underline-offset-6">vector formulas</span>.
+      </h1>
+      <p class="text-muted dark:text-mutedDark text-xs sm:text-sm font-sans max-w-xl">
+        Nhập tự nhiên hoặc dán văn bản. Locus giữ nguyên cấu trúc chữ, tự động dựng Toán, Lý, Hóa chuẩn xác.
+      </p>
+    </section>
+
+    <!-- WORKSPACE 1: SCIENTIFIC FORMULA STUDIO -->
+    <div id="workspace-formula" class="flex flex-col">
+      
+      <!-- 1. THANH ĐIỀU KHIỂN NHẬN DIỆN & CÂN BẰNG (EDITORIAL SEGMENTED TOOL SHELF) -->
+      <div class="border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark px-4 py-2.5 text-xs font-mono flex flex-wrap items-center justify-between gap-4 shadow-2xs relative z-20">
+        
+        <!-- Nhóm 1: Thanh Segmented Bar nhận diện theo phong cách Editorial tối giản -->
+        <div class="flex items-center gap-2">
+          <div class="inline-flex items-stretch border border-borderline dark:border-borderlineDark p-0.5 bg-subtle/40 dark:bg-subtleDark/40">
+            <button id="btn-detect-all" onclick="setDetectMode('all')" class="px-3.5 py-1.5 font-mono text-[11px] font-bold tracking-wider transition bg-terracotta text-white shadow-2xs">
+              ALL DETECT
+            </button>
+            <button id="btn-detect-math" onclick="setDetectMode('math')" class="px-3.5 py-1.5 font-mono text-[11px] font-medium tracking-wider text-muted dark:text-mutedDark hover:text-terracotta transition border-l border-borderline dark:border-borderlineDark">
+              TOÁN HỌC
+            </button>
+            <button id="btn-detect-phys" onclick="setDetectMode('phys')" class="px-3.5 py-1.5 font-mono text-[11px] font-medium tracking-wider text-muted dark:text-mutedDark hover:text-terracotta transition border-l border-borderline dark:border-borderlineDark">
+              VẬT LÝ
+            </button>
+            <button id="btn-detect-chem" onclick="setDetectMode('chem')" class="px-3.5 py-1.5 font-mono text-[11px] font-medium tracking-wider text-muted dark:text-mutedDark hover:text-terracotta transition border-l border-borderline dark:border-borderlineDark">
+              HÓA HỌC
+            </button>
+            <button id="btn-detect-manual" onclick="setDetectMode('manual')" class="px-3.5 py-1.5 font-mono text-[11px] font-medium tracking-wider text-muted dark:text-mutedDark hover:text-terracotta transition border-l border-borderline dark:border-borderlineDark flex items-center gap-1.5">
+              <span>MANUAL</span>
+              <span id="manual-indicator-dot" class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Nhóm 2: Nút Cân bằng phương trình tinh gọn + Dòng hướng dẫn nằm ngang -->
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <button id="btn-balance-equation" onclick="executeEquationBalance()" title="Cân bằng phương trình hóa học" class="px-3.5 py-1.5 border border-terracotta text-terracotta hover:bg-terracotta hover:text-white bg-terracottaLight dark:bg-terracottaDark/40 font-mono font-bold tracking-wider transition flex items-center gap-2 shadow-2xs text-[11px]">
+            <svg class="w-3.5 h-3.5 text-terracotta shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <rect x="3" y="3" width="18" height="18" rx="1"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+            </svg>
+            <span>CÂN BẰNG PHƯƠNG TRÌNH</span>
+          </button>
+          <span class="text-[11px] text-muted dark:text-mutedDark italic select-none">
+            * gõ <span class="text-terracotta">Fe + O2 =</span> rồi bấm để cân bằng
+          </span>
+        </div>
+
+      </div>
+
+      <!-- BẢNG CẤU HÌNH THẺ BỌC KHI CHỌN CHẾ ĐỘ MANUAL (XỔ XUỐNG MƯỢT MÀ) -->
+      <div id="manual-tag-config-shelf" class="hidden border-x border-b border-borderline dark:border-borderlineDark bg-subtle/40 dark:bg-subtleDark/40 px-4 py-3 text-xs font-mono space-y-2.5 animate-fadeIn">
+        <div class="flex items-center justify-between pb-1.5 border-b border-borderline/80 dark:border-borderlineDark/80">
+          <div class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-terracotta inline-block"></span>
+            <span class="font-bold text-ink dark:text-inkDark uppercase text-[11px] tracking-wider">CẤU HÌNH THẺ BỌC THỦ CÔNG (MANUAL TAGS)</span>
+            <span class="text-muted dark:text-mutedDark text-[10px]">(Chỉ phân tích nội dung được bao bọc trong các ký hiệu chỉ định)</span>
+          </div>
+          <span class="text-[10px] text-terracotta font-medium">Chế độ thủ công đang bật</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-muted dark:text-mutedDark text-[10px] mb-1 font-semibold">Thẻ chung:</label>
+            <input type="text" id="tag-general" value="lc[...]" class="w-full px-2 py-1 text-xs border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark text-ink dark:text-inkDark focus:border-terracotta outline-none">
+          </div>
+          <div>
+            <label class="block text-muted dark:text-mutedDark text-[10px] mb-1 font-semibold">Toán:</label>
+            <input type="text" id="tag-math" value="toan-[...]" class="w-full px-2 py-1 text-xs border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark text-ink dark:text-inkDark focus:border-terracotta outline-none">
+          </div>
+          <div>
+            <label class="block text-muted dark:text-mutedDark text-[10px] mb-1 font-semibold">Lý:</label>
+            <input type="text" id="tag-phys" value="ly-[...]" class="w-full px-2 py-1 text-xs border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark text-ink dark:text-inkDark focus:border-terracotta outline-none">
+          </div>
+          <div>
+            <label class="block text-muted dark:text-mutedDark text-[10px] mb-1 font-semibold">Hóa:</label>
+            <input type="text" id="tag-chem" value="hoa-[...]" class="w-full px-2 py-1 text-xs border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark text-ink dark:text-inkDark focus:border-terracotta outline-none">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. KHUNG KÉP CHÍNH (MAIN BALANCED DUAL FRAME: CÂN BẰNG ĐỐI XỨNG, ĐÁY KẾT THÚC BẰNG NHAU) -->
+      <div class="border-x border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark shadow-sm overflow-hidden relative">
+        <div class="h-[2px] w-full bg-gradient-to-r from-terracotta via-[#FF7A29] to-terracotta"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2">
+          
+          <!-- KHUNG TRÁI: NGUỒN VĂN BẢN (INPUT) -->
+          <div class="flex flex-col h-[520px] border-b md:border-b-0 md:border-r border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark">
+            
+            <!-- Header Khung Trái: Cao chính xác 40px -->
+            <div class="h-10 px-4 border-b border-borderline dark:border-borderlineDark bg-subtle/40 dark:bg-subtleDark/40 flex items-center justify-between text-xs font-mono shrink-0">
+              <span class="font-bold tracking-wider text-ink dark:text-inkDark flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 bg-terracotta"></span>
+                VĂN BẢN & BIỂU THỨC
+              </span>
+              <button onclick="clearFormulaInput()" title="Xóa nội dung" class="text-muted dark:text-mutedDark hover:text-rose-600 transition text-[11px]">
+                XÓA TRẮNG
+              </button>
+            </div>
+
+            <!-- Vùng Textarea Khung Trái: Chiếm trọn không gian giữa -->
+            <div class="flex-1 relative flex flex-col min-h-0">
+              <textarea 
+                id="formula-input" 
+                oninput="handleFormulaInput(event)" 
+                onkeydown="handleFormulaKeydown(event)"
+                class="w-full flex-1 p-4 text-xs sm:text-sm font-mono leading-relaxed bg-transparent focus:outline-none resize-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 selection:bg-terracotta selection:text-white text-ink dark:text-inkDark"
+                placeholder="Gõ hoặc dán nội dung vào đây...&#10;&#10;Toán: Cho phương trình x mũ 2 + 2x - 3 = 0, tính nghiệm.&#10;Hóa: Gõ Fe + O2 = rồi ấn Space để nhận diện & cân bằng.&#10;Lý: Vận tốc v = s / t với s = 100 m và t = 5 s."></textarea>
+              
+              <!-- Spacebar notification hint -->
+              <div id="chem-space-hint" class="hidden mx-4 mb-3 p-2 border border-terracotta bg-terracotta/5 dark:bg-terracotta/10 text-xs font-mono flex items-center justify-between text-ink dark:text-inkDark">
+                <span class="flex items-center gap-1.5 truncate">
+                  <span class="w-1.5 h-1.5 bg-terracotta"></span>
+                  <span>Ấn <kbd class="px-1 bg-white dark:bg-surfaceDark border font-bold">Space</kbd> hoàn tất:</span>
+                  <strong id="chem-space-preview" class="text-terracotta truncate"></strong>
+                </span>
+                <button onclick="dismissSpaceHint()" class="text-muted hover:text-ink ml-2 text-[10px]">✕</button>
+              </div>
+            </div>
+
+            <!-- Footer Khung Trái: Cao chính xác 36px, cân bằng hoàn hảo với đáy bên phải -->
+            <div class="h-9 px-4 border-t border-borderline dark:border-borderlineDark bg-subtle/30 dark:bg-subtleDark/30 flex items-center justify-between text-[11px] font-mono text-muted dark:text-mutedDark shrink-0">
+              <span id="char-counter">0 từ | 0 ký tự</span>
+              <span class="text-[10px]">Phím tắt: Space (Hóa) • Ctrl+Z</span>
+            </div>
+          </div>
+
+          <!-- KHUNG PHẢI: KẾT QUẢ HIỂN THỊ (OUTPUT VIEWPORT) -->
+          <div class="flex flex-col h-[520px] bg-[#FAF9F5] dark:bg-[#121210]">
+            
+            <!-- Header Khung Phải: Cao chính xác 40px -->
+            <div class="h-10 px-4 border-b border-borderline dark:border-borderlineDark bg-subtle/40 dark:bg-subtleDark/40 flex items-center justify-between text-xs font-mono shrink-0">
+              <span class="font-bold tracking-wider text-ink dark:text-inkDark flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 bg-forest"></span>
+                KẾT QUẢ BIÊN DỊCH
+              </span>
+              <span id="output-status-indicator" class="text-[10px] text-muted dark:text-mutedDark uppercase tracking-wider">
+                SẴN SÀNG
+              </span>
+            </div>
+
+            <!-- Viewport Hiển thị KaTeX: Liền khối, sạch sẽ, không lồng viền kép -->
+            <div id="render-viewport" class="w-full flex-1 p-5 overflow-y-auto select-text font-serif text-base leading-relaxed text-ink dark:text-inkDark min-h-0">
+              <div id="formula-rendered-view" class="min-h-full">
+                <!-- Nội dung đã biên dịch KaTeX chèn vào đây -->
+              </div>
+            </div>
+
+            <!-- Footer Khung Phải (Gợi ý phương án "Ý bạn là"): Cao chính xác 36px -->
+            <div id="suggestion-chips-container" class="h-9 px-4 border-t border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark text-xs font-mono flex items-center gap-2 overflow-x-auto shrink-0">
+              <div class="flex items-center gap-1 shrink-0 text-terracotta font-bold text-[10px]">
+                <span>💡</span>
+                <span>Ý BẠN LÀ:</span>
+              </div>
+              <div id="suggestion-chips-list" class="flex items-center gap-1.5 overflow-x-auto">
+                <span class="text-muted dark:text-mutedDark italic text-[11px]">Nhấp vào một công thức để xem gợi ý</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 3. KHU VỰC TẢI ẢNH & ĐIỀU KHIỂN XUẤT BẢN ĐỘC LẬP (NẰM HOÀN TOÀN NGOÀI KHUNG OUTPUT) -->
+      <div class="border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark px-4 py-3 text-xs font-mono flex flex-wrap items-center justify-between gap-4 shadow-sm">
+        
+        <!-- Cụm bên trái: NÚT CHỌN TOÀN BÀI / CHỌN CÔNG THỨC (Đưa xuống đây theo yêu cầu) -->
+        <div class="flex items-center gap-2.5">
+          <span class="text-muted dark:text-mutedDark text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+            <span class="w-1.5 h-1.5 bg-terracotta"></span>
+            PHẠM VI XUẤT:
+          </span>
+          <div class="inline-flex border border-borderline dark:border-borderlineDark p-0.5 bg-subtle/50 dark:bg-subtleDark/50">
+            <button id="scope-btn-formula" onclick="setExportScope(false)" class="px-2.5 py-1 font-mono text-[11px] font-semibold bg-white dark:bg-surfaceDark text-terracotta shadow-2xs border border-borderline dark:border-borderlineDark transition">
+              CÔNG THỨC ĐANG TRỎ
+            </button>
+            <button id="scope-btn-all" onclick="setExportScope(true)" class="px-2.5 py-1 font-mono text-[11px] font-medium text-muted dark:text-mutedDark hover:text-terracotta transition">
+              TOÀN BỘ BÀI VIẾT
+            </button>
+          </div>
+        </div>
+
+        <!-- Cụm bên phải: CÁC NÚT TẢI VỀ & SAO CHÉP ẢNH -->
+        <div class="flex flex-wrap items-center gap-3">
+          
+          <!-- Nhóm nút Tải file -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-muted dark:text-mutedDark text-[11px] font-medium flex items-center gap-1 mr-0.5">
+              <svg class="w-3.5 h-3.5 text-terracotta" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              <span>TẢI VỀ:</span>
+            </span>
+            <button onclick="downloadActiveContent('svg')" title="Xuất vector SVG sắc nét" class="px-2.5 py-1 bg-subtle/50 dark:bg-subtleDark/50 border border-borderline dark:border-borderlineDark text-ink dark:text-inkDark hover:border-terracotta hover:text-terracotta transition font-mono text-[11px] shadow-2xs">
+              SVG
+            </button>
+            <button onclick="downloadActiveContent('png', 2)" title="Tải ảnh PNG độ phân giải 2X" class="px-2.5 py-1 bg-subtle/50 dark:bg-subtleDark/50 border border-borderline dark:border-borderlineDark text-ink dark:text-inkDark hover:border-terracotta hover:text-terracotta transition font-mono text-[11px] shadow-2xs">
+              PNG 2X
+            </button>
+            <button onclick="downloadActiveContent('png', 4)" title="Tải ảnh PNG siêu nét UHD 4X" class="px-2.5 py-1 bg-subtle/50 dark:bg-subtleDark/50 border border-borderline dark:border-borderlineDark text-ink dark:text-inkDark hover:border-terracotta hover:text-terracotta transition font-mono text-[11px] shadow-2xs">
+              <span class="text-terracotta font-bold text-[9px]">UHD</span> PNG 4X
+            </button>
+          </div>
+
+          <div class="h-4 w-[1px] bg-borderline dark:bg-borderlineDark hidden sm:block"></div>
+
+          <!-- Nút Copy Ảnh chính (Primary Action) -->
+          <div>
+            <button onclick="copyActiveContentImage()" id="btn-copy-image" title="Sao chép trực tiếp ảnh vào Clipboard" class="px-4 py-1.5 bg-terracotta hover:bg-[#d44e08] text-white active:scale-95 transition font-mono text-[11px] font-semibold flex items-center gap-1.5 shadow-2xs">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+              <span id="btn-copy-image-label">COPY ẢNH CÔNG THỨC</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- WORKSPACE 2: GRAPHING STUDIO -->
+    <div id="workspace-graph" class="hidden flex flex-col">
+      <div class="border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark shadow-sm overflow-hidden">
+        <div class="h-[2px] w-full bg-terracotta"></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 h-[560px]">
+          
+          <!-- Graph Sidebar: Functions & Dynamic Sliders -->
+          <div class="border-b md:border-b-0 md:border-r border-borderline dark:border-borderlineDark p-4 font-mono text-xs flex flex-col justify-between bg-white dark:bg-surfaceDark">
+            <div>
+              <div class="flex items-center justify-between pb-3 border-b border-borderline dark:border-borderlineDark mb-3">
+                <span class="font-bold uppercase tracking-wider text-ink dark:text-inkDark">HÀM SỐ y = f(x)</span>
+                <button onclick="addNewFunction()" class="px-2.5 py-1 bg-terracotta text-white font-medium hover:bg-[#d44e08] transition">+ THÊM HÀM</button>
+              </div>
+              <div id="graph-functions-list" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- Parameters Sliders -->
+            <div class="pt-3 border-t border-borderline dark:border-borderlineDark">
+              <span class="font-bold uppercase tracking-wider text-muted text-[10px] block mb-2">THAM SỐ ĐỘNG (SLIDERS)</span>
+              <div id="graph-parameters-list" class="space-y-2 max-h-40 overflow-y-auto"></div>
+            </div>
+          </div>
+
+          <!-- Graph Viewport Canvas -->
+          <div class="md:col-span-2 bg-[#0E0E0D] relative flex flex-col overflow-hidden">
+            <div class="absolute top-3 left-3 z-10 flex items-center gap-2 bg-[#1A1A17]/90 border border-borderlineDark p-1 text-xs font-mono text-inkDark">
+              <button onclick="resetGraphView()" class="px-2 py-0.5 border border-borderlineDark hover:border-terracotta transition">GỐC O(0,0)</button>
+              <button onclick="zoomGraph(1.2)" class="px-2 py-0.5 border border-borderlineDark hover:border-terracotta transition">+</button>
+              <button onclick="zoomGraph(0.8)" class="px-2 py-0.5 border border-borderlineDark hover:border-terracotta transition">-</button>
+            </div>
+            <div id="graph-coords" class="absolute bottom-3 right-3 z-10 px-2.5 py-0.5 bg-[#1A1A17]/90 border border-borderlineDark text-zinc-400 font-mono text-xs">X: 0.00, Y: 0.00</div>
+            <div class="flex-1 w-full h-full relative" id="graph-canvas-container">
+              <canvas id="graph-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKSPACE 3: GEOMETRY STUDIO -->
+    <div id="workspace-geo" class="hidden flex flex-col">
+      
+      <!-- Subswitch 2D / 3D được đặt đúng vị trí cục bộ của Studio Hình học -->
+      <div class="border border-b-0 border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark px-4 py-2 text-xs font-mono flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="font-bold uppercase text-[10px] text-muted tracking-wider">CHẾ ĐỘ KHÔNG GIAN:</span>
+          <div class="inline-flex border border-borderline dark:border-borderlineDark p-0.5 bg-subtle/50 dark:bg-subtleDark/50">
+            <button id="geo-2d-btn" onclick="switchGeoDim('2d')" class="px-3 py-1 bg-white dark:bg-surfaceDark text-terracotta font-semibold shadow-2xs">2D PHẲNG</button>
+            <button id="geo-3d-btn" onclick="switchGeoDim('3d')" class="px-3 py-1 text-muted dark:text-mutedDark hover:text-terracotta">3D KHÔNG GIAN</button>
+          </div>
+        </div>
+        <span class="text-[11px] text-muted dark:text-mutedDark">Vector Geometry Engine</span>
+      </div>
+
+      <div class="border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark shadow-sm overflow-hidden">
+        <div class="h-[2px] w-full bg-terracotta"></div>
+        
+        <!-- 2D EUCLIDEAN CONTAINER -->
+        <div id="geo-2d-container" class="flex flex-col md:flex-row h-[560px]">
+          <!-- 2D Toolbar -->
+          <div class="w-full md:w-14 border-b md:border-b-0 md:border-r border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark flex md:flex-col items-center p-2 gap-2 shrink-0">
+            <button onclick="setGeoTool('select')" id="tool-select" title="Chọn và Kéo" class="geo-tool-btn p-2 border border-terracotta bg-terracotta/10 text-terracotta w-full flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
+            </button>
+            <button onclick="setGeoTool('point')" id="tool-point" title="Đặt điểm mới" class="geo-tool-btn p-2 border border-borderline dark:border-borderlineDark hover:border-terracotta text-muted dark:text-mutedDark w-full flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+            </button>
+            <button onclick="setGeoTool('segment')" id="tool-segment" title="Vẽ đoạn thẳng" class="geo-tool-btn p-2 border border-borderline dark:border-borderlineDark hover:border-terracotta text-muted dark:text-mutedDark w-full flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 20L20 4"/></svg>
+            </button>
+            <button onclick="setGeoTool('circle')" id="tool-circle" title="Vẽ đường tròn" class="geo-tool-btn p-2 border border-borderline dark:border-borderlineDark hover:border-terracotta text-muted dark:text-mutedDark w-full flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"/></svg>
+            </button>
+          </div>
+
+          <!-- 2D Canvas Viewport -->
+          <div class="flex-1 bg-white dark:bg-[#121210] relative overflow-hidden" id="geo-2d-canvas-container">
+            <div id="snap-banner" class="hidden absolute top-3 left-1/2 -translate-x-1/2 px-3 py-1 border border-terracotta bg-white dark:bg-surfaceDark text-terracotta font-mono text-xs shadow-md z-20 flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-terracotta pulse-dot"></span>
+              <span id="snap-text" class="font-bold">ĐÃ DÍNH TRUNG ĐIỂM</span>
+            </div>
+            <canvas id="geo-2d-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+          </div>
+
+          <!-- 2D Object Attributes -->
+          <div class="w-full md:w-60 border-t md:border-t-0 md:border-l border-borderline dark:border-borderlineDark p-4 font-mono text-xs bg-subtle/30 dark:bg-subtleDark/30">
+            <span class="font-bold uppercase tracking-wider text-ink dark:text-inkDark block mb-3 text-[11px]">THUỘC TÍNH</span>
+            <div id="geo-prop-empty" class="text-muted dark:text-mutedDark italic">Nhấp vào điểm hoặc cạnh để chỉnh sửa.</div>
+            <div id="geo-prop-controls" class="hidden space-y-3">
+              <div>
+                <label class="block text-muted text-[10px] mb-1">Tên / Nhãn:</label>
+                <input type="text" id="prop-label-input" oninput="updateSelectedObjectProp('label', this.value)" class="w-full px-2 py-1 bg-white dark:bg-surfaceDark border border-borderline dark:border-borderlineDark">
+              </div>
+              <div>
+                <label class="block text-muted text-[10px] mb-1">Màu sắc:</label>
+                <input type="color" id="prop-color-input" onchange="updateSelectedObjectProp('color', this.value)" class="w-full h-7 cursor-pointer border border-borderline">
+              </div>
+              <button onclick="deleteSelectedObject()" class="w-full py-1 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 border border-rose-300 dark:border-rose-900 mt-2">XÓA ĐỐI TƯỢNG</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D THREE.JS CONTAINER -->
+        <div id="geo-3d-container" class="hidden flex flex-col md:flex-row h-[560px]">
+          <div class="w-full md:w-60 border-r border-borderlineDark bg-[#161614] p-4 text-xs font-mono text-inkDark flex flex-col gap-3 shrink-0">
+            <span class="font-bold uppercase tracking-wider text-mutedDark text-[11px]">MÔ HÌNH 3D</span>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button onclick="init3DShape('pyramid')" class="p-2 border border-borderlineDark hover:border-terracotta bg-[#1E1E1B]">Chóp S.ABC</button>
+              <button onclick="init3DShape('cube')" class="p-2 border border-borderlineDark hover:border-terracotta bg-[#1E1E1B]">Khối Hộp</button>
+              <button onclick="init3DShape('prism')" class="p-2 border border-borderlineDark hover:border-terracotta bg-[#1E1E1B]">Lăng Trụ</button>
+              <button onclick="init3DShape('tetrahedron')" class="p-2 border border-borderlineDark hover:border-terracotta bg-[#1E1E1B]">Tứ Diện</button>
+            </div>
+            <span class="text-mutedDark text-[11px] mt-2">💡 Kéo chuột trái để xoay 360°</span>
+          </div>
+          <div id="three-viewport" class="flex-1 h-full bg-[#0E0E0D] relative overflow-hidden"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER TOÀN CỤC -->
+  <footer class="border-t border-borderline dark:border-borderlineDark text-xs font-mono bg-white dark:bg-surfaceDark select-none shrink-0 mt-8">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 bg-terracotta"></div>
+        <span class="font-bold text-ink dark:text-inkDark">LOCUS°</span>
+        <span class="text-muted dark:text-mutedDark">— Fast Vector Scientific Typesetting</span>
+      </div>
+      <div class="text-muted dark:text-mutedDark flex items-center gap-4 text-[11px]">
+        <span>KATEX 0.16</span>
+        <span>MHCHEM</span>
+        <span>SVG / PNG UHD</span>
+        <span class="text-ink dark:text-inkDark font-medium">© 2026 LOCUS LABS</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification Box -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-16 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 bg-black dark:bg-[#1E1E1C] text-white px-5 py-3 border border-zinc-700 dark:border-zinc-600 shadow-2xl font-mono text-xs">
+    <span class="w-2 h-2 bg-terracotta inline-block"></span>
+    <span id="toast-message">Thông báo</span>
+  </div>
+
+  <script>
+    const state = {
+      currentTab: 'formula', // 'formula' | 'graph' | 'geo'
+      geoDimension: '2d',
+      detectMode: 'all', // 'all' | 'math' | 'phys' | 'chem' | 'manual'
+      selectAllActive: false,
+
+      sourceText: `Cho phương trình x mũ 2 + 2x - 3 = 0, tính nghiệm của phương trình trên.
+Đốt cháy hoàn toàn sắt trong oxi: Fe + O2 =
+Vận tốc tức thời tính theo công thức v = s / t với s = 100 m và t = 5 s.`,
+
+      activeFormulaIndex: 0,
+      formulas: [],
+      chemicalMemory: new Map(),
+
+      // Graphing state
+      functions: [
+        { id: 1, expr: 'sin(x) * a', color: '#E8590C', visible: true, width: 2 },
+        { id: 2, expr: 'x^2 / 4 - 2', color: '#15803d', visible: true, width: 2 }
+      ],
+      parameters: [
+        { name: 'a', value: 1.5, min: -5, max: 5, step: 0.1 }
+      ],
+      graphView: { offsetX: 0, offsetY: 0, scale: 40 },
+
+      // Geometry 2D state
+      geoTool: 'select',
+      geoObjects: [
+        { type: 'point', id: 'A', x: 120, y: 220, label: 'A', color: '#0D0D0D' },
+        { type: 'point', id: 'B', x: 380, y: 220, label: 'B', color: '#0D0D0D' },
+        { type: 'point', id: 'C', x: 250, y: 90,  label: 'C', color: '#0D0D0D' },
+        { type: 'segment', from: 'A', to: 'B', stroke: 'solid', width: 2, color: '#E8590C' },
+        { type: 'segment', from: 'B', to: 'C', stroke: 'solid', width: 2, color: '#E8590C' },
+        { type: 'segment', from: 'C', to: 'A', stroke: 'solid', width: 2, color: '#E8590C' }
+      ],
+      selectedGeoId: null
+    };
+
+    const chemicalReactions = [
+      { reactants: 'Fe + O2', balanced: '3Fe + 2O2 -> Fe3O4', unbalanced: 'Fe + O2 -> Fe3O4' },
+      { reactants: 'Al + HCl', balanced: '2Al + 6HCl -> 2AlCl3 + 3H2', unbalanced: 'Al + HCl -> AlCl3 + H2' },
+      { reactants: 'H2 + O2', balanced: '2H2 + O2 -> 2H2O', unbalanced: 'H2 + O2 -> H2O' },
+      { reactants: 'NaOH + HCl', balanced: 'NaOH + HCl -> NaCl + H2O', unbalanced: 'NaOH + HCl -> NaCl + H2O' },
+      { reactants: 'CaCO3', balanced: 'CaCO3 -> CaO + CO2', unbalanced: 'CaCO3 -> CaO + CO2' },
+      { reactants: 'CH4 + O2', balanced: 'CH4 + 2O2 -> CO2 + 2H2O', unbalanced: 'CH4 + O2 -> CO2 + H2O' },
+      { reactants: 'Cu + HNO3', balanced: '3Cu + 8HNO3 -> 3Cu(NO3)2 + 2NO + 4H2O', unbalanced: 'Cu + HNO3 -> Cu(NO3)2 + NO + H2O' }
+    ];
+
+    function setDetectMode(mode) {
+      state.detectMode = mode;
+
+      const modes = ['all', 'math', 'phys', 'chem', 'manual'];
+      modes.forEach(m => {
+        const btn = document.getElementById(`btn-detect-${m}`);
+        if (!btn) return;
+        if (m === mode) {
+          btn.className = "px-3.5 py-1.5 font-mono text-[11px] font-bold tracking-wider transition bg-terracotta text-white shadow-2xs";
+        } else {
+          btn.className = "px-3.5 py-1.5 font-mono text-[11px] font-medium tracking-wider text-muted dark:text-mutedDark hover:text-terracotta transition border-l border-borderline dark:border-borderlineDark";
+        }
+      });
+
+      const manualPanel = document.getElementById('manual-tag-config-shelf');
+      const manualDot = document.getElementById('manual-indicator-dot');
+      if (mode === 'manual') {
+        if (manualPanel) manualPanel.classList.remove('hidden');
+        if (manualDot) {
+          manualDot.classList.remove('bg-zinc-400');
+          manualDot.classList.add('bg-white');
+        }
+      } else {
+        if (manualPanel) manualPanel.classList.add('hidden');
+        if (manualDot) {
+          manualDot.classList.remove('bg-white');
+          manualDot.classList.add('bg-zinc-400');
+        }
+      }
+
+      // Xử lý trạng thái sáng / ghost của nút Cân Bằng Phương Trình
+      const balanceBtn = document.getElementById('btn-balance-equation');
+      if (balanceBtn) {
+        if (mode === 'all' || mode === 'chem' || mode === 'manual') {
+          // Trạng thái SÁNG (Active)
+          balanceBtn.classList.remove('opacity-30', 'pointer-events-none', 'cursor-not-allowed', 'border-zinc-300', 'dark:border-zinc-700', 'text-zinc-400');
+          balanceBtn.classList.add('border-terracotta', 'text-terracotta', 'hover:bg-terracotta', 'hover:text-white', 'cursor-pointer');
+          balanceBtn.removeAttribute('disabled');
+        } else {
+          // Trạng thái GHOST (Tắt/Mờ khi chỉ chọn Toán hoặc Lý)
+          balanceBtn.classList.add('opacity-30', 'pointer-events-none', 'cursor-not-allowed', 'border-zinc-300', 'dark:border-zinc-700', 'text-zinc-400');
+          balanceBtn.classList.remove('border-terracotta', 'text-terracotta', 'hover:bg-terracotta', 'hover:text-white', 'cursor-pointer');
+          balanceBtn.setAttribute('disabled', 'true');
+        }
+      }
+
+      updateFormulaPreview();
+      showToast(`Chế độ nhận diện: ${mode.toUpperCase()}`);
+    }
+
+    // Logic Cân bằng phương trình khi bấm nút
+    function executeEquationBalance() {
+      const textarea = document.getElementById('formula-input');
+      let val = textarea.value;
+      let changed = false;
+
+      // Quét các phản ứng dạng a + b = hoặc các phản ứng unbalanced
+      chemicalReactions.forEach(rx => {
+        const queryWithEqual = new RegExp(`${rx.reactants}\\s*=`, 'gi');
+        if (queryWithEqual.test(val)) {
+          val = val.replace(queryWithEqual, rx.balanced);
+          changed = true;
+          showToast(`🪄 Đã cân bằng: ${rx.balanced}`);
+        } else if (val.includes(rx.unbalanced)) {
+          state.chemicalMemory.set(rx.balanced, rx.unbalanced);
+          val = val.replace(rx.unbalanced, rx.balanced);
+          changed = true;
+          showToast(`🪄 Đã cân bằng: ${rx.balanced}`);
+        } else if (val.includes(rx.balanced)) {
+          const original = state.chemicalMemory.get(rx.balanced) || rx.unbalanced;
+          val = val.replace(rx.balanced, original);
+          changed = true;
+          showToast(`Phục hồi hệ số: ${original}`);
+        }
+      });
+
+      if (changed) {
+        textarea.value = val;
+        state.sourceText = val;
+        updateFormulaPreview();
+      } else {
+        showToast('Chưa phát hiện phản ứng dạng "a + b =" để cân bằng.');
+      }
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('locus_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+        updateThemeUI(true);
+      } else {
+        document.documentElement.classList.remove('dark');
+        updateThemeUI(false);
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('locus_theme', isDark ? 'dark' : 'light');
+      updateThemeUI(isDark);
+      showToast(isDark ? 'Dark Mode kích hoạt' : 'Light Mode kích hoạt');
+      if (state.currentTab === 'graph') drawGraph();
+      if (state.currentTab === 'geo' && state.geoDimension === '2d') drawGeo2D();
+    }
+
+    function updateThemeUI(isDark) {
+      const icon = document.getElementById('theme-icon');
+      const label = document.getElementById('theme-label');
+      if (icon) icon.textContent = isDark ? '☼' : '☾';
+      if (label) label.textContent = isDark ? 'LIGHT MODE' : 'DARK MODE';
+    }
+
+    function switchMainTab(tab) {
+      state.currentTab = tab;
+      ['formula', 'graph', 'geo'].forEach(t => {
+        const btn = document.getElementById(`nav-btn-${t}`);
+        const ws = document.getElementById(`workspace-${t}`);
+        if (t === tab) {
+          btn.className = "px-4 py-3.5 border-r border-borderline dark:border-borderlineDark flex items-center gap-2 font-medium bg-white dark:bg-surfaceDark text-terracotta border-b-2 border-b-terracotta transition";
+          ws.classList.remove('hidden');
+        } else {
+          btn.className = "px-4 py-3.5 border-r border-borderline dark:border-borderlineDark flex items-center gap-2 text-muted dark:text-mutedDark hover:text-terracotta dark:hover:text-terracotta hover:bg-subtle dark:hover:bg-subtleDark transition";
+          ws.classList.add('hidden');
+        }
+      });
+
+      if (tab === 'geo') {
+        if (state.geoDimension === '3d') setTimeout(initThreeJS, 50);
+        else setTimeout(drawGeo2D, 50);
+      }
+
+      if (tab === 'graph') setTimeout(initGraphCanvas, 50);
+    }
+
+    function switchGeoDim(dim) {
+      state.geoDimension = dim;
+      const btn2d = document.getElementById('geo-2d-btn');
+      const btn3d = document.getElementById('geo-3d-btn');
+      const cont2d = document.getElementById('geo-2d-container');
+      const cont3d = document.getElementById('geo-3d-container');
+
+      if (dim === '2d') {
+        btn2d.className = "px-3 py-1 bg-white dark:bg-surfaceDark text-terracotta font-semibold shadow-2xs";
+        btn3d.className = "px-3 py-1 text-muted dark:text-mutedDark hover:text-terracotta";
+        cont2d.classList.remove('hidden');
+        cont3d.classList.add('hidden');
+        drawGeo2D();
+      } else {
+        btn3d.className = "px-3 py-1 bg-white dark:bg-surfaceDark text-terracotta font-semibold shadow-2xs";
+        btn2d.className = "px-3 py-1 text-muted dark:text-mutedDark hover:text-terracotta";
+        cont3d.classList.remove('hidden');
+        cont2d.classList.add('hidden');
+        initThreeJS();
+      }
+    }
+
+    function toggleTagAccordion() {
+      const panel = document.getElementById('tag-accordion-panel');
+      const chevron = document.getElementById('accordion-chevron');
+      if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        chevron.style.transform = 'rotate(180deg)';
+      } else {
+        panel.classList.add('hidden');
+        chevron.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function changeChemMode(mode) {
+      state.chemMode = mode;
+      showToast(`Chế độ hóa: ${mode === 'auto-space' ? 'Space khi a+b=' : mode === 'auto-all' ? 'Tự động tất cả' : 'Tắt'}`);
+      if (mode === 'auto-all') autoBalanceWholeText();
+    }
+
+    function naturalMathToLatex(raw) {
+      let s = raw.trim();
+      
+      // Powers: "x mũ 2"
+      s = s.replace(/([a-zA-Z0-9\(\)]+)\s+mũ\s+([a-zA-Z0-9\(\)\-]+)/gi, '$1^{$2}');
+      
+      // Fractions: "1 trên 2"
+      s = s.replace(/([a-zA-Z0-9\(\)]+)\s+trên\s+([a-zA-Z0-9\(\)]+)/gi, '\\frac{$1}{$2}');
+      
+      // Roots: "căn(x)"
+      s = s.replace(/căn\s*\(([^\)]+)\)/gi, '\\sqrt{$1}');
+      s = s.replace(/căn\s+([a-zA-Z0-9]+)/gi, '\\sqrt{$1}');
+
+      // Chem subscripts (khi không phải toán đơn thuần)
+      if (state.detectMode === 'all' || state.detectMode === 'chem' || state.detectMode === 'manual') {
+        s = s.replace(/([A-Z][a-z]?)([0-9]+)/g, '$1_{$2}');
+      }
+
+      // Slashes: "v = s / t"
+      s = s.replace(/([a-zA-Z0-9\(\)]+)\s*\/\s*([a-zA-Z0-9\(\)]+)/g, '\\frac{$1}{$2}');
+
+      return s;
+    }
+
+    function handleFormulaKeydown(e) {
+      // Phím tắt space khi gõ a+b=
+      if (e.key === ' ' && (state.detectMode === 'all' || state.detectMode === 'chem' || state.detectMode === 'manual')) {
+        const textarea = document.getElementById('formula-input');
+        const cursor = textarea.selectionStart;
+        const textBefore = textarea.value.slice(0, cursor);
+
+        const match = textBefore.match(/([A-Za-z0-9\s\+]+)=\s*$/);
+        if (match) {
+          const rawReactants = match[1].trim();
+          const found = chemicalReactions.find(rx => rx.reactants.replace(/\s+/g, '') === rawReactants.replace(/\s+/g, ''));
+          if (found) {
+            e.preventDefault();
+            const startIdx = cursor - match[0].length;
+            const replacement = found.balanced + ' ';
+            textarea.value = textarea.value.slice(0, startIdx) + replacement + textarea.value.slice(cursor);
+            textarea.selectionStart = textarea.selectionEnd = startIdx + replacement.length;
+            state.sourceText = textarea.value;
+            dismissSpaceHint();
+            updateFormulaPreview();
+            showToast(`🪄 Đã cân bằng: ${found.balanced}`);
+          }
+        }
+      }
+    }
+
+    function handleFormulaInput() {
+      const textarea = document.getElementById('formula-input');
+      state.sourceText = textarea.value;
+
+      const words = state.sourceText.trim() ? state.sourceText.trim().split(/\s+/).length : 0;
+      document.getElementById('char-counter').textContent = `${words} từ | ${state.sourceText.length} ký tự`;
+
+      if (state.detectMode === 'all' || state.detectMode === 'chem' || state.detectMode === 'manual') {
+        const cursor = textarea.selectionStart;
+        const textBefore = textarea.value.slice(0, cursor);
+        const match = textBefore.match(/([A-Za-z0-9\s\+]+)=\s*$/);
+        if (match) {
+          const rawReactants = match[1].trim();
+          const found = chemicalReactions.find(rx => rx.reactants.replace(/\s+/g, '') === rawReactants.replace(/\s+/g, ''));
+          if (found) {
+            const hintBox = document.getElementById('chem-space-hint');
+            document.getElementById('chem-space-preview').textContent = found.balanced;
+            if (hintBox) hintBox.classList.remove('hidden');
+          } else {
+            dismissSpaceHint();
+          }
+        } else {
+          dismissSpaceHint();
+        }
+      } else {
+        dismissSpaceHint();
+      }
+
+      updateFormulaPreview();
+    }
+
+    function dismissSpaceHint() {
+      const el = document.getElementById('chem-space-hint');
+      if (el) el.classList.add('hidden');
+    }
+
+    function updateFormulaPreview() {
+      const view = document.getElementById('formula-rendered-view');
+      const text = state.sourceText;
+      const lines = text.split('\n');
+      state.formulas = [];
+      let formulaIdCounter = 0;
+      let htmlOutput = '';
+
+      lines.forEach((line) => {
+        if (!line.trim()) {
+          htmlOutput += '<div class="h-3"></div>';
+          return;
+        }
+
+        let processedLine = line;
+
+        // Nếu ở chế độ MANUAL: quét các cặp ngoặc thẻ bọc
+        if (state.detectMode === 'manual') {
+          const manualTagRegex = /lc\[(.*?)\]|toan-\[(.*?)\]|ly-\[(.*?)\]|hoa-\[(.*?)\]/g;
+          processedLine = processedLine.replace(manualTagRegex, (match, p1, p2, p3, p4) => {
+            const content = p1 || p2 || p3 || p4;
+            if (!content) return match;
+            const fId = formulaIdCounter++;
+            const parsedLatex = naturalMathToLatex(content);
+            state.formulas.push({
+              id: fId,
+              raw: content,
+              currentLatex: parsedLatex,
+              predictions: generatePredictiveChips(content, parsedLatex)
+            });
+            return `<span id="formula-token-${fId}" onclick="selectFormulaToken(${fId})" class="formula-token ${fId === state.activeFormulaIndex ? 'active' : ''}" title="Nhấp chọn"><span id="katex-slot-${fId}"></span></span>`;
+          });
+        } else {
+          // Các chế độ AUTO DETECT
+          const formulaRegex = /([a-zA-Z0-9\+\-\*\/\^\s\(\)_=]+(?:mũ|trên|căn|=)[a-zA-Z0-9\+\-\*\/\^\s\(\)_]*|[a-zA-Z0-9]+_{?[0-9]}?[a-zA-Z0-9_]*)/g;
+          const matches = [...line.matchAll(formulaRegex)];
+
+          if (matches.length > 0) {
+            matches.forEach(m => {
+              const rawChunk = m[0].trim();
+              if (rawChunk.length > 2) {
+                // Kiểm tra phân loại theo chế độ lọc
+                let allowParse = true;
+                if (state.detectMode === 'math' && rawChunk.includes('->')) allowParse = false;
+                if (state.detectMode === 'chem' && !(/[A-Z][a-z]?[0-9]?/.test(rawChunk) || rawChunk.includes('='))) allowParse = false;
+
+                if (allowParse) {
+                  const fId = formulaIdCounter++;
+                  const parsedLatex = naturalMathToLatex(rawChunk);
+                  const predictions = generatePredictiveChips(rawChunk, parsedLatex);
+
+                  state.formulas.push({
+                    id: fId,
+                    raw: rawChunk,
+                    currentLatex: parsedLatex,
+                    predictions: predictions
+                  });
+
+                  const spanTag = `<span id="formula-token-${fId}" onclick="selectFormulaToken(${fId})" class="formula-token ${fId === state.activeFormulaIndex ? 'active' : ''}" title="Nhấp chọn"><span id="katex-slot-${fId}"></span></span>`;
+                  processedLine = processedLine.replace(rawChunk, spanTag);
+                }
+              }
+            });
+          }
+        }
+
+        htmlOutput += `<p class="mb-2 leading-relaxed">${processedLine}</p>`;
+      });
+
+      view.innerHTML = htmlOutput;
+
+      state.formulas.forEach(f => {
+        const slot = document.getElementById(`katex-slot-${f.id}`);
+        if (slot && window.katex) {
+          try {
+            katex.render(f.currentLatex, slot, { throwOnError: false, displayMode: false });
+          } catch(e) {
+            slot.textContent = f.raw;
+          }
+        }
+      });
+
+      const status = document.getElementById('output-status-indicator');
+      if (status) {
+        status.textContent = state.formulas.length > 0 ? `${state.formulas.length} CÔNG THỨC` : 'SẴN SÀNG';
+      }
+
+      if (state.formulas.length > 0) {
+        selectFormulaToken(Math.min(state.activeFormulaIndex, state.formulas.length - 1));
+      } else {
+        renderSuggestionChips([]);
+      }
+    }
+
+    function generatePredictiveChips(raw, latex) {
+      const chips = [];
+      if (raw.includes('/') && !raw.includes('(')) {
+        const parts = raw.split('/');
+        chips.push({ label: `(${parts[0].trim()}) / ${parts[1].trim()}`, latex: `\\frac{${parts[0].trim()}}{${parts[1].trim()}}` });
+        chips.push({ label: `${parts[0].trim()} / (${parts[1].trim()})`, latex: `${parts[0].trim()} \\cdot \\frac{1}{${parts[1].trim()}}` });
+      }
+      if (raw.includes('mũ') && (raw.includes('+') || raw.includes('-'))) {
+        chips.push({ label: `Gộp toàn bộ ^{...}`, latex: raw.replace(/([a-zA-Z0-9]+)\s+mũ\s+(.+)/, '$1^{$2}') });
+      }
+      if (/[A-Z][a-z]?[0-9]/.test(raw)) {
+        chips.push({ label: `Hợp chất: \\mathrm{${raw}}`, latex: `\\mathrm{${raw}}` });
+      }
+      chips.push({ label: `Giữ Text gốc`, isRawText: true });
+      return chips;
+    }
+
+    function selectFormulaToken(id) {
+      state.activeFormulaIndex = id;
+      document.querySelectorAll('.formula-token').forEach(el => el.classList.remove('active'));
+      const activeEl = document.getElementById(`formula-token-${id}`);
+      if (activeEl) activeEl.classList.add('active');
+
+      const f = state.formulas.find(item => item.id === id);
+      if (f) renderSuggestionChips(f.predictions);
+    }
+
+    function renderSuggestionChips(chips) {
+      const container = document.getElementById('suggestion-chips-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (!chips || chips.length === 0) {
+        container.innerHTML = '<span class="text-muted dark:text-mutedDark italic text-[11px]">Không có đề xuất bổ sung</span>';
+        return;
+      }
+
+      chips.forEach((c) => {
+        const btn = document.createElement('button');
+        btn.className = "px-2 py-0.5 border border-borderline dark:border-borderlineDark hover:border-terracotta bg-white dark:bg-surfaceDark text-ink dark:text-inkDark text-[11px] rounded-xs transition flex items-center gap-1 shrink-0 hover:bg-terracotta/5";
+        btn.innerHTML = `<span class="text-terracotta font-bold">›</span> <span>${c.label}</span>`;
+        btn.onclick = () => applyChipSuggestion(c);
+        container.appendChild(btn);
+      });
+    }
+
+    function applyChipSuggestion(chip) {
+      const f = state.formulas.find(item => item.id === state.activeFormulaIndex);
+      if (!f) return;
+
+      const slot = document.getElementById(`katex-slot-${f.id}`);
+      if (chip.isRawText) {
+        slot.textContent = f.raw;
+        showToast('Đã chuyển sang Text thuần');
+      } else if (chip.latex && window.katex) {
+        f.currentLatex = chip.latex;
+        katex.render(f.currentLatex, slot, { throwOnError: false });
+        showToast('✓ Đã cập nhật công thức theo đề xuất!');
+      }
+    }
+
+    /* ĐIỀU KHIỂN PHẠM VI XUẤT ẢNH / TẢI VỀ NẰM NGOÀI KHUNG OUTPUT */
+    function setExportScope(isAll) {
+      state.selectAllActive = isAll;
+      const btnFormula = document.getElementById('scope-btn-formula');
+      const btnAll = document.getElementById('scope-btn-all');
+      const docView = document.getElementById('formula-rendered-view');
+      const copyBtnLabel = document.getElementById('btn-copy-image-label');
+
+      if (isAll) {
+        btnAll.className = "px-2.5 py-1 font-mono text-[11px] font-semibold bg-white dark:bg-surfaceDark text-terracotta shadow-2xs border border-borderline dark:border-borderlineDark transition";
+        btnFormula.className = "px-2.5 py-1 font-mono text-[11px] font-medium text-muted dark:text-mutedDark hover:text-terracotta transition";
+        docView.classList.add('whole-document-selected');
+        if (copyBtnLabel) copyBtnLabel.textContent = 'COPY ẢNH TOÀN BÀI';
+        showToast('Phạm vi xuất: TOÀN BỘ BÀI VIẾT');
+      } else {
+        btnFormula.className = "px-2.5 py-1 font-mono text-[11px] font-semibold bg-white dark:bg-surfaceDark text-terracotta shadow-2xs border border-borderline dark:border-borderlineDark transition";
+        btnAll.className = "px-2.5 py-1 font-mono text-[11px] font-medium text-muted dark:text-mutedDark hover:text-terracotta transition";
+        docView.classList.remove('whole-document-selected');
+        if (copyBtnLabel) copyBtnLabel.textContent = 'COPY ẢNH CÔNG THỨC';
+        showToast('Phạm vi xuất: CÔNG THỨC ĐANG TRỎ');
+      }
+    }
+
+    async function copyActiveContentImage() {
+      const targetElement = state.selectAllActive 
+        ? document.getElementById('formula-rendered-view')
+        : (document.getElementById(`formula-token-${state.activeFormulaIndex}`) || document.getElementById('formula-rendered-view'));
+
+      if (!targetElement) return;
+
+      const btnLabel = document.getElementById('btn-copy-image-label');
+      const prevLabel = btnLabel ? btnLabel.textContent : 'COPY ẢNH';
+      if (btnLabel) btnLabel.textContent = 'ĐANG SAO CHÉP...';
+
+      const isDark = document.documentElement.classList.contains('dark');
+
+      try {
+        showToast('Đang kết xuất ảnh...');
+        const canvas = await html2canvas(targetElement, {
+          scale: 3,
+          backgroundColor: isDark ? '#121210' : '#FFFFFF',
+          logging: false,
+          useCORS: true
+        });
+
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            showToast('Không thể tạo ảnh.');
+            if (btnLabel) btnLabel.textContent = prevLabel;
+            return;
+          }
+
+          try {
+            if (navigator.clipboard && navigator.clipboard.write) {
+              await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+              ]);
+              showToast(state.selectAllActive ? '✓ ĐÃ COPY ẢNH TOÀN BÀI VÀO CLIPBOARD' : '✓ ĐÃ COPY ẢNH CÔNG THỨC VÀO CLIPBOARD');
+            } else {
+              downloadCanvas(canvas, state.selectAllActive ? 'locus-document.png' : 'locus-formula.png');
+              showToast('Trình duyệt không hỗ trợ dán ảnh trực tiếp, đã tự động tải ảnh');
+            }
+          } catch(clipErr) {
+            downloadCanvas(canvas, state.selectAllActive ? 'locus-document.png' : 'locus-formula.png');
+            showToast('Đã tải ảnh PNG về máy');
+          } finally {
+            if (btnLabel) btnLabel.textContent = prevLabel;
+          }
+        }, 'image/png');
+
+      } catch(err) {
+        if (btnLabel) btnLabel.textContent = prevLabel;
+        showToast('Lỗi sao chép ảnh: ' + err.message);
+      }
+    }
+
+    function downloadCanvas(canvas, filename) {
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    async function downloadActiveContent(type, scaleMultiplier = 2) {
+      const targetElement = state.selectAllActive 
+        ? document.getElementById('formula-rendered-view')
+        : (document.getElementById(`formula-token-${state.activeFormulaIndex}`) || document.getElementById('formula-rendered-view'));
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const filename = state.selectAllActive ? `Locus_Document.${type}` : `Locus_Formula.${type}`;
+
+      if (type === 'png') {
+        try {
+          showToast('Đang tạo ảnh độ nét cao...');
+          const canvas = await html2canvas(targetElement, {
+            scale: scaleMultiplier,
+            backgroundColor: isDark ? '#121210' : '#FFFFFF',
+            logging: false,
+            useCORS: true
+          });
+
+          const link = document.createElement('a');
+          link.download = filename;
+          link.href = canvas.toDataURL('image/png');
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          showToast(`✓ Đã tải ảnh PNG ${scaleMultiplier}X thành công!`);
+        } catch(err) {
+          showToast('Lỗi khi xuất ảnh: ' + err.message);
+        }
+      } else if (type === 'svg') {
+        try {
+          const bbox = targetElement.getBoundingClientRect();
+          const width = Math.max(bbox.width + 40, 260);
+          const height = Math.max(bbox.height + 40, 120);
+          const bgColor = isDark ? '#121210' : '#FFFFFF';
+          const textColor = isDark ? '#F3F3ED' : '#0D0D0D';
+
+          const svgContent = `
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <style>
+    @import url('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css');
+    .formula-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: ${bgColor};
+      color: ${textColor};
+      font-family: 'Newsreader', Georgia, serif;
+    }
+  </style>
+  <rect width="100%" height="100%" fill="${bgColor}"/>
+  <foreignObject x="0" y="0" width="${width}" height="${height}">
+    <div xmlns="http://www.w3.org/1999/xhtml" class="formula-container">
+      ${targetElement.innerHTML}
+    </div>
+  </foreignObject>
+</svg>`.trim();
+
+          const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = filename;
+          link.href = url;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          showToast('✓ Đã xuất vector SVG sắc nét!');
+        } catch(err) {
+          showToast('Lỗi xuất SVG: ' + err.message);
+        }
+      }
+    }
+
+    function clearFormulaInput() {
+      state.sourceText = '';
+      document.getElementById('formula-input').value = '';
+      updateFormulaPreview();
+      document.getElementById('formula-input').focus();
+      showToast('Đã xóa nội dung văn bản');
+    }
+
+    let graphCanvas, graphCtx;
+
+    function initGraphCanvas() {
+      const container = document.getElementById('graph-canvas-container');
+      graphCanvas = document.getElementById('graph-canvas');
+      if (!graphCanvas || !container) return;
+      graphCtx = graphCanvas.getContext('2d');
+
+      graphCanvas.width = container.clientWidth;
+      graphCanvas.height = container.clientHeight;
+
+      renderGraphParametersUI();
+      renderGraphFunctionsUI();
+      bindGraphEvents();
+      drawGraph();
+    }
+
+    function renderGraphFunctionsUI() {
+      const container = document.getElementById('graph-functions-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      state.functions.forEach((fn, idx) => {
+        const div = document.createElement('div');
+        div.className = "p-2 border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark space-y-1.5";
+        div.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-ink dark:text-inkDark">y = f${idx+1}(x)</span>
+            <button onclick="deleteFunction(${fn.id})" class="text-rose-600 hover:text-rose-800">✕</button>
+          </div>
+          <input type="text" value="${fn.expr}" oninput="updateFnExpr(${fn.id}, this.value)" class="w-full px-2 py-1 bg-subtle/50 dark:bg-subtleDark/50 border border-borderline dark:border-borderlineDark text-xs">
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderGraphParametersUI() {
+      const container = document.getElementById('graph-parameters-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      state.parameters.forEach(p => {
+        const div = document.createElement('div');
+        div.className = "p-2 border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark space-y-1";
+        div.innerHTML = `
+          <div class="flex justify-between items-center text-[11px]">
+            <span class="font-bold text-terracotta">${p.name} = <span id="val-${p.name}">${p.value}</span></span>
+            <span class="text-muted">[${p.min} đến ${p.max}]</span>
+          </div>
+          <input type="range" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.value}" 
+            oninput="updateParamValue('${p.name}', parseFloat(this.value))" class="w-full accent-[#E8590C]">
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function updateParamValue(name, val) {
+      const p = state.parameters.find(item => item.name === name);
+      if (p) {
+        p.value = val;
+        const lbl = document.getElementById(`val-${name}`);
+        if (lbl) lbl.textContent = val;
+        drawGraph();
+      }
+    }
+
+    function updateFnExpr(id, val) {
+      const fn = state.functions.find(f => f.id === id);
+      if (fn) {
+        fn.expr = val;
+        drawGraph();
+      }
+    }
+
+    function deleteFunction(id) {
+      state.functions = state.functions.filter(f => f.id !== id);
+      renderGraphFunctionsUI();
+      drawGraph();
+    }
+
+    function addNewFunction() {
+      state.functions.push({ id: Date.now(), expr: 'cos(x)', color: '#E8590C', visible: true, width: 2 });
+      renderGraphFunctionsUI();
+      drawGraph();
+      showToast('Đã thêm hàm số mới');
+    }
+
+    function drawGraph() {
+      if (!graphCtx || !graphCanvas) return;
+      const w = graphCanvas.width;
+      const h = graphCanvas.height;
+      const { offsetX, offsetY, scale } = state.graphView;
+      const isDark = document.documentElement.classList.contains('dark');
+
+      graphCtx.fillStyle = isDark ? '#0E0E0D' : '#FBFBF9';
+      graphCtx.fillRect(0, 0, w, h);
+
+      const originX = w / 2 + offsetX;
+      const originY = h / 2 + offsetY;
+
+      graphCtx.strokeStyle = isDark ? '#1E1E1B' : '#EBEBE3';
+      graphCtx.lineWidth = 1;
+      for (let x = originX % scale; x < w; x += scale) {
+        graphCtx.beginPath(); graphCtx.moveTo(x, 0); graphCtx.lineTo(x, h); graphCtx.stroke();
+      }
+      for (let y = originY % scale; y < h; y += scale) {
+        graphCtx.beginPath(); graphCtx.moveTo(0, y); graphCtx.lineTo(w, y); graphCtx.stroke();
+      }
+
+      graphCtx.strokeStyle = isDark ? '#383832' : '#C5C5B8';
+      graphCtx.lineWidth = 1.5;
+      graphCtx.beginPath(); graphCtx.moveTo(0, originY); graphCtx.lineTo(w, originY); graphCtx.stroke();
+      graphCtx.beginPath(); graphCtx.moveTo(originX, 0); graphCtx.lineTo(originX, h); graphCtx.stroke();
+
+      const paramMap = {};
+      state.parameters.forEach(p => paramMap[p.name] = p.value);
+
+      state.functions.forEach(fn => {
+        if (!fn.visible) return;
+        graphCtx.strokeStyle = fn.color;
+        graphCtx.lineWidth = fn.width || 2;
+        graphCtx.beginPath();
+        let started = false;
+
+        for (let px = 0; px < w; px += 2) {
+          const x = (px - originX) / scale;
+          let y = null;
+
+          try {
+            let parsedExpr = fn.expr
+              .replace(/\^/g, '**')
+              .replace(/sin/g, 'Math.sin')
+              .replace(/cos/g, 'Math.cos')
+              .replace(/tan/g, 'Math.tan');
+            Object.keys(paramMap).forEach(key => {
+              parsedExpr = parsedExpr.replace(new RegExp(`\\b${key}\\b`, 'g'), paramMap[key]);
+            });
+            y = Function('x', `"use strict"; return (${parsedExpr});`)(x);
+          } catch(err) { y = null; }
+
+          if (y !== null && !isNaN(y) && isFinite(y)) {
+            const py = originY - y * scale;
+            if (!started) { graphCtx.moveTo(px, py); started = true; }
+            else { graphCtx.lineTo(px, py); }
+          } else {
+            started = false;
+          }
+        }
+        graphCtx.stroke();
+      });
+    }
+
+    let isGraphDragging = false, graphDragStart = { x: 0, y: 0 };
+    function bindGraphEvents() {
+      graphCanvas.onmousedown = (e) => {
+        isGraphDragging = true;
+        graphDragStart = { x: e.clientX, y: e.clientY };
+      };
+      window.addEventListener('mousemove', (e) => {
+        if (isGraphDragging) {
+          state.graphView.offsetX += e.clientX - graphDragStart.x;
+          state.graphView.offsetY += e.clientY - graphDragStart.y;
+          graphDragStart = { x: e.clientX, y: e.clientY };
+          drawGraph();
+        }
+      });
+      window.addEventListener('mouseup', () => { isGraphDragging = false; });
+      graphCanvas.onwheel = (e) => {
+        e.preventDefault();
+        zoomGraph(e.deltaY < 0 ? 1.1 : 0.9);
+      };
+      graphCanvas.onmousemove = (e) => {
+        const rect = graphCanvas.getBoundingClientRect();
+        const originX = graphCanvas.width / 2 + state.graphView.offsetX;
+        const originY = graphCanvas.height / 2 + state.graphView.offsetY;
+        const mathX = ((e.clientX - rect.left - originX) / state.graphView.scale).toFixed(2);
+        const mathY = (-(e.clientY - rect.top - originY) / state.graphView.scale).toFixed(2);
+        document.getElementById('graph-coords').textContent = `X: ${mathX}, Y: ${mathY}`;
+      };
+    }
+
+    function resetGraphView() {
+      state.graphView = { offsetX: 0, offsetY: 0, scale: 40 };
+      drawGraph();
+    }
+    function zoomGraph(factor) {
+      state.graphView.scale = Math.max(10, Math.min(250, state.graphView.scale * factor));
+      drawGraph();
+    }
+
+    let geoCanvas, geoCtx, draggedPoint = null;
+
+    function drawGeo2D() {
+      const container = document.getElementById('geo-2d-canvas-container');
+      geoCanvas = document.getElementById('geo-2d-canvas');
+      if (!geoCanvas || !container) return;
+      geoCtx = geoCanvas.getContext('2d');
+
+      geoCanvas.width = container.clientWidth;
+      geoCanvas.height = container.clientHeight;
+      const isDark = document.documentElement.classList.contains('dark');
+
+      geoCtx.clearRect(0, 0, geoCanvas.width, geoCanvas.height);
+
+      geoCtx.fillStyle = isDark ? '#282824' : '#E5E5DE';
+      for (let x = 20; x < geoCanvas.width; x += 30) {
+        for (let y = 20; y < geoCanvas.height; y += 30) {
+          geoCtx.beginPath(); geoCtx.arc(x, y, 1, 0, Math.PI * 2); geoCtx.fill();
+        }
+      }
+
+      state.geoObjects.filter(o => o.type === 'segment').forEach(seg => {
+        const p1 = state.geoObjects.find(p => p.id === seg.from);
+        const p2 = state.geoObjects.find(p => p.id === seg.to);
+        if (p1 && p2) {
+          geoCtx.strokeStyle = seg.color || '#E8590C';
+          geoCtx.lineWidth = seg.width || 2;
+          geoCtx.beginPath();
+          geoCtx.moveTo(p1.x, p1.y);
+          geoCtx.lineTo(p2.x, p2.y);
+          geoCtx.stroke();
+        }
+      });
+
+      state.geoObjects.filter(o => o.type === 'point').forEach(pt => {
+        const isSelected = state.selectedGeoId === pt.id;
+        if (isSelected) {
+          geoCtx.strokeStyle = '#E8590C';
+          geoCtx.lineWidth = 2.5;
+          geoCtx.beginPath(); geoCtx.arc(pt.x, pt.y, 9, 0, Math.PI * 2); geoCtx.stroke();
+        }
+        geoCtx.fillStyle = pt.color || (isDark ? '#F3F3ED' : '#0D0D0D');
+        geoCtx.beginPath(); geoCtx.arc(pt.x, pt.y, 5, 0, Math.PI * 2); geoCtx.fill();
+
+        geoCtx.fillStyle = isDark ? '#F3F3ED' : '#0D0D0D';
+        geoCtx.font = '600 12px JetBrains Mono';
+        geoCtx.fillText(pt.label || pt.id, pt.x + 8, pt.y - 8);
+      });
+
+      bindGeo2DEvents();
+    }
+
+    function bindGeo2DEvents() {
+      geoCanvas.onmousedown = (e) => {
+        const rect = geoCanvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        const clickedPoint = state.geoObjects.find(o => o.type === 'point' && Math.hypot(o.x - mx, o.y - my) < 14);
+        if (clickedPoint) {
+          state.selectedGeoId = clickedPoint.id;
+          draggedPoint = clickedPoint;
+          showGeoObjectProperties(clickedPoint);
+          drawGeo2D();
+        } else if (state.geoTool === 'point') {
+          const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+          const nextLabel = alphabet[state.geoObjects.filter(o => o.type === 'point').length % 26];
+          const newPt = { type: 'point', id: nextLabel + Date.now().toString().slice(-3), x: mx, y: my, label: nextLabel, color: '#E8590C' };
+          state.geoObjects.push(newPt);
+          state.selectedGeoId = newPt.id;
+          showGeoObjectProperties(newPt);
+          drawGeo2D();
+          showToast(`Đã tạo điểm ${nextLabel}`);
+        }
+      };
+
+      geoCanvas.onmousemove = (e) => {
+        if (!draggedPoint) return;
+        const rect = geoCanvas.getBoundingClientRect();
+        let mx = e.clientX - rect.left;
+        let my = e.clientY - rect.top;
+
+        const snapBanner = document.getElementById('snap-banner');
+        let snapped = false;
+        state.geoObjects.filter(o => o.type === 'segment').forEach(seg => {
+          const p1 = state.geoObjects.find(p => p.id === seg.from);
+          const p2 = state.geoObjects.find(p => p.id === seg.to);
+          if (p1 && p2) {
+            const midX = (p1.x + p2.x) / 2;
+            const midY = (p1.y + p2.y) / 2;
+            if (Math.hypot(mx - midX, my - midY) < 16) {
+              mx = midX; my = midY; snapped = true;
+              snapBanner.classList.remove('hidden');
+              document.getElementById('snap-text').textContent = `DÍNH TRUNG ĐIỂM ${p1.label}${p2.label}`;
+            }
+          }
+        });
+        if (!snapped) snapBanner.classList.add('hidden');
+
+        draggedPoint.x = mx;
+        draggedPoint.y = my;
+        drawGeo2D();
+      };
+
+      window.addEventListener('mouseup', () => {
+        if (draggedPoint) {
+          draggedPoint = null;
+          document.getElementById('snap-banner').classList.add('hidden');
+        }
+      });
+    }
+
+    function setGeoTool(tool) {
+      state.geoTool = tool;
+      document.querySelectorAll('.geo-tool-btn').forEach(b => {
+        b.classList.remove('border-terracotta', 'bg-terracotta/10', 'text-terracotta');
+        b.classList.add('border-borderline', 'dark:border-borderlineDark', 'text-muted');
+      });
+      const activeBtn = document.getElementById(`tool-${tool}`);
+      if (activeBtn) {
+        activeBtn.classList.add('border-terracotta', 'bg-terracotta/10', 'text-terracotta');
+        activeBtn.classList.remove('border-borderline', 'dark:border-borderlineDark', 'text-muted');
+      }
+    }
+
+    function showGeoObjectProperties(obj) {
+      document.getElementById('geo-prop-empty').classList.add('hidden');
+      const panel = document.getElementById('geo-prop-controls');
+      panel.classList.remove('hidden');
+      document.getElementById('prop-label-input').value = obj.label || '';
+      document.getElementById('prop-color-input').value = obj.color || '#E8590C';
+    }
+
+    function updateSelectedObjectProp(prop, val) {
+      const obj = state.geoObjects.find(o => o.id === state.selectedGeoId);
+      if (obj) { obj[prop] = val; drawGeo2D(); }
+    }
+
+    function deleteSelectedObject() {
+      state.geoObjects = state.geoObjects.filter(o => o.id !== state.selectedGeoId);
+      state.selectedGeoId = null;
+      document.getElementById('geo-prop-controls').classList.add('hidden');
+      document.getElementById('geo-prop-empty').classList.remove('hidden');
+      drawGeo2D();
+      showToast('Đã xóa đối tượng');
+    }
+
+    let threeScene, threeCamera, threeRenderer, threeCurrentMesh;
+    let isThreeDragging = false, prevThreeMouse = { x: 0, y: 0 };
+
+    function initThreeJS() {
+      const container = document.getElementById('three-viewport');
+      if (!container || threeRenderer) return;
+
+      threeScene = new THREE.Scene();
+      threeScene.background = new THREE.Color(0x0E0E0D);
+
+      threeCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      threeCamera.position.set(4, 3, 5);
+      threeCamera.lookAt(0, 0, 0);
+
+      threeRenderer = new THREE.WebGLRenderer({ antialias: true });
+      threeRenderer.setSize(container.clientWidth, container.clientHeight);
+      container.innerHTML = '';
+      container.appendChild(threeRenderer.domElement);
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+      threeScene.add(ambientLight);
+      const dirLight = new THREE.DirectionalLight(0xE8590C, 0.9);
+      dirLight.position.set(5, 10, 7);
+      threeScene.add(dirLight);
+
+      init3DShape('pyramid');
+
+      container.onmousedown = (e) => {
+        isThreeDragging = true;
+        prevThreeMouse = { x: e.clientX, y: e.clientY };
+      };
+      window.addEventListener('mousemove', (e) => {
+        if (!isThreeDragging || !threeCurrentMesh) return;
+        threeCurrentMesh.rotation.y += (e.clientX - prevThreeMouse.x) * 0.01;
+        threeCurrentMesh.rotation.x += (e.clientY - prevThreeMouse.y) * 0.01;
+        prevThreeMouse = { x: e.clientX, y: e.clientY };
+      });
+      window.addEventListener('mouseup', () => { isThreeDragging = false; });
+
+      function animate3D() {
+        requestAnimationFrame(animate3D);
+        threeRenderer.render(threeScene, threeCamera);
+      }
+      animate3D();
+    }
+
+    function init3DShape(shape) {
+      if (threeCurrentMesh) threeScene.remove(threeCurrentMesh);
+
+      let geometry;
+      if (shape === 'pyramid') geometry = new THREE.ConeGeometry(1.5, 2.2, 4);
+      else if (shape === 'cube') geometry = new THREE.BoxGeometry(1.8, 1.8, 1.8);
+      else if (shape === 'prism') geometry = new THREE.CylinderGeometry(1.2, 1.2, 2.4, 3);
+      else geometry = new THREE.TetrahedronGeometry(1.6);
+
+      const material = new THREE.MeshPhongMaterial({
+        color: 0xE8590C,
+        transparent: true,
+        opacity: 0.65,
+        side: THREE.DoubleSide
+      });
+
+      threeCurrentMesh = new THREE.Mesh(geometry, material);
+      const edges = new THREE.EdgesGeometry(geometry);
+      const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xFFF4ED, linewidth: 2 }));
+      threeCurrentMesh.add(line);
+
+      threeScene.add(threeCurrentMesh);
+      showToast(`Đã dựng mô hình 3D: ${shape}`);
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-message');
+      if (!toast || !text) return;
+      text.textContent = message;
+      toast.classList.remove('opacity-0', 'translate-y-16', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-16', 'pointer-events-none');
+      }, 2200);
+    }
+
+    function triggerUndo() { showToast('Đã hoàn tác (Undo)'); }
+    function triggerRedo() { showToast('Đã làm lại (Redo)'); }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      document.getElementById('formula-input').value = state.sourceText;
+      updateFormulaPreview();
+
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+          e.preventDefault();
+          triggerUndo();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

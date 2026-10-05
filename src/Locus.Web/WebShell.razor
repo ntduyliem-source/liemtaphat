@@ -1,0 +1,11 @@
+@using Microsoft.AspNetCore.Components
+@using Locus.Editor
+@using Locus.DesignSystem.Components
+<div class="locus-web">
+    <EditorShell Host="browser">
+        <Header Context="shell">
+            <StudioHeader Active="@shell.Active" Theme="@shell.Theme" CanUndo="shell.CanUndo" CanRedo="shell.CanRedo"
+                          OnNavigate="shell.Navigate" OnHistory="shell.History" OnTheme="shell.ToggleTheme" />
+        </Header>
+    </EditorShell>
+</div>

@@ -1,0 +1,22 @@
+<div class="export-toolbar studio-export" aria-label="@ScopeLabel">
+    <StudioButton id="select-result-all" aria-pressed="@AllSelected.ToString().ToLowerInvariant()" Disabled="@(IsBusy||IsComposing||IsEmpty)" OnClick="OnSelectAll">Chọn tất cả</StudioButton>
+    <div class="export-row">
+        <span class="download-label"><StudioIcon Name="download" />TẢI VỀ:</span>
+        <StudioButton id="download-svg" Disabled="@(!CanExportImage||IsExporting)" title="@($"Tải SVG · {ScopeLabel}")" OnClick='()=>OnImage.InvokeAsync(new("svg"))'>SVG</StudioButton>
+        <StudioButton id="download-png" Disabled="@(!CanExportImage||IsExporting)" title="@($"Tải PNG 2X · {ScopeLabel}")" OnClick='()=>OnImage.InvokeAsync(new("png",false,2))'>PNG 2X</StudioButton>
+        <StudioButton id="download-png-4x" Disabled="@(!CanExportImage||IsExporting)" title="@($"Tải PNG 4X · {ScopeLabel}")" OnClick='()=>OnImage.InvokeAsync(new("png",false,4))'><small>UHD</small> PNG 4X</StudioButton>
+        <StudioButton id="copy-png" class="studio-primary" Disabled="@(!CanExportImage||IsExporting)" title="@($"Copy PNG · {ScopeLabel}")" OnClick='()=>OnImage.InvokeAsync(new("png",true,2))'><StudioIcon Name="copy" />Copy ảnh</StudioButton>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string ScopeLabel { get; set; } = "Toàn bộ kết quả";
+    [Parameter] public bool AllSelected { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public bool IsComposing { get; set; }
+    [Parameter] public bool IsEmpty { get; set; }
+    [Parameter] public bool IsExporting { get; set; }
+    [Parameter] public bool CanExportImage { get; set; }
+    [Parameter] public EventCallback OnSelectAll { get; set; }
+    [Parameter] public EventCallback<FormulaImageRequest> OnImage { get; set; }
+}

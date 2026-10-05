@@ -124,9 +124,23 @@ namespace Locus.Core.Detection
                 for (int j = contentStart; j < slash && wordDirectory; j++)
                     wordDirectory = char.IsLetterOrDigit(text[j]) || text[j] == '_' || text[j] == '-' || text[j] == '.';
                 string firstPart = text.Substring(contentStart, slash - contentStart);
-                if (wordDirectory && !FormulaLexicon.IsSupportedWord(firstPart) && !FormulaLexicon.IsCompactRootNumber(firstPart)) return "PROTECTED_PATH";
+                if (wordDirectory && !FormulaLexicon.IsSupportedWord(firstPart) && !FormulaLexicon.IsCompactRootNumber(firstPart) &&
+                    !IsSubtractionWithDivision(text, contentStart, end, firstPart)) return "PROTECTED_PATH";
             }
             return null;
+        }
+
+        private static bool IsSubtractionWithDivision(string text, int start, int end, string prefix)
+        {
+            // Require a full valid expression on both sides, not just a math-looking substring of a path.
+            if (prefix.IndexOf('-') < 0 || end - start > FormulaParser.MaximumRegionLength) return false;
+            var before = new SourceSnapshot(prefix);
+            var left = new FormulaParser().Parse(before, new TextSpan(0, prefix.Length));
+            if (left.Candidates.Count == 0 || left.Candidates[0].Document.Root.Type != "Binary" || left.Candidates[0].Document.Root.Operator != "subtract") return false;
+            while (end > start && ",;.!?".IndexOf(text[end - 1]) >= 0) end--;
+            var source = new SourceSnapshot(text.Substring(start, end - start));
+            var parsed = new FormulaParser().Parse(source, new TextSpan(0, source.Raw.Length));
+            return parsed.Candidates.Count > 0 && parsed.Candidates[0].Kind == "direct";
         }
 
         private static bool IsPathPrefix(string text, int start)

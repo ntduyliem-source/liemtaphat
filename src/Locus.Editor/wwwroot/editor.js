@@ -22,7 +22,7 @@ export function wire(element,reference){
   element.addEventListener('compositionend',()=>{composing=false;send();},{signal});
   element.addEventListener('input',send,{signal});
   element.closest('.locus-app').addEventListener('click',event=>{
-    if(element.closest('.locus-app').dataset.inputPending==='true'&&event.target.closest('.export-toolbar,.export-row,.export-more,.document-bar,.candidate-list,.result-region,.formula-details,.card-heading,.balance-toolbar,.auto-balance-option')){event.preventDefault();event.stopImmediatePropagation();}
+    if(element.closest('.locus-app').dataset.inputPending==='true'&&event.target.closest('.export-toolbar,.export-row,.export-more,.document-bar,.candidate-list,.result-region,.card-heading,.balance-toolbar,.auto-balance-option,.detection-options,.studio-mode-switch,.studio-markers')){event.preventDefault();event.stopImmediatePropagation();}
   },{signal,capture:true});
   document.addEventListener('keydown',event=>{
     if(ghost.keydown(event))return;

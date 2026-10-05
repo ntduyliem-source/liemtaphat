@@ -1,0 +1,9 @@
+[
+  {
+    "Id": "5ad8131387875e7b0da4cf79bc6672c927ae454d0f5c97e48b691ded753d11ee",
+    "Kind": "direct",
+    "Latex": "{x}^{2}\u002B\\frac{1}{2}",
+    "MathMl": "\u003Cmath xmlns=\u0022http://www.w3.org/1998/Math/MathML\u0022 display=\u0022inline\u0022\u003E\u003Cmrow\u003E\u003Cmsup\u003E\u003Cmrow\u003E\u003Cmi\u003Ex\u003C/mi\u003E\u003C/mrow\u003E\u003Cmrow\u003E\u003Cmn\u003E2\u003C/mn\u003E\u003C/mrow\u003E\u003C/msup\u003E\u003Cmo\u003E\u002B\u003C/mo\u003E\u003Cmfrac\u003E\u003Cmrow\u003E\u003Cmn\u003E1\u003C/mn\u003E\u003C/mrow\u003E\u003Cmrow\u003E\u003Cmn\u003E2\u003C/mn\u003E\u003C/mrow\u003E\u003C/mfrac\u003E\u003C/mrow\u003E\u003C/math\u003E",
+    "Omml": "\u003Cm:oMath xmlns:m=\u0022http://schemas.openxmlformats.org/officeDocument/2006/math\u0022\u003E\u003Cm:sSup\u003E\u003Cm:e\u003E\u003Cm:r\u003E\u003Cm:t\u003Ex\u003C/m:t\u003E\u003C/m:r\u003E\u003C/m:e\u003E\u003Cm:sup\u003E\u003Cm:r\u003E\u003Cm:t\u003E2\u003C/m:t\u003E\u003C/m:r\u003E\u003C/m:sup\u003E\u003C/m:sSup\u003E\u003Cm:r\u003E\u003Cm:t\u003E\u002B\u003C/m:t\u003E\u003C/m:r\u003E\u003Cm:f\u003E\u003Cm:num\u003E\u003Cm:r\u003E\u003Cm:t\u003E1\u003C/m:t\u003E\u003C/m:r\u003E\u003C/m:num\u003E\u003Cm:den\u003E\u003Cm:r\u003E\u003Cm:t\u003E2\u003C/m:t\u003E\u003C/m:r\u003E\u003C/m:den\u003E\u003C/m:f\u003E\u003C/m:oMath\u003E"
+  }
+]

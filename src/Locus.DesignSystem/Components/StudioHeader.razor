@@ -1,0 +1,27 @@
+<header class="studio-header">
+    <div class="studio-header-inner">
+        <a class="studio-brand" href="#studio-content" aria-label="Locus — tới vùng làm việc"><span class="studio-brand-mark" aria-hidden="true"></span>LOCUS<sup>°</sup></a>
+        <nav class="studio-tabs" aria-label="Không gian làm việc">
+            <StudioButton id="editor-tab" aria-current="@(Active=="formula"?"page":null)" OnClick='()=>OnNavigate.InvokeAsync("formula")'><span class="tab-dot" aria-hidden="true"></span>Công thức</StudioButton>
+            <StudioButton id="plot-tab" aria-current="@(Active=="plot"?"page":null)" OnClick='()=>OnNavigate.InvokeAsync("plot")'><span class="tab-dot" aria-hidden="true"></span>Đồ thị</StudioButton>
+            <StudioButton id="geometry-tab" aria-current="@(Active=="geometry"?"page":null)" OnClick='()=>OnNavigate.InvokeAsync("geometry")'><span class="tab-dot" aria-hidden="true"></span>Hình học</StudioButton>
+        </nav>
+        <div class="studio-shell-actions">
+            @if(Active=="formula"){
+                <StudioIconButton id="undo" Title="Hoàn tác (Ctrl+Z)" Label="Hoàn tác" Icon="undo" Disabled="@(!CanUndo)" OnClick="()=>OnHistory.InvokeAsync(false)" />
+                <StudioIconButton id="redo" Title="Làm lại (Ctrl+Y)" Label="Làm lại" Icon="redo" Disabled="@(!CanRedo)" OnClick="()=>OnHistory.InvokeAsync(true)" />
+            }
+            <StudioButton id="studio-theme" title="@(Theme=="dark"?"Chuyển giao diện sáng":"Chuyển giao diện tối")" aria-label="Giao diện tối" aria-pressed="@((Theme=="dark").ToString().ToLowerInvariant())" OnClick="OnTheme"><StudioIcon Name="@(Theme=="dark"?"sun":"moon")" /><span>@(Theme=="dark"?"Light mode":"Dark mode")</span></StudioButton>
+        </div>
+    </div>
+</header>
+
+@code {
+    [Parameter] public string Active { get; set; } = "formula";
+    [Parameter] public string Theme { get; set; } = "light";
+    [Parameter] public bool CanUndo { get; set; }
+    [Parameter] public bool CanRedo { get; set; }
+    [Parameter] public EventCallback<string> OnNavigate { get; set; }
+    [Parameter] public EventCallback<bool> OnHistory { get; set; }
+    [Parameter] public EventCallback OnTheme { get; set; }
+}

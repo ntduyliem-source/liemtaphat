@@ -1,0 +1,10 @@
+<StudioButton @attributes="Attributes" Class="studio-icon-button" Disabled="Disabled" OnClick="OnClick" aria-label="@Label" title="@Title"><StudioIcon Name="@Icon" /></StudioButton>
+
+@code {
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string Icon { get; set; } = "file";
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+}

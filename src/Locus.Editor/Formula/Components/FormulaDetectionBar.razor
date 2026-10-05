@@ -1,0 +1,32 @@
+<div class="studio-shelf">
+            <StudioSegmentedControl Class="detection-options" Label="Nhận diện">
+                <StudioButton id="detect-all" aria-pressed='@IsSelected("all").ToString().ToLowerInvariant()' Disabled="@IsComposing" OnClick='()=>OnDetect.InvokeAsync("all")'>ALL DETECT</StudioButton>
+                <StudioButton id="detect-math" aria-pressed='@IsSelected("math").ToString().ToLowerInvariant()' Disabled="@IsComposing" OnClick='()=>OnDetect.InvokeAsync("math")'>TOÁN HỌC</StudioButton>
+                <StudioButton id="detect-physics" aria-pressed='@IsSelected("physics").ToString().ToLowerInvariant()' Disabled="@IsComposing" OnClick='()=>OnDetect.InvokeAsync("physics")'>VẬT LÝ</StudioButton>
+                <StudioButton id="detect-chemistry" aria-pressed='@IsSelected("chemistry").ToString().ToLowerInvariant()' Disabled="@IsComposing" OnClick='()=>OnDetect.InvokeAsync("chemistry")'>HÓA HỌC</StudioButton>
+                <StudioButton id="manual-mode" aria-pressed='@IsSelected("manual").ToString().ToLowerInvariant()' Disabled="@IsComposing" OnClick='()=>OnDetect.InvokeAsync("manual")'>MANUAL<span class="manual-dot" aria-hidden="true"></span></StudioButton>
+            </StudioSegmentedControl>
+            <div class="studio-balance-tools">
+                <div class="balance-toolbar" aria-label="Cân bằng phương trình"><div class="balance-actions">
+                    <StudioButton id="balance-step" title="@BalanceHint" Disabled="@(!Ready||!CanBalance)" OnClick="OnBalance"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 12h18"/></svg>@BalanceLabel</StudioButton>
+                    @if(IsBalancing){<StudioButton id="cancel-balance-work" OnClick="()=>OnCancelBalance.InvokeAsync()">Dừng xử lý</StudioButton>}
+                    @if(CanDropProducts){<StudioButton id="drop-products" OnClick="OnDropProducts">Hủy tự điền</StudioButton>}
+                </div></div>
+                <span class="balance-hint">@BalanceHint</span>
+            </div>
+        </div>
+
+@code {
+    [Parameter] public bool Ready { get; set; }
+    [Parameter] public bool IsComposing { get; set; }
+    [Parameter] public bool CanBalance { get; set; }
+    [Parameter] public bool IsBalancing { get; set; }
+    [Parameter] public string BalanceLabel { get; set; } = "Cân bằng phương trình hóa học";
+    [Parameter] public string BalanceHint { get; set; } = "Nhập a+b= rồi bấm Cân bằng để tự điền sản phẩm phản ứng và cân bằng phương trình.";
+    [Parameter] public bool CanDropProducts { get; set; }
+    [Parameter] public EventCallback OnDropProducts { get; set; }
+    [Parameter] public Func<string,bool> IsSelected { get; set; } = _ => false;
+    [Parameter] public EventCallback<string> OnDetect { get; set; }
+    [Parameter] public EventCallback OnBalance { get; set; }
+    [Parameter] public EventCallback OnCancelBalance { get; set; }
+}

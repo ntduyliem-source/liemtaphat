@@ -1,0 +1,15 @@
+<section class="input-card" aria-labelledby="source-title">
+                <div class="card-heading"><h2 id="source-title"><span class="section-dot" aria-hidden="true"></span><label for="source">Văn bản &amp; biểu thức</label></h2><StudioButton id="clear-source" class="subtle" Disabled="@(!Ready||IsComposing||Raw.Length==0)" OnClick='()=>OnClear.InvokeAsync()'>Xóa trắng</StudioButton></div>
+                <div class="source-shell"><textarea id="source" @ref="Element" value="@Raw" readonly="@(!Ready)" spellcheck="false" placeholder="Gõ công thức hoặc dán cả đoạn…" aria-describedby="ghost-hint"></textarea><div class="source-ghost" aria-hidden="true" hidden></div><p id="ghost-hint" class="ghost-hint" role="status" hidden></p></div>
+                <div class="input-foot"><span id="source-count">@WordCount từ | @Raw.Length ký tự</span><span>@(IsComposing?"Đang ghép dấu…":IsBusy?"Đang nhận diện…":"Nguồn gốc được giữ nguyên")</span></div>
+            </section>
+
+@code {
+    public ElementReference Element { get; private set; }
+    [Parameter] public string Raw { get; set; } = "";
+    [Parameter] public bool Ready { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public bool IsComposing { get; set; }
+    [Parameter] public int WordCount { get; set; }
+    [Parameter] public EventCallback OnClear { get; set; }
+}

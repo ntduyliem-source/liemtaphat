@@ -1,0 +1,15 @@
+.formula-studio .studio-feedback p:empty { display: none; }
+.formula-studio .studio-feedback .selection-status { margin: 8px 0; font-size: var(--studio-size-control); min-height: 0; }
+.formula-studio .notice { margin: 8px 0; padding: 8px 12px; border-radius: 0; border-left: 2px solid var(--studio-accent); background: var(--studio-tint); color: var(--studio-ink); font-size: var(--studio-size-label); }
+.formula-studio pre { border-radius: 0; font-family: var(--studio-mono); }
+.formula-studio .studio-chemistry-context { margin-top: 8px; }
+.formula-studio .chemistry-tools { border: 0; padding: 0; font-size: var(--studio-size-label); }
+.formula-studio .assistance-results { margin: 8px 0; border-color: var(--studio-line); border-radius: 0; }
+.formula-studio .assistance-choice small { color: var(--studio-action); }
+.formula-studio .chemistry-conditions label { color: var(--studio-muted); }
+.formula-studio .studio-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--studio-space-3); margin: 64px 0 0; padding: 16px 0; border-top: 1px solid var(--studio-line); color: var(--studio-muted); font: 400 var(--studio-size-control)/1.5 var(--studio-mono); }
+.formula-studio .studio-footer > span { display: inline-flex; align-items: center; gap: 6px; }
+.formula-studio ::-webkit-scrollbar { width: 4px; height: 4px; }
+.formula-studio ::-webkit-scrollbar-track { background: transparent; }
+.formula-studio ::-webkit-scrollbar-thumb { background: var(--studio-scroll); }
+.formula-studio[data-input-pending='true'] .mixed-result { opacity: .55; }

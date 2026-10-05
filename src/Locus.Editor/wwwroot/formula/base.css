@@ -1,0 +1,35 @@
+/* Explicit inherited rules previously supplied by editor.css/ux1.css.
+   Formula owns these styles; legacy editor CSS is never required. */
+.formula-studio { display: block; min-height: 100vh; }
+.formula-studio h2, .formula-studio h3 { margin: 0; }
+.formula-studio p { margin: 8px 0; }
+.formula-studio pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.formula-studio summary { cursor: pointer; }
+.formula-studio .mixed-result { white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; text-align: left; }
+.formula-studio .region-content { cursor: pointer; }
+.formula-studio .candidate-list { display: flex; padding: 15px 20px; gap: 10px; flex-wrap: wrap; }
+.formula-studio .candidate-list button { flex: 1; }
+.formula-studio .candidate-list math { font: 24px 'Cambria Math', 'STIX Two Math', math; }
+.formula-studio .suggestion-chips { flex-wrap: nowrap; }
+.formula-studio .marker-settings { color: var(--studio-muted); }
+.formula-studio .marker-settings p { line-height: 1.6; margin: 10px 0; }
+.formula-studio .marker-profile-row { align-items: end; }
+.formula-studio .marker-profile-row label { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.formula-studio .marker-profile-row .marker-profile-name { flex-direction: row; align-items: center; align-self: center; gap: 6px; }
+.formula-studio .marker-message { color: var(--studio-action); }
+.formula-studio .source-ghost { position: absolute; top: 0; left: 0; pointer-events: none; color: transparent; white-space: pre-wrap; overflow: hidden; overflow-wrap: break-word; border-style: solid; border-color: transparent; }
+.formula-studio .source-ghost[hidden], .formula-studio .ghost-hint[hidden], .formula-studio .ghost-equation[hidden] { display: none; }
+.formula-studio .ghost-products { border-bottom: 1px dotted var(--studio-action); }
+.formula-studio .ghost-hint { font-size: 11px; line-height: 1.6; }
+.formula-studio .ghost-equation { overflow-x: auto; }
+.formula-studio .ghost-equation math { font: 23px 'Cambria Math', math; }
+.formula-studio .ghost-equation p { font-size: 11px; margin: 8px 0 0; }
+.formula-studio .assistance-results { padding: 14px; border: 1px solid var(--studio-line); background: var(--studio-subtle); }
+.formula-studio .assistance-results p, .formula-studio .assistance-note { font-size: 14px; color: var(--studio-muted); }
+.formula-studio .assistance-choice { display: flex; flex-direction: column; gap: 12px; align-items: center; width: 100%; padding: 18px; overflow-x: auto; }
+.formula-studio .assistance-choice math { font-size: 1.35rem; }
+.formula-studio .chemistry-conditions { display: grid; gap: .65rem; margin: .7rem 0; }
+.formula-studio .chemistry-conditions label { display: grid; gap: .3rem; font-size: .84rem; }
+.formula-studio .chemistry-conditions select { width: 100%; min-width: 0; max-width: 100%; white-space: normal; }
+.formula-studio .region-content, .formula-studio summary { transition: color var(--studio-transition), background-color var(--studio-transition), border-color var(--studio-transition), box-shadow var(--studio-transition); }
+.formula-studio[data-input-pending='true'] .export-row { pointer-events: none; opacity: .45; }

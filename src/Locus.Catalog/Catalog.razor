@@ -1,0 +1,65 @@
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+@inject NavigationManager Navigation
+
+@if (Navigation.Uri.Contains("playground=1", StringComparison.Ordinal))
+{
+    <div class="catalog-preview"><EditorShell Host="browser">
+        <Header Context="shell"><StudioHeader Active="@shell.Active" Theme="@shell.Theme" CanUndo="shell.CanUndo" CanRedo="shell.CanRedo" OnNavigate="shell.Navigate" OnHistory="shell.History" OnTheme="shell.ToggleTheme" /></Header>
+    </EditorShell></div>
+}
+else
+{
+    <div class="catalog">
+        <header class="catalog-top"><a href=".">LOCUS° <span>Design system</span></a><span>@CatalogIndex.Version</span><StudioButton id="catalog-theme" OnClick="ToggleTheme">@(theme=="dark"?"Giao diện sáng":"Giao diện tối")</StudioButton></header>
+        <aside class="catalog-nav">
+            <label for="catalog-search">Tìm token / component</label><input id="catalog-search" class="studio-field" @bind="query" @bind:event="oninput" placeholder="accent, nguồn, Button…" />
+            @foreach(var item in sections){<StudioButton aria-current="@(section==item.Id?"page":null)" OnClick="()=>section=item.Id">@item.Title</StudioButton>}
+            <p>Thay giá trị tại source chuẩn; catalog đọc lại chính CSS và component của sản phẩm.</p>
+            <a href="docs/README.md" target="_blank">Hướng dẫn bảo trì ↗</a>
+            <a href="docs/SOURCES.md" target="_blank">Nguồn thiết kế ↗</a>
+            <a href="docs/CT4-VERIFICATION.md" target="_blank">Kết quả kiểm CT4 ↗</a>
+        </aside>
+        <main class="catalog-main">
+            @if(section=="tokens"){
+                <h1>Palette &amp; tokens</h1><p>Giá trị lấy từ CSS đang chạy. Độ tương phản là màu này trên nền paper hiện tại, không phải kết luận mọi cặp màu đều đạt chuẩn.</p>
+                <TokenCatalog Theme="@theme" Query="@query" />
+            }else if(section=="type"){
+                <h1>Typography &amp; foundations</h1><p>Font Việt được đóng gói local; Newsreader / Inter / JetBrains Mono. Không gọi Google Fonts.</p>
+                <div class="type-specimen serif"><span>Newsreader · hero 2.7rem / 1.25</span><h2>Natural text to vector formulas.</h2><p>Đường tròn, phương trình và những dấu hỏi — ă â ê ô ơ ư đ.</p></div>
+                <div class="type-specimen sans"><span>Inter · body 14px / 1.5</span><p>Nhập tự nhiên hoặc dán văn bản. Giữ nguyên nguồn và quyền quyết định.</p></div>
+                <div class="type-specimen mono"><span>JetBrains Mono · input 14px / 1.625 · control 11px</span><p>lc[x mũ 2 + 1] · H2+O2= · 0 O o · 1 I l · − + =</p></div>
+                <h2>Khoảng cách / motion / bố cục</h2><TokenCatalog Theme="@theme" Query="@query" FoundationsOnly="true" />
+                <p>Breakpoint: dưới 768px chuyển nguồn/kết quả thành một cột; dưới 640px dùng header compact và hero 1.8rem. Các mốc CSS được kiểm trong preview iframe.</p>
+                <p>Control 150ms; theme 200ms; toast 300ms. prefers-reduced-motion bỏ chuyển động. Dùng Tab để kiểm focus, giữ chuột để kiểm active.</p>
+            }else if(section=="components"){
+                <h1>Component catalog</h1><p>Các mẫu bên dưới render trực tiếp thư viện. API lấy từ Parameter của component; không có bản HTML mô phỏng thứ hai.</p>
+                <ControlSpecimens />
+                @foreach(var entry in CatalogIndex.Components.Where(Matches)){
+                    <article class="component-entry"><h2>@entry.Role <code>@entry.Type.Name</code></h2><p>@entry.Usage</p><p><strong>Trạng thái:</strong> @entry.States</p><p><strong>Source:</strong> <code>@entry.Source</code><br /><strong>Styles:</strong> <code>@entry.Styles</code></p>
+                        <details><summary>Đầu vào và sự kiện thật</summary><ul>@foreach(var property in entry.Type.GetProperties().Where(p=>Attribute.IsDefined(p,typeof(ParameterAttribute)))){<li><code>@property.Name</code> — @property.PropertyType.Name</li>}</ul></details>
+                    </article>
+                }
+            }else if(section=="patterns"){
+                <h1>Trạng thái Công thức</h1><p>Mẫu dùng FormulaSession và các component sản phẩm. Bản xem này có phiên tạm riêng; lệnh trong mẫu không đổi tài liệu đang làm trên Web.</p>
+                <label for="pattern-state">Chọn trạng thái</label><select id="pattern-state" class="studio-select" @bind="pattern">@foreach(var state in FormulaPattern.States){<option value="@state.Id">@state.Label</option>}</select>
+                <FormulaPattern @key="pattern" State="@pattern" />
+            }else{
+                <h1>Preview tương tác / responsive</h1><p>Editor thật trong iframe, origin catalog riêng. Thử nhập, chọn, cân bằng, giữ text và Undo. Preview không tự đồng bộ với website hay ứng dụng Windows.</p>
+                <label for="preview-width">Khung xem</label><select id="preview-width" class="studio-select" @bind="width"><option value="1280">Web rộng · 1280px</option><option value="720">Web hẹp · 720px</option><option value="390">Compact · 390px</option></select>
+                <div class="preview-scroll"><iframe title="Preview Công thức thật" src="?playground=1" style="width:@(width)px" height="960"></iframe></div>
+                <p>Compact chỉ đối chiếu layout. Kiểm native Windows, clipboard và bộ cài thuộc nghiệm thu Desktop riêng.</p>
+            }
+        </main>
+    </div>
+}
+
+@code {
+    private string section="tokens",query="",theme="light",pattern="single",width="1280";
+    private IJSObjectReference? module;
+    private static readonly (string Id,string Title)[] sections=[("tokens","01 · Palette / tokens"),("type","02 · Typography / layout"),("components","03 · Components / API"),("patterns","04 · Trạng thái Công thức"),("preview","05 · Preview tương tác")];
+    private bool Matches(CatalogComponent entry)=>(entry.Role+entry.Type.Name+entry.Usage+entry.Source).Contains(query,StringComparison.OrdinalIgnoreCase);
+    protected override async Task OnAfterRenderAsync(bool first){if(!first)return;module=await Js.InvokeAsync<IJSObjectReference>("import","./_content/Locus.DesignSystem/theme.js");theme=await module.InvokeAsync<string>("current");StateHasChanged();}
+    private async Task ToggleTheme(){if(module!=null)theme=await module.InvokeAsync<string>("apply",theme=="dark"?"light":"dark");}
+    public async ValueTask DisposeAsync(){if(module!=null)await module.DisposeAsync();}
+}

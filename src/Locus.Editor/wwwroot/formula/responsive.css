@@ -1,0 +1,23 @@
+@media (max-width: 767px) {
+  .formula-studio .studio-editor-frame { grid-template-columns: minmax(0,1fr); }
+  .formula-studio .result-card { border-left: 0; border-top: 1px solid var(--studio-line); }
+  .formula-studio .mixed-result math { font-size: var(--studio-size-formula-compact); }
+  .formula-studio .studio-shelf { gap: var(--studio-space-3); }
+}
+@media (max-width: 639px) {
+  .locus-app.formula-studio { padding: 20px 16px 0; }
+  .formula-studio .studio-intro h1 { font-size: var(--studio-size-hero-compact); }
+  .formula-studio .studio-intro p { font-size: var(--studio-size-label); }
+  .formula-studio .detection-options { width: 100%; flex-wrap: wrap; }
+  .formula-studio .detection-options button { padding: 6px 9px; flex-grow: 1; }
+  .formula-studio .detection-options button:last-child { border-top: 1px solid var(--studio-line); }
+  .formula-studio #source { font-size: var(--studio-size-label); }
+  .formula-studio .input-foot { gap: var(--studio-space-1); font-size: var(--studio-size-caption); }
+  .formula-studio .input-foot > span:last-child { font-size: var(--studio-size-micro); }
+  .formula-studio .marker-profiles { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .formula-studio .studio-scope-actions button { font-size: var(--studio-size-caption); }
+  .formula-studio .studio-primary { margin-left: 0; }
+  .formula-studio .export-row { gap: 6px; }
+  .formula-studio .studio-footer { margin-top: 32px; }
+}
+@media (prefers-reduced-motion: reduce) { .formula-studio *, .studio-header * { transition: none; animation: none; } }

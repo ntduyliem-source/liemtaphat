@@ -1,13 +1,17 @@
-<link rel="stylesheet" href="_content/Locus.Editor/web1.css" />
-<link rel="stylesheet" href="_content/Locus.Editor/ux1.css" />
-<link rel="stylesheet" href="_content/Locus.Editor/plot.css" />
-<link rel="stylesheet" href="_content/Locus.Editor/geometry.css" />
-<div class="tab-strip" role="tablist" aria-label="Editor"><button id="editor-tab" role="tab" aria-selected="@(active=="formula")" @onclick='()=>Switch("formula")'>ƒ Công thức</button><button id="plot-tab" role="tab" aria-selected="@(active=="plot")" @onclick='()=>Switch("plot")'>⌁ Đồ thị</button><button id="geometry-tab" role="tab" aria-selected="@(active=="geometry")" @onclick='()=>Switch("geometry")'>△ Hình học</button>@if(active=="formula"&&opened&&DesktopWindow==null){<button id="close-editor-tab" aria-label="Đóng tab công thức" @onclick="CloseFormula">×</button>}</div>
-@if(active=="plot"){<PlotWorkspace @ref="plotView" Host="@Host" DesktopWindow="@DesktopWindow" />}
-else if(active=="geometry"){<GeometryWorkspace @ref="geometryView" Host="@Host" DesktopWindow="@DesktopWindow" />}
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+@inject FormulaWorkspace FormulaModel
+<link rel="stylesheet" href="_content/Locus.Editor/formula.css" />
+<link rel="stylesheet" href="_content/Locus.Editor/legacy.css" />
+@Header?.Invoke(new(active,theme,FormulaModel.Session.CanUndo,FormulaModel.Session.CanRedo,Switch,FormulaHistory,ToggleTheme))
+<div id="studio-content">
+@if(active=="plot"){<div class="legacy-editors"><PlotWorkspace @ref="plotView" Host="@Host" DesktopWindow="@DesktopWindow" /></div>}
+else if(active=="geometry"){<div class="legacy-editors"><GeometryWorkspace @ref="geometryView" Host="@Host" DesktopWindow="@DesktopWindow" /></div>}
 else if(opened){<Workspace @ref="formulaView" Host="@Host" DesktopWindow="@DesktopWindow" />}
 else{<div class="closed-tab"><h1>Phiên công thức vẫn được giữ.</h1><p>Mở lại tab để tiếp tục. Nháp được giữ trên thiết bị nếu bạn đã bật tự lưu; tệp .locus giúp giữ bản sao riêng.</p><button id="reopen-editor-tab" @onclick="()=>opened=true">Mở lại công thức</button></div>}
+</div>
 @code{
+    [Parameter, EditorRequired] public RenderFragment<StudioShellState>? Header { get; set; }
     [Parameter] public string Host {get;set;}="browser";
     [Parameter] public Locus.Application.IEditorWindow? DesktopWindow {get;set;}
     private bool opened=true;
@@ -16,6 +20,22 @@ else{<div class="closed-tab"><h1>Phiên công thức vẫn được giữ.</h1><
     private PlotWorkspace? plotView;
     private GeometryWorkspace? geometryView;
     private bool switching;
+    private string theme="light";
+    private IJSObjectReference? themeModule;
+    protected override void OnInitialized()=>FormulaModel.Session.Changed+=FormulaChanged;
+    private void FormulaChanged()=>_=InvokeAsync(StateHasChanged);
+    private async Task FormulaHistory(bool redo){if(formulaView!=null)await formulaView.StudioHistory(redo);}
+    protected override async Task OnAfterRenderAsync(bool first)
+    {
+        if(!first)return;
+        themeModule=await Js.InvokeAsync<IJSObjectReference>("import","./_content/Locus.DesignSystem/theme.js");
+        theme=await themeModule.InvokeAsync<string>("current");StateHasChanged();
+    }
+    private async Task ToggleTheme()
+    {
+        if(themeModule!=null)theme=await themeModule.InvokeAsync<string>("apply",theme=="dark"?"light":"dark");
+    }
+    public async ValueTask DisposeAsync(){FormulaModel.Session.Changed-=FormulaChanged;if(themeModule!=null)try{await themeModule.DisposeAsync();}catch(JSException){}}
     private async Task<bool> CanLeave()=>active switch
     {
         "formula"=>!opened||formulaView==null||await formulaView.CanLeaveAsync(),

@@ -1,20 +1,35 @@
 using Locus.Application;
 using Locus.Core.Assistance;
-using Locus.Core.Export;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace Locus.Editor;
 
 public partial class Workspace
 {
-    private bool showDropProducts;
     private void BalanceChanged(){if(!disposed)_=InvokeAsync(StateHasChanged);}
-    private async Task RefreshWand()
+    private Task RefreshWand()
     {
         session.SetBalanceSelection(resultSelection);
-        await session.RefreshBalanceAsync();
+        return Task.CompletedTask;
     }
-    private async Task BalanceStep(){await session.BalanceStepAsync();await RenderCurrent();QueuePersist();}
+    private async Task BalanceStep()
+    {
+        if(module==null||!ready)return;
+        await module.InvokeVoidAsync("settleInput",sourceElement);
+        if(session.IsComposing||session.IsBalancing)return;
+        debounce?.Cancel();
+        if(!session.State.HasResult)await AnalyzeAndRender();
+        if(!CanStudioBalance)return;
+        var selectionTicket=selectionEpoch;
+        var command=session.StudioCommand(StudioHasBalance?StudioChemistryAction.CancelBalance:StudioChemistryAction.Balance,StudioTargetIds);
+        await session.RunStudioChemistryAsync(command,async()=>
+        {
+            var stamp=await module.InvokeAsync<EditorInputStamp>("inputStamp",sourceElement);
+            return selectionTicket==selectionEpoch&&!stamp.Composing&&!stamp.Pending&&stamp.Raw==session.State.Raw;
+        });
+        await RenderCurrent();QueuePersist();
+    }
     private async Task BalanceBatch(bool cancel){await session.BalanceBatchAsync(cancel);await RenderCurrent();QueuePersist();}
     private async Task AutoBalanceChanged(ChangeEventArgs args)
     {
@@ -23,7 +38,15 @@ public partial class Workspace
     }
     private async Task DropProducts()
     {
-        if(ActiveContentRegion is {} region&&session.DropContentProducts(region.Id)){showDropProducts=false;await RenderCurrent();alternatives=true;QueuePersist();}
+        if(module==null)return;
+        await module.InvokeVoidAsync("settleInput",sourceElement);
+        if(!CanDropProducts||SelectedSingleRegion is not {} region)return;
+        var ticket=selectionEpoch;
+        await session.RunStudioChemistryAsync(session.StudioCommand(StudioChemistryAction.DropProducts,[region.Id]),async()=>
+        {
+            var stamp=await module.InvokeAsync<EditorInputStamp>("inputStamp",sourceElement);
+            return ticket==selectionEpoch&&!stamp.Composing&&!stamp.Pending&&stamp.Raw==session.State.Raw;
+        });
+        await RenderCurrent();QueuePersist();
     }
-    private static string BeforeBalanceMathMl(ContentRegion region)=>region.ResultOverride?.BalanceBefore?.Candidate is {} before?CandidateExporter.ToMathMl(before):region.Selected is {} candidate?CandidateExporter.ToMathMl(candidate):"";
 }

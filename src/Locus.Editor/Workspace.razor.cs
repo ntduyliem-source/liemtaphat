@@ -12,9 +12,8 @@ public partial class Workspace
     private CancellationTokenSource? persistDelay;
     private readonly CancellationTokenSource lifetime = new();
     private DraftItem[] drafts = [];
-    private bool contextMenu, updateAvailable;
+    private bool updateAvailable;
     private string appStatus = "Đang chuẩn bị bản offline…";
-    private string? fallbackFormat;
     private sealed record DraftItem(string Id, string Label);
     private sealed record LocalStartup(string Id, string? Preferences, string? Document, string? Raw, string Error, DraftItem[] Drafts);
     private sealed record DraftRead(string? Document, string? Raw);
@@ -47,6 +46,8 @@ public partial class Workspace
                 Model.DraftStatus = state.Error.Length > 0 ? state.Error : state.Document != null || state.Raw != null ? "Đã phục hồi nháp trên thiết bị." : "Nháp lưu riêng cho tab này.";
                 Model.Initialized = true;
             }
+            // Studio exposes deliberate balancing only; a hidden legacy preference must not alter new input.
+            session.SetAutoBalance(false);
             UpgradeMarkers();
             await SavePreferences();
             await module!.InvokeVoidAsync("setSource", sourceElement, session.State.Raw);
@@ -139,7 +140,7 @@ public partial class Workspace
             case "redo": await History(true); break;
             case "analyze": debounce?.Cancel(); await AnalyzeAndRender(); break;
             case "save": await SaveDocument(); break;
-            case "dismiss": contextMenu = false; alternatives = false;ghostDismissedVersion=session.Version;preparedGhost=null; session.DismissAssistance(); StateHasChanged(); break;
+            case "dismiss": ghostDismissedVersion=session.Version;preparedGhost=null; session.DismissAssistance(); StateHasChanged(); break;
             default:
                 if (command.StartsWith("candidate") && int.TryParse(command[9..], out var index) && !session.IsBusy && session.State.Region is {} region && index >= 1 && index <= region.Candidates.Count)
                     await Choose(session.State.Region.Candidates[index - 1].Id);

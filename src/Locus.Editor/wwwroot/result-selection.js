@@ -2,6 +2,7 @@ const bindings=new WeakMap();
 export function wireResult(root,reference){
   bindings.get(root)?.();const abort=new AbortController(),signal=abort.signal;let serial=0;
   const parent=node=>node?.nodeType===Node.ELEMENT_NODE?node:node?.parentElement;
+  const clear=()=>reference.invokeMethodAsync('ResultSelectionChanged',root.closest('.locus-app').dataset.version,0,0,[]).catch(()=>{});
   function endpoint(node,offset,end){
     const element=parent(node),region=element?.closest('.result-region');
     if(region&&root.contains(region)){
@@ -50,15 +51,23 @@ export function wireResult(root,reference){
   root.addEventListener('pointerup',()=>queueMicrotask(read),{signal});
   root.addEventListener('keyup',event=>{if(event.shiftKey||event.key.startsWith('Arrow'))read();},{signal});
   root.addEventListener('keydown',event=>{
+    if(event.key==='Escape'){
+      event.preventDefault();event.stopPropagation();document.getSelection()?.removeAllRanges();clear();return;
+    }
     if((event.key==='Enter'||event.key===' ')&&event.target.matches('.region-content')){
       event.preventDefault();event.target.click();return;
     }
     if((event.ctrlKey||event.metaKey)&&!event.altKey&&event.key.toLowerCase()==='a'){
       event.preventDefault();const range=document.createRange();range.selectNodeContents(root);
-      const selection=document.getSelection();selection.removeAllRanges();selection.addRange(range);read();
+      const selection=document.getSelection();selection.removeAllRanges();selection.addRange(range);
+      reference.invokeMethodAsync('ResultSelectAll',root.closest('.locus-app').dataset.version).catch(()=>{});
     }
   },{signal});
-  root.addEventListener('click',event=>{const selected=document.getSelection();if(!event.target.closest('button')&&selected&&!selected.isCollapsed&&root.contains(selected.anchorNode)){event.stopPropagation();}},{signal,capture:true});
+  root.addEventListener('click',event=>{
+    const selected=document.getSelection();
+    if(!event.target.closest('button')&&selected&&!selected.isCollapsed&&root.contains(selected.anchorNode)){event.stopPropagation();return;}
+    if(!event.target.closest('.result-region'))clear();
+  },{signal,capture:true});
   const observer=new MutationObserver(()=>{if(!root.isConnected){abort.abort();observer.disconnect();bindings.delete(root);}});observer.observe(document.body,{subtree:true,childList:true});
   bindings.set(root,()=>{abort.abort();observer.disconnect();});
 }

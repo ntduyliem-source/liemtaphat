@@ -1,9 +1,10 @@
+using Locus.Web;
 using Locus.Application;
 using Locus.Editor;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
-builder.RootComponents.Add<EditorShell>("#app");
+builder.RootComponents.Add<WebShell>("#app");
 builder.Services.AddScoped<IAnalysisScheduler, BrowserAnalysisScheduler>();
 builder.Services.AddScoped<FormulaWorkspace>();
 builder.Services.AddScoped<PlotSession>();

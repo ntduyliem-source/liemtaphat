@@ -1,0 +1,57 @@
+@implements IDisposable
+@inject IAnalysisScheduler Scheduler
+<div class="formula-studio catalog-pattern">
+    <FormulaDetectionBar Ready="ready" IsComposing="composing" CanBalance="@(ready&&!busy&&!composing&&State!="partial"&&session?.CanRunStudioBalance==true)" IsBalancing="@(session?.IsBalancing==true)"
+        CanDropProducts="@(selected?.ResultOverride?.ProductProposal!=null&&!FormulaSession.HasManagedCoefficientChange(selected))" OnDropProducts="DropProducts"
+        BalanceLabel="@(session?.HasStudioBalance()==true?"Hủy cân bằng":"Cân bằng phương trình hóa học")" OnBalance="Balance" IsSelected='m=>m==(State=="chemistry-ghost"?"math":"all")' />
+    <div class="studio-editor-frame">
+        <FormulaSourcePanel Raw="@raw" Ready="false" IsBusy="busy" IsComposing="composing" WordCount="@raw.Split((char[]?)null,StringSplitOptions.RemoveEmptyEntries).Length" />
+        <section class="result-card">
+            <div class="card-heading"><h2>Kết quả mẫu</h2><span role="status">@(busy?"Đang nhận diện":composing?"Đang ghép dấu":"Phiên catalog")</span></div>
+            <FormulaResult Raw="@raw" Content="session?.State.Content" Revision="@(session?.State.SourceRevision??0)" IsBusy="busy" IsComposing="composing" WholeDocumentSelected="article" SelectedIds="@(!busy&&!composing&&selectedId is {} id?new[]{id}:[])" OnSelect="Select" />
+            <FormulaSuggestions SelectedRegion="@(busy||composing?null:selected)" IsComposing="composing" IsBusy="busy" OnChoose="Choose" OnKeepText="KeepText" />
+        </section>
+    </div>
+    <FormulaExportBar ScopeLabel="Xuất trong mẫu catalog" AllSelected="article" IsEmpty="@(raw.Length==0)" IsBusy="busy" IsComposing="composing" CanExportImage="@(raw.Length>0&&!busy&&!composing&&State!="partial")"
+        OnSelectAll="()=>article=!article" OnImage="NotifyExport" />
+    @if(message.Length>0){<p class="notice" role="status">@message</p>}
+    <div class="studio-markers"><MarkerSettingsEditor Settings="@(session?.State.Settings??new())" Expanded="true" Disabled="composing" OnApply="ApplyMarkers" /></div>
+</div>
+@code {
+    [Parameter] public string State {get;set;}="single";
+    public static readonly (string Id,string Label)[] States=[("empty","Trống"),("single","Công thức đơn"),("mixed","Đoạn hỗn hợp"),("all","Chọn tất cả"),("partial","Chọn dở công thức"),("ambiguous","Gợi ý phạm vi phân số"),("root","Gợi ý phạm vi căn"),("repair","Ngoặc thiếu"),("kept","Giữ text gốc"),("composing","Đang ghép dấu IME"),("busy","Đang nhận diện"),("chemistry-ghost","Hóa ghost ở Toán"),("chemistry","Hóa trước cân bằng"),("balanced","Hóa sau cân bằng"),("products","Chỉ tự điền sản phẩm"),("already-balanced","Hệ số gõ đã cân bằng"),("export-error","Lỗi xuất"),("export-limit","Vượt trần PNG")];
+    private FormulaSession? session;
+    private bool ready,busy,composing,article;
+    private string raw="",message="";
+    private Guid? selectedId;
+    private ContentRegion? selected=>session?.State.Content?.Regions.FirstOrDefault(r=>r.Id==selectedId);
+    protected override async Task OnInitializedAsync()
+    {
+        raw=State switch {
+            "empty"=>"", "mixed"=>"Bài hôm nay: lc[x mũ 2 + 1].\nXét hoa-[H2+O2=H2O]. Giữ nguyên câu này.",
+            "ambiguous"=>"x^2+1/2", "root"=>"can x-1", "repair"=>"(x+1", "chemistry" or "balanced"=>"H2+O2=", "products"=>"HCl+NaOH=", "already-balanced"=>"2H2+O2=2H2O", _=>"x mũ 2 + 1"
+        };
+        session=new(Scheduler);
+        session.Configure(new(EnabledDomains:State=="chemistry-ghost"?DetectionDomains.Math:DetectionDomains.All));
+        session.UpdateSource(raw);
+        await session.AnalyzeContentAsync();
+        if(State is "balanced" or "products" or "already-balanced")await session.StudioBalanceAsync();
+        article=State=="all";
+        selectedId=session.State.Content?.Regions.FirstOrDefault()?.Id;
+        if(State=="kept" && selectedId is {} id)session.KeepContentText(id,true);
+        busy=State=="busy";composing=State=="composing";
+        if(State=="export-error")message="Chưa copy được ảnh. Nguồn và công thức vẫn được giữ; có thể tải tệp.";
+        if(State=="export-limit")message="Ảnh PNG vượt giới hạn 24 triệu pixel hoặc 32.767 px mỗi cạnh. Chọn SVG hoặc một đoạn ngắn hơn.";
+        if(State=="partial")message="Chọn trọn công thức để cân bằng hoặc xuất ảnh.";
+        ready=true;
+    }
+    private void Select(Guid id){article=false;selectedId=id;session?.FocusContentRegion(id);}
+    private void Choose(string id){if(session!=null && selectedId is {} region){session.FocusContentRegion(region);session.Select(session.State.RegionIndex,id);}}
+    private void KeepText(){if(selected is {} region)session?.KeepContentText(region.Id,!region.KeepText);}
+    private async Task Balance(){if(session!=null)await session.StudioBalanceAsync();message=session?.BalanceMessage??"";}
+    private async Task DropProducts(){if(session!=null&&selected is {} r)await session.RunStudioChemistryAsync(session.StudioCommand(StudioChemistryAction.DropProducts,[r.Id]));}
+    private void ApplyMarkers(FormulaSettings settings){session?.Configure(settings);}
+    private void Notify()=>message="Mẫu chỉ minh họa trạng thái xuất. Dùng Preview tương tác để tạo tệp thật.";
+    private void NotifyExport(FormulaImageRequest _)=>Notify();
+    public void Dispose()=>session?.Dispose();
+}

@@ -7,7 +7,8 @@ using Locus.Core.Detection;
 namespace Locus.Application;
 
 public sealed record AssistanceCondition(string Key,string Value);
-public sealed record ChemistryAssistanceRequest(AnalysisRequest Input,int RegionStart,AssistanceCondition[] Conditions);
+public sealed record ChemistryAssistanceRequest(AnalysisRequest Input,int RegionStart,AssistanceCondition[] Conditions,
+    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingDefault)] bool UseUniqueCatalogConditions=false);
 public sealed record ChemistryConditionOption(string Value,string Label);
 public sealed record ChemistryConditionChoice(string Key,string Label,ChemistryConditionOption[] Options);
 public sealed record ChemistryRuleInfo(string Id,string Title,string Scope,string Exclusions,string[] References,AssistanceCondition[] Conditions);
@@ -56,7 +57,19 @@ public static class ChemistryAssistanceWire
             region=new(source,new(0,source.Raw.Length),new(0,source.Raw.Length));
         }
         var result=ChemistryAssistance.Analyze(region,context,domains,token);
-        return new(source.Id,source.Revision,context.Id,result.Status,result.Message,result.Proposals.Select(AssistanceSerializer.Serialize).ToArray(),result.Draft==null?null:AssistanceSerializer.SerializeDraft(result.Draft),
+        string? assumedScope=null;
+        // Only the explicit fill-and-balance command opts in. Ghost suggestions still require user conditions.
+        if(request.UseUniqueCatalogConditions&&result.Status=="needs-conditions")
+        {
+            var compatible=result.MatchedRules.Where(r=>context.Conditions.All(c=>r.Conditions.Any(f=>f.Key==c.Key&&f.Value==c.Value))).ToArray();
+            if(compatible.Length==1&&!compatible[0].IsNoReaction)
+            {
+                context=AssistanceHistory.Context(input.Settings,compatible[0].Conditions);
+                assumedScope=compatible[0].Scope;
+                result=ChemistryAssistance.Analyze(region,context,domains,token);
+            }
+        }
+        return new(source.Id,source.Revision,context.Id,result.Status,assumedScope==null?result.Message:"Điền theo trường hợp: "+assumedScope,result.Proposals.Select(AssistanceSerializer.Serialize).ToArray(),result.Draft==null?null:AssistanceSerializer.SerializeDraft(result.Draft),
             result.ConditionChoices.Count==0?null:result.ConditionChoices.Select(d=>new ChemistryConditionChoice(d.Key,d.Label,d.Options.Select(o=>new ChemistryConditionOption(o.Value,o.Label)).ToArray())).ToArray(),
             result.MatchedRules.Count==0?null:result.MatchedRules.Select(r=>new ChemistryRuleInfo(r.Id,r.Title,r.Scope,r.Exclusions,r.References.ToArray(),r.Conditions.Select(c=>new AssistanceCondition(c.Key,c.Value)).ToArray())).ToArray());
         ChemistryAssistanceResponse Reply(string status,string message)=>new(source.Id,source.Revision,context.Id,status,message,[],null);

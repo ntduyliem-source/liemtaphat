@@ -1,0 +1,26 @@
+<div class="studio-suggestions" aria-label="Ý bạn là">
+                    <span class="suggestion-label">Ý BẠN LÀ:</span>
+                    <div class="suggestion-chips candidate-list">
+                        @if(SelectedRegion is {} selectedRegion){
+                            @if(selectedRegion.Readings is {} suggestions){
+                                @foreach(var choice in suggestions.Candidates.Where(c=>c.Kind!="direct"&&c.Id!=selectedRegion.Display?.Id)){
+                                    <StudioButton Class="suggestion-chip" Disabled="Disabled" aria-label="@CandidateLabels.Explanation(choice)" title="@CandidateLabels.Explanation(choice)" OnClick="()=>OnChoose.InvokeAsync(choice.Id)">@((MarkupString)CandidateExporter.ToMathMl(choice))</StudioButton>
+                                }
+                                @if(selectedRegion.Display?.Kind is "repair" or "interpretation"){
+                                    var direct=suggestions.Candidates.FirstOrDefault(c=>c.Kind=="direct");
+                                    <StudioButton id="restore-direct" Disabled="Disabled" OnClick="()=>direct!=null?OnChoose.InvokeAsync(direct.Id):OnKeepText.InvokeAsync()">@(direct!=null?"Theo cú pháp đã gõ":"Trở về text gốc")</StudioButton>
+                                }
+                            }
+                            <span class="suggestion-context-actions"><StudioButton id="keep-region-text" Disabled="Disabled" OnClick="()=>OnKeepText.InvokeAsync()">@(selectedRegion.KeepText?"Dựng lại":"Giữ text gốc")</StudioButton></span>
+                        }else{<span class="suggestion-empty">Chọn một công thức để xem cách hiểu khác, nếu có.</span>}
+                    </div>
+                </div>
+
+@code {
+    [Parameter] public ContentRegion? SelectedRegion { get; set; }
+    [Parameter] public bool IsComposing { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    private bool Disabled => IsBusy || IsComposing;
+    [Parameter] public EventCallback<string> OnChoose { get; set; }
+    [Parameter] public EventCallback OnKeepText { get; set; }
+}

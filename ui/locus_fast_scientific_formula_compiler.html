@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOCUS — Fast Scientific Formula Compiler</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Newsreader (Serif), JetBrains Mono, Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+
+  <!-- KaTeX & MhChem Extension -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/mhchem.min.js"></script>
+
+  <!-- html2canvas dùng để xuất ảnh PNG chất lượng cao và Copy to Clipboard -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            paper: '#FBFBF9',
+            paperDark: '#0E0E0D',
+            surfaceDark: '#161614',
+            surfaceLight: '#FFFFFF',
+            subtle: '#F4F4F0',
+            subtleDark: '#1E1E1B',
+            borderline: '#E5E5DE',
+            borderlineDark: '#282824',
+            ink: '#0D0D0D',
+            inkDark: '#F3F3ED',
+            muted: '#686862',
+            mutedDark: '#8E8E87',
+            terracotta: '#E8590C',
+            terracottaLight: '#FFF4ED',
+            terracottaDark: '#2C170B'
+          },
+          fontFamily: {
+            serif: ['Newsreader', 'Georgia', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      transition: background-color 0.2s ease, color 0.2s ease;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .katex-display {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .katex {
+      font-size: 1.85rem !important;
+      text-rendering: geometricPrecision;
+    }
+
+    @media (max-width: 768px) {
+      .katex {
+        font-size: 1.35rem !important;
+      }
+    }
+
+    /* Đảm bảo KaTeX kế thừa màu chữ trong Dark Mode */
+    .dark .katex {
+      color: #F3F3ED !important;
+    }
+
+    /* Thanh cuộn tối giản */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D3D3C9;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #383832;
+    }
+
+    @keyframes subtlePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.9); }
+    }
+    .pulse-dot {
+      animation: subtlePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-paper dark:bg-paperDark text-ink dark:text-inkDark selection:bg-terracotta selection:text-white">
+
+  <!-- Dải màu nhấn thương hiệu sắc sảo trên đầu trang -->
+  <div class="h-[2.5px] w-full bg-terracotta"></div>
+
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-16 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 bg-black dark:bg-[#1E1E1C] text-white px-5 py-3 border border-zinc-700 dark:border-zinc-600 shadow-2xl font-mono text-xs">
+    <span class="w-2 h-2 bg-terracotta inline-block"></span>
+    <span id="toast-message">Thông báo</span>
+  </div>
+
+  <div>
+    <header class="border-b border-borderline dark:border-borderlineDark text-xs font-mono select-none sticky top-0 bg-paper/95 dark:bg-paperDark/95 backdrop-blur-sm z-40">
+      <div class="max-w-7xl mx-auto flex items-stretch">
+        
+        <!-- Logo Locus -->
+        <a href="#" class="px-5 sm:px-6 py-4 border-r border-borderline dark:border-borderlineDark flex items-center gap-3 font-semibold tracking-wider hover:bg-subtle dark:hover:bg-subtleDark transition group">
+          <div class="relative w-4 h-4 border border-terracotta flex items-center justify-center bg-terracotta/10">
+            <div class="w-1.5 h-1.5 bg-terracotta"></div>
+          </div>
+          <span>LOCUS<span class="text-terracotta font-bold">°</span></span>
+        </a>
+
+        <!-- Theme Toggle (Dark / Light) -->
+        <div class="flex items-stretch ml-auto">
+          <button id="theme-toggle" onclick="toggleTheme()" class="px-5 py-4 border-l border-borderline dark:border-borderlineDark hover:bg-subtle dark:hover:bg-subtleDark hover:text-terracotta dark:hover:text-terracotta transition flex items-center gap-2 text-muted dark:text-mutedDark font-mono text-xs">
+            <span id="theme-icon" class="text-terracotta">☾</span>
+            <span id="theme-label" class="hidden sm:inline">DARK MODE</span>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <section class="max-w-4xl mx-auto px-6 pt-14 pb-8 text-center">
+      <!-- Tiêu đề Serif lớn phong cách Editorial -->
+      <h1 class="text-3xl sm:text-5xl md:text-6xl font-serif tracking-tight text-ink dark:text-inkDark mb-4 leading-[1.12]">
+        Natural text to <span class="underline decoration-terracotta decoration-2 underline-offset-8">vector formulas</span>.
+      </h1>
+
+      <p class="text-muted dark:text-mutedDark text-xs sm:text-sm max-w-xl mx-auto font-sans leading-relaxed mb-6">
+        Gõ tiếng Việt hoặc ký hiệu tự nhiên thông thường. Locus tự động biên dịch sang công thức Toán, Lý, Hóa chuẩn xác, sao chép ảnh hoặc xuất file vector tức thì.
+      </p>
+
+      <!-- Bộ lọc Chế độ nhận diện (All / Math / Physics / Chem) -->
+      <div class="inline-flex border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark p-1 shadow-sm font-mono text-xs">
+        <button id="btn-mode-all" onclick="setDomainMode('all')" class="domain-btn px-3 sm:px-4 py-1.5 bg-terracotta text-white font-medium shadow-sm transition">
+          ALL DETECT
+        </button>
+        <button id="btn-mode-math" onclick="setDomainMode('math')" class="domain-btn px-3 sm:px-4 py-1.5 text-muted dark:text-mutedDark hover:text-terracotta dark:hover:text-terracotta hover:bg-terracotta/5 transition">
+          TOÁN HỌC
+        </button>
+        <button id="btn-mode-physics" onclick="setDomainMode('physics')" class="domain-btn px-3 sm:px-4 py-1.5 text-muted dark:text-mutedDark hover:text-terracotta dark:hover:text-terracotta hover:bg-terracotta/5 transition">
+          VẬT LÝ
+        </button>
+        <button id="btn-mode-chemistry" onclick="setDomainMode('chemistry')" class="domain-btn px-3 sm:px-4 py-1.5 text-muted dark:text-mutedDark hover:text-terracotta dark:hover:text-terracotta hover:bg-terracotta/5 transition">
+          HÓA HỌC
+        </button>
+      </div>
+
+    </section>
+
+    <section id="playground" class="max-w-6xl mx-auto px-4 sm:px-6 mb-16">
+      <div class="border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark shadow-sm overflow-hidden relative">
+        <!-- Vạch cam điểm nhấn trên đỉnh khung (Lấy cảm hứng từ thẻ Pro trong ảnh mẫu) -->
+        <div class="h-[2px] w-full bg-gradient-to-r from-terracotta via-[#FF7A29] to-terracotta"></div>
+        
+        <!-- Thanh trạng thái khung Input & Output tối giản -->
+        <div class="grid grid-cols-1 md:grid-cols-2 border-b border-borderline dark:border-borderlineDark bg-subtle/50 dark:bg-subtleDark/50 text-xs font-mono text-muted dark:text-mutedDark">
+          
+          <!-- Header Bên Trái -->
+          <div class="px-5 py-3 border-b md:border-b-0 md:border-r border-borderline dark:border-borderlineDark flex items-center justify-between">
+            <span class="tracking-wider flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-terracotta inline-block"></span>
+              INPUT
+            </span>
+            <span id="detected-domain-tag" class="text-[11px] text-terracotta font-medium flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-terracotta pulse-dot"></span>
+              AUTO: TOÁN HỌC
+            </span>
+          </div>
+
+          <!-- Header Bên Phải -->
+          <div class="px-5 py-3 flex items-center justify-between">
+            <span class="tracking-wider flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-terracotta inline-block"></span>
+              OUTPUT
+            </span>
+            <span class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
+              KATEX VECTOR
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2">
+          
+          <!-- KHUNG TRÁI: Vùng gõ văn bản tự nhiên -->
+          <div class="flex flex-col border-b md:border-b-0 md:border-r border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark relative">
+            <textarea 
+              id="raw-input" 
+              class="w-full h-80 sm:h-96 p-6 text-sm sm:text-base font-mono leading-relaxed bg-transparent focus:outline-none resize-none placeholder:text-zinc-400 dark:placeholder:text-zinc-600 selection:bg-terracotta selection:text-white text-ink dark:text-inkDark"
+              placeholder="Nhập biểu thức tự nhiên hoặc mã LaTeX...&#10;&#10;Toán: tích phân từ 0 đến vô cùng của e mũ -x bình dx&#10;Lý: F = G * m1*m2 / r^2&#10;Hóa: Fe + 4HNO3 -> Fe(NO3)3 + NO + 2H2O"></textarea>
+            
+            <!-- Chân khung Input -->
+            <div class="px-5 py-3 border-t border-borderline dark:border-borderlineDark bg-subtle dark:bg-subtleDark flex items-center justify-between text-xs font-mono text-muted dark:text-mutedDark">
+              <div class="flex items-center gap-4">
+                <span><kbd class="px-1.5 py-0.5 border border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark text-ink dark:text-inkDark text-[10px]">CTRL + ENTER</kbd></span>
+                <span id="char-counter" class="hidden sm:inline">0 ký tự</span>
+              </div>
+              <button onclick="clearInput()" class="hover:text-terracotta transition font-medium">
+                [XÓA TRẮNG]
+              </button>
+            </div>
+          </div>
+
+          <!-- KHUNG PHẢI: Vùng hiển thị kết quả trực quan -->
+          <div class="flex flex-col bg-[#FAF9F5] dark:bg-[#121210] relative">
+            
+            <!-- Vùng hiển thị KaTeX -->
+            <div id="render-viewport" class="w-full h-80 sm:h-96 p-6 flex items-center justify-center overflow-x-auto overflow-y-auto bg-[#FAF9F5] dark:bg-[#121210] select-text">
+              <div id="formula-canvas-wrapper" class="p-8 bg-white dark:bg-[#1A1A17] border border-[#EBEBE3] dark:border-[#2C2C26] shadow-sm max-w-full text-center transition-all relative group">
+                <div class="absolute top-2 right-2 w-1.5 h-1.5 bg-terracotta/40 group-hover:bg-terracotta transition"></div>
+                <div id="formula-output" class="text-ink dark:text-inkDark text-center flex items-center justify-center">
+                  <!-- Công thức KaTeX render tại đây -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Preview mã LaTeX -->
+            <div class="px-5 py-2.5 border-t border-borderline dark:border-borderlineDark bg-white dark:bg-surfaceDark flex items-center justify-between text-xs font-mono">
+              <span class="text-muted dark:text-mutedDark flex items-center gap-1.5 truncate max-w-[240px] sm:max-w-md">
+                <span class="text-terracotta font-bold">$</span> <code id="latex-code-preview" class="text-ink dark:text-inkDark truncate">\int_{0}^{\infty} e^{-x^2} dx = \frac{\sqrt{\pi}}{2}</code>
+              </span>
+              <button onclick="copyLatexCode()" class="text-terracotta hover:underline ml-2 flex-shrink-0 font-medium">
+                COPY LATEX
+              </button>
+            </div>
+
+            <div class="px-5 py-3 border-t border-borderline dark:border-borderlineDark bg-subtle dark:bg-subtleDark flex flex-wrap items-center justify-between gap-3">
+              
+              <!-- Nút tải file vector / PNG -->
+              <div class="flex flex-wrap items-center gap-2">
+                <button onclick="downloadSVG()" class="px-3.5 py-2 bg-white dark:bg-surfaceDark border border-borderline dark:border-borderlineDark text-ink dark:text-inkDark hover:border-terracotta hover:text-terracotta transition font-mono text-xs flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  <span>SVG</span>
+                </button>
+
+                <button onclick="downloadPNG(2)" class="px-3.5 py-2 bg-white dark:bg-surfaceDark border border-borderline dark:border-borderlineDark text-ink dark:text-inkDark hover:border-terracotta hover:text-terracotta transition font-mono text-xs flex items-center gap-1.5">
+                  <span>PNG 2X</span>
+                </button>
+
+                <button onclick="downloadPNG(4)" class="px-3.5 py-2 bg-white dark:bg-surfaceDark border border-borderline dark:border-borderlineDark text-ink dark:text-inkDark hover:border-terracotta hover:text-terracotta transition font-mono text-xs flex items-center gap-1.5">
+                  <span class="font-bold text-[10px] text-terracotta">UHD</span>
+                  <span>PNG 4X</span>
+                </button>
+              </div>
+
+              <!-- Nút CTA chính: Sử dụng màu nền Terracotta rực rỡ và chuyên nghiệp -->
+              <button onclick="copyFormulaImage()" id="btn-copy-image" class="px-5 py-2 bg-terracotta hover:bg-[#d44e08] text-white active:scale-[0.98] transition font-mono text-xs flex items-center gap-2 tracking-wider font-semibold shadow-sm">
+                <span>COPY ẢNH (CLIPBOARD)</span>
+                <span>↗</span>
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="border-t border-borderline dark:border-borderlineDark text-xs font-mono bg-white dark:bg-surfaceDark select-none">
+    <div class="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 bg-terracotta"></div>
+        <span class="font-bold text-ink dark:text-inkDark">LOCUS</span>
+        <span class="text-muted dark:text-mutedDark">— Fast Vector Scientific Typesetting</span>
+      </div>
+      <div class="text-muted dark:text-mutedDark flex items-center gap-5">
+        <span>LATEX</span>
+        <span>MHCHEM</span>
+        <span>SVG / PNG</span>
+        <span class="text-ink dark:text-inkDark font-medium">© 2026 LOCUS LABS</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // State của ứng dụng
+    let currentDomain = 'all'; // 'all' | 'math' | 'physics' | 'chemistry'
+    let currentLatex = '';
+    let debounceTimer = null;
+
+    // Theme Management
+    function initTheme() {
+      const savedTheme = localStorage.getItem('locus_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+        updateThemeUI(true);
+      } else {
+        document.documentElement.classList.remove('dark');
+        updateThemeUI(false);
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('locus_theme', isDark ? 'dark' : 'light');
+      updateThemeUI(isDark);
+      showToast(isDark ? 'Dark Mode' : 'Light Mode');
+    }
+
+    function updateThemeUI(isDark) {
+      const icon = document.getElementById('theme-icon');
+      const label = document.getElementById('theme-label');
+      if (icon) icon.textContent = isDark ? '☼' : '☾';
+      if (label) label.textContent = isDark ? 'LIGHT MODE' : 'DARK MODE';
+    }
+
+    function detectDomain(text) {
+      const lower = text.toLowerCase();
+
+      // Dấu hiệu Hóa học
+      const chemKeywords = [
+        'fe', 'hno3', 'h2so4', 'hcl', 'naoh', 'caco3', 'co2', 'h2o', 'ch3cooh', 'c2h5oh', 
+        'axit', 'bazơ', 'muối', 'este', 'phản ứng', 'oxi hóa', 'kết tủa', 'bay lên', 'loãng', 
+        'ancol', 'mol', 'cân bằng', '->', '<=>'
+      ];
+      const hasChem = chemKeywords.some(kw => lower.includes(kw));
+
+      // Dấu hiệu Vật lý
+      const physKeywords = [
+        'lực', 'vận tốc', 'gia tốc', 'điện trường', 'từ trường', 'vector', 'omega', 
+        'lorentz', 'newton', 'quang điện', 'einstein', 'tần số', 'bước sóng', 'khối lượng', 
+        'con lắc', 'hấp dẫn', 'định luật ohm', 'hbar', 'joule', 'công suất'
+      ];
+      const hasPhys = physKeywords.some(kw => lower.includes(kw));
+
+      // Dấu hiệu Toán học
+      const mathKeywords = [
+        'tích phân', 'đạo hàm', 'vi phân', 'ma trận', 'xích ma', 'căn bậc', 'phân số', 
+        'lim', 'giới hạn', 'vô cùng', 'sin', 'cos', 'tan', 'cot', 'logarit', 'alpha', 'beta', 'theta'
+      ];
+      const hasMath = mathKeywords.some(kw => lower.includes(kw));
+
+      if (hasChem && !hasMath) return 'chemistry';
+      if (hasPhys) return 'physics';
+      if (hasMath) return 'math';
+      if (hasChem) return 'chemistry';
+
+      return 'math';
+    }
+
+    function parseNaturalTextToLatex(text, activeMode) {
+      if (!text || !text.trim()) {
+        return "\\text{Nhập biểu thức để hiển thị...}";
+      }
+
+      let t = text.trim();
+
+      // Nếu đã là mã LaTeX trực tiếp
+      if (t.includes('\\') || t.includes('_{') || t.includes('^{')) {
+        return t;
+      }
+
+      const resolvedDomain = (activeMode === 'all') ? detectDomain(t) : activeMode;
+      updateDetectedBadge(resolvedDomain, activeMode === 'all');
+
+      // 1. HÓA HỌC
+      if (resolvedDomain === 'chemistry') {
+        let chemExpr = t
+          .replace(/loãng/gi, '')
+          .replace(/đặc/gi, '')
+          .replace(/khí bay lên|\(k\)|bay hơi/gi, ' ^')
+          .replace(/kết tủa|\(r\)/gi, ' v')
+          .replace(/nhiệt độ|đun nóng|t0|t\^0/gi, '[t^\\circ]')
+          .replace(/xúc tác h2so4/gi, '[H2SO4]')
+          .replace(/hai chiều/gi, '<=>')
+          .replace(/tạo thành|tạo ra|suy ra/gi, '->')
+          .replace(/cộng/gi, '+');
+
+        if (!chemExpr.startsWith('\\ce{')) {
+          return `\\ce{${chemExpr}}`;
+        }
+        return chemExpr;
+      }
+
+      // 2. TOÁN HỌC
+      if (resolvedDomain === 'math') {
+        let res = t;
+        res = res.replace(/tích phân từ\s+([^\s]+)\s+đến\s+([^\s]+)\s+của\s+(.*?)\s+d([a-zA-Z])/gi, '\\int_{$1}^{$2} $3 \\, d$4');
+        res = res.replace(/tích phân\s+của\s+(.*?)\s+d([a-zA-Z])/gi, '\\int $1 \\, d$2');
+        res = res.replace(/vô cùng/gi, '\\infty');
+        res = res.replace(/đạo hàm bậc\s*([0-9]+)\s*của\s*([a-zA-Z]+)\s*theo\s*([a-zA-Z]+)/gi, '\\frac{d^{$1} $2}{d$3^{$1}}');
+        res = res.replace(/đạo hàm\s*của\s*([a-zA-Z]+)\s*theo\s*([a-zA-Z]+)/gi, '\\frac{d $1}{d$2}');
+        res = res.replace(/căn bậc hai của\s+(.+)/gi, '\\sqrt{$1}');
+        res = res.replace(/căn\s*\((.*?)\)/gi, '\\sqrt{$1}');
+        res = res.replace(/([a-zA-Z0-9_\^\+\-]+)\s+chia cho\s+([a-zA-Z0-9_\^\+\-]+)/gi, '\\frac{$1}{$2}');
+        res = res.replace(/phân số\s+(.+?)\s+trên\s+(.+)/gi, '\\frac{$1}{$2}');
+        res = res.replace(/lim\s+([a-zA-Z])\s+tiến tới\s+([^\s]+)\s+của\s+(.+)/gi, '\\lim_{$1 \\to $2} $3');
+        res = res.replace(/tổng xích ma từ\s+(.*?)\s+đến\s+(.*?)\s+của\s+(.+)/gi, '\\sum_{$1}^{$2} $3');
+
+        if (res.includes('ma trận') || res.includes('matrix')) {
+          res = res.replace(/ma trận.*?:/gi, '').trim();
+          const rows = res.split(';').map(r => r.trim().split(',').join(' & ')).join(' \\\\ ');
+          return `\\begin{pmatrix} ${rows} \\end{pmatrix}`;
+        }
+
+        res = res.replace(/mũ trừ\s*([a-zA-Z0-9]+)/gi, '^{-$1}');
+        res = res.replace(/mũ\s*([a-zA-Z0-9]+)/gi, '^{$1}');
+        res = res.replace(/bình/gi, '^2');
+        res = res.replace(/pi/gi, '\\pi');
+        res = res.replace(/theta/gi, '\\theta');
+        res = res.replace(/alpha/gi, '\\alpha');
+        res = res.replace(/bằng/gi, '=');
+        res = res.replace(/trên/gi, '/');
+
+        if (res.includes('=')) {
+          const parts = res.split('=');
+          const rhs = parts[1].trim();
+          if (rhs.includes('/') && !rhs.includes('\\frac')) {
+            const fracParts = rhs.split('/');
+            if (fracParts.length === 2) {
+              parts[1] = `\\frac{${fracParts[0].trim()}}{${fracParts[1].trim()}}`;
+              res = parts.join(' = ');
+            }
+          }
+        }
+        return res;
+      }
+
+      // 3. VẬT LÝ
+      if (resolvedDomain === 'physics') {
+        let p = t;
+        p = p.replace(/vector\s+([a-zA-Z])/gi, '\\vec{$1}');
+        p = p.replace(/nhân có hướng/gi, '\\times');
+        p = p.replace(/nhân/gi, '\\cdot');
+        p = p.replace(/thuyết tương đối/gi, '');
+        p = p.replace(/lực lorentz/gi, '');
+        p = p.replace(/căn\((.*?)\)/gi, '\\sqrt{$1}');
+        p = p.replace(/căn\s+([a-zA-Z0-9\/_\-]+)/gi, '\\sqrt{$1}');
+        p = p.replace(/m0/gi, 'm_0');
+        p = p.replace(/v\^2\/c\^2/gi, '\\frac{v^2}{c^2}');
+        p = p.replace(/hbar/gi, '\\hbar');
+        p = p.replace(/omega/gi, '\\omega');
+        p = p.replace(/lambda/gi, '\\lambda');
+        return p;
+      }
+
+      return t;
+    }
+
+    function updateDetectedBadge(domain, isAuto) {
+      const badge = document.getElementById('detected-domain-tag');
+      if (!badge) return;
+      const domainNames = {
+        math: 'TOÁN HỌC',
+        physics: 'VẬT LÝ',
+        chemistry: 'HÓA HỌC'
+      };
+
+      const name = domainNames[domain] || domain.toUpperCase();
+      badge.textContent = isAuto ? `AUTO: ${name}` : `CHẾ ĐỘ: ${name}`;
+    }
+
+    function renderFormula() {
+      const input = document.getElementById('raw-input').value;
+      const outputEl = document.getElementById('formula-output');
+      const previewLatexEl = document.getElementById('latex-code-preview');
+      const counterEl = document.getElementById('char-counter');
+
+      if (counterEl) counterEl.textContent = `${input.length} ký tự`;
+
+      try {
+        const latex = parseNaturalTextToLatex(input, currentDomain);
+        currentLatex = latex;
+        if (previewLatexEl) previewLatexEl.textContent = latex;
+
+        katex.render(latex, outputEl, {
+          displayMode: true,
+          throwOnError: false,
+          output: 'htmlAndMathml'
+        });
+
+      } catch (err) {
+        outputEl.innerHTML = `<span class="text-xs font-mono text-rose-500">[Lỗi KaTeX: ${err.message}]</span>`;
+      }
+    }
+
+    function setDomainMode(mode) {
+      currentDomain = mode;
+      
+      const buttons = {
+        all: document.getElementById('btn-mode-all'),
+        math: document.getElementById('btn-mode-math'),
+        physics: document.getElementById('btn-mode-physics'),
+        chemistry: document.getElementById('btn-mode-chemistry')
+      };
+
+      Object.keys(buttons).forEach(key => {
+        if (!buttons[key]) return;
+        if (key === mode) {
+          buttons[key].className = "domain-btn px-3 sm:px-4 py-1.5 bg-terracotta text-white font-medium shadow-sm transition";
+        } else {
+          buttons[key].className = "domain-btn px-3 sm:px-4 py-1.5 text-muted dark:text-mutedDark hover:text-terracotta dark:hover:text-terracotta hover:bg-terracotta/5 transition";
+        }
+      });
+
+      renderFormula();
+    }
+
+    function clearInput() {
+      document.getElementById('raw-input').value = '';
+      renderFormula();
+      document.getElementById('raw-input').focus();
+    }
+
+    async function copyFormulaImage() {
+      const target = document.getElementById('formula-canvas-wrapper');
+      const btn = document.getElementById('btn-copy-image');
+      const originalText = btn.innerHTML;
+      const isDark = document.documentElement.classList.contains('dark');
+
+      try {
+        btn.innerHTML = `<span>ĐANG TẠO ẢNH...</span>`;
+        btn.classList.add('opacity-75');
+
+        const canvas = await html2canvas(target, {
+          scale: 3,
+          backgroundColor: isDark ? '#1A1A17' : '#FFFFFF',
+          logging: false,
+          useCORS: true
+        });
+
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            showToast('Không tạo được ảnh. Vui lòng thử lại!');
+            btn.innerHTML = originalText;
+            btn.classList.remove('opacity-75');
+            return;
+          }
+
+          try {
+            if (navigator.clipboard && navigator.clipboard.write) {
+              await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+              ]);
+              showToast('✓ ĐÃ COPY ẢNH VÀO CLIPBOARD');
+            } else {
+              downloadCanvas(canvas, 'locus-formula.png');
+              showToast('Đã tải ảnh về máy');
+            }
+          } catch (clipErr) {
+            downloadCanvas(canvas, 'locus-formula.png');
+            showToast('Đã tải ảnh về máy');
+          } finally {
+            btn.innerHTML = originalText;
+            btn.classList.remove('opacity-75');
+          }
+        }, 'image/png');
+
+      } catch (err) {
+        btn.innerHTML = originalText;
+        btn.classList.remove('opacity-75');
+        showToast('Lỗi: ' + err.message);
+      }
+    }
+
+    async function downloadPNG(scaleMultiplier) {
+      const target = document.getElementById('formula-canvas-wrapper');
+      const isDark = document.documentElement.classList.contains('dark');
+
+      try {
+        const canvas = await html2canvas(target, {
+          scale: scaleMultiplier,
+          backgroundColor: isDark ? '#1A1A17' : '#FFFFFF',
+          logging: false
+        });
+
+        downloadCanvas(canvas, `locus-formula-${scaleMultiplier}x.png`);
+        showToast(`✓ Đã tải file PNG ${scaleMultiplier}X`);
+      } catch (err) {
+        showToast('Lỗi tải PNG: ' + err.message);
+      }
+    }
+
+    function downloadCanvas(canvas, filename) {
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function downloadSVG() {
+      try {
+        const target = document.getElementById('formula-output');
+        const bbox = target.getBoundingClientRect();
+        const width = Math.max(bbox.width + 40, 200);
+        const height = Math.max(bbox.height + 40, 100);
+        const isDark = document.documentElement.classList.contains('dark');
+        const bgColor = isDark ? '#1A1A17' : '#ffffff';
+        const textColor = isDark ? '#F3F3ED' : '#0d0d0d';
+
+        const svgContent = `
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <style>
+    @import url('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css');
+    .formula-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: ${bgColor};
+      color: ${textColor};
+    }
+    .katex { color: ${textColor} !important; }
+  </style>
+  <rect width="100%" height="100%" fill="${bgColor}"/>
+  <foreignObject x="0" y="0" width="${width}" height="${height}">
+    <div xmlns="http://www.w3.org/1999/xhtml" class="formula-container">
+      ${target.innerHTML}
+    </div>
+  </foreignObject>
+</svg>`.trim();
+
+        const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = 'locus-formula.svg';
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        showToast('✓ Đã tải file vector SVG');
+      } catch (err) {
+        showToast('Lỗi xuất SVG: ' + err.message);
+      }
+    }
+
+    function copyLatexCode() {
+      if (!currentLatex) return;
+
+      const ta = document.createElement('textarea');
+      ta.value = currentLatex;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      
+      try {
+        document.execCommand('copy');
+        showToast('✓ Đã sao chép mã LaTeX');
+      } catch (e) {
+        showToast('Không thể copy mã LaTeX');
+      } finally {
+        document.body.removeChild(ta);
+      }
+    }
+
+    let toastTimeout = null;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-message');
+      if (!toast || !text) return;
+      
+      text.textContent = message;
+      toast.classList.remove('opacity-0', 'translate-y-16', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-16', 'pointer-events-none');
+      }, 2500);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+
+      const inputEl = document.getElementById('raw-input');
+      inputEl.value = 'tích phân từ 0 đến vô cùng của e mũ trừ x bình dx bằng căn pi trên 2';
+      renderFormula();
+
+      // Debounce render 60ms
+      inputEl.addEventListener('input', () => {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(renderFormula, 60);
+      });
+
+      // Phím tắt Ctrl + Enter
+      inputEl.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          renderFormula();
+          showToast('✓ Đã biên dịch lại công thức');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

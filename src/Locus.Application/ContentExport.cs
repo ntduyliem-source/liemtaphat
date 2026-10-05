@@ -16,6 +16,7 @@ public sealed class ContentExport
     private static readonly XNamespace W="http://schemas.openxmlformats.org/wordprocessingml/2006/main";
     private static readonly XNamespace M=CandidateExporter.OmmlNamespace;
     private readonly IReadOnlyList<ContentExportPart> parts;
+    public IReadOnlyList<ContentExportPart> Parts => parts;
     public int FormulaCount=>parts.Count(p=>p.Formula!=null);
     private ContentExport(IEnumerable<ContentExportPart> parts)=>this.parts=Array.AsReadOnly(parts.ToArray());
 

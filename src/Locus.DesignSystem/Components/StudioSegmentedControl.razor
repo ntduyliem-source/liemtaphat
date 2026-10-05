@@ -1,0 +1,7 @@
+<div class="@Class" role="group" aria-label="@Label">@ChildContent</div>
+
+@code {
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

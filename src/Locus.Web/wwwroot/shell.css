@@ -1,0 +1,4 @@
+/* Web viewport and page ownership. Windows window/tray rules do not belong here. */
+.locus-web { min-height: 100vh; }
+.locus-web .studio-header-inner { max-width: var(--studio-width); }
+.locus-web > .closed-tab { max-width: var(--studio-width); margin: auto; }

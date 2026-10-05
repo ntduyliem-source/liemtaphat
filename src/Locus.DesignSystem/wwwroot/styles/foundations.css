@@ -1,0 +1,13 @@
+@import url('./tokens.css');
+@import url('./controls.css');
+@import url('./header.css');
+
+/* The only document reset. Product layout belongs to the host. */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--studio-paper); color: var(--studio-ink); font: 14px/1.5 var(--studio-sans); -webkit-font-smoothing: antialiased; font-synthesis: none; transition: background-color var(--studio-motion-theme), color var(--studio-motion-theme); }
+::selection { background: var(--studio-accent); color: var(--studio-on-action); }
+button, input, textarea, select { font: inherit; }
+a { color: inherit; }
+.loading { display: grid; place-items: center; min-height: 100vh; color: var(--studio-action); }
+#blazor-error-ui { display: none; background: var(--studio-tint); padding: 16px; position: fixed; bottom: 0; right: 0; left: 0; z-index: 90; }
+@media (prefers-reduced-motion: reduce) { body { transition: none; } }

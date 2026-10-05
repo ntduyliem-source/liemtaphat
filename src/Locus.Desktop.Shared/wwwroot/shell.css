@@ -1,0 +1,4 @@
+/* Installed Windows app. This stylesheet is packaged with the executable. */
+.locus-desktop { min-height: 100vh; }
+.locus-desktop .studio-header-inner { max-width: var(--studio-width); }
+.locus-desktop .formula-studio { width: 100%; }

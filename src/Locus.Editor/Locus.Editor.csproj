@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><RestorePackagesWithLockFile>true</RestorePackagesWithLockFile><TreatWarningsAsErrors>true</TreatWarningsAsErrors></PropertyGroup>
-  <ItemGroup><PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.11" /><ProjectReference Include="../Locus.Application/Locus.Application.csproj" /></ItemGroup>
+  <ItemGroup><PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.11" /><ProjectReference Include="../Locus.Application/Locus.Application.csproj" /><ProjectReference Include="../Locus.DesignSystem/Locus.DesignSystem.csproj" /></ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot/vendor/mathjax-newcm-font/**;wwwroot/vendor/mathjax/**" />
     <Content Include="wwwroot/vendor/mathjax-newcm-font/svg.js;wwwroot/vendor/mathjax-newcm-font/svg/**;wwwroot/vendor/mathjax-newcm-font/package.json;wwwroot/vendor/mathjax/mml-svg-nofont.js;wwwroot/vendor/mathjax/LICENSE;wwwroot/vendor/mathjax/package.json;wwwroot/vendor/mathjax/sre/**" />

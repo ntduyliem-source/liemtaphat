@@ -4,6 +4,8 @@ Locus hỗ trợ nhập công thức bằng cách gõ tự nhiên, ưu tiên cá
 
 ## Trạng thái hiện tại
 
+**Cập nhật 05/10/2026: CT0–CT4 đã triển khai và kiểm Web local.** Công thức có [catalog 0.2.1, nguồn thiết kế và hướng dẫn bảo trì](docs/design-system/README.md), luồng Cân bằng/Hủy tự điền, gợi ý cấu trúc và SVG/PNG cả đoạn. [Bản web hiện hành](http://127.0.0.1:4202/releases/20261005-112656-216/) · [kết quả CT4](docs/design-system/CT4-VERIFICATION.md) · [thay đổi sau CT4: bỏ Chi tiết và nhãn loại gợi ý](docs/design-system/CHANGELOG.md) · [backlog core](docs/design-system/CT4-CORE-AUDIT.md). Web và Desktop có shell riêng; Desktop là ứng dụng Windows chạy tài nguyên đóng gói. Đợt này chỉ build kiểm tương thích Desktop, chưa phát hành bộ cài mới. [Kết quả lịch sử CT0–CT3](docs/design-system/CT0-CT3-VERIFICATION.md).
+
 **G alpha local đạt 14/14 task**, chốt ngày 30/09/2026. Web/Desktop có Công thức Toán/Lý/Hóa, Đồ thị và Hình học 2D/3D; dùng chung mã C#. Ô kết quả Web/Desktop đã bỏ fx; chọn công thức để mở **Chi tiết công thức** bên dưới. Đồ thị có **Cách hiểu**, nhiều đường/tham số/slider; hình học kéo điểm/cạnh, snap, góc/phép dựng, camera và mặt phẳng 3D. Có `.locus`, nháp, PNG/SVG và xuất nguyên đoạn DOCX/HTML. [Phạm vi G](docs/phase-g/REPORT.md), [biên bản kiểm máy](docs/host-review/20260930.md), [backlog hiện tại](docs/BACKLOG.md).
 
 Repository chứa mã nguồn, test, corpus/fixture, prototype và tài liệu. `artifacts/`, output build, cache, `node_modules` và profile WebView không được đưa vào Git. Các liên kết `artifacts/` trong báo cáo lịch sử là bằng chứng trên máy phát triển, không có sẵn sau clone. H/WEB2 chưa triển khai; các cổng IME, tải tệp Web và Word nhiều DPI/màn hình còn mở theo biên bản.

@@ -99,7 +99,7 @@ public sealed partial class FormulaSession
         if(candidate==null)return new(region.Id,"","invalid",region.KeepText?"Vùng này đang được giữ là text; chọn cách đọc trong Chi tiết công thức.":"Cần chốt một cách đọc trước khi cân bằng.");
         if(candidate.Document.Domain!="chemistry")return new(region.Id,candidate.Id,"invalid","Cân bằng chỉ áp dụng cho phương trình Hóa.");
         if(candidate.Document.Root.Type!="ChemReaction")return new(region.Id,candidate.Id,"invalid","Cần phương trình có đủ hai vế.");
-        if(region.ResultOverride?.ManagedBalance==true)return new(region.Id,candidate.Id,"cancel","Có thể trả đúng hệ số trước khi Locus cân bằng.");
+        if(HasManagedCoefficientChange(region))return new(region.Id,candidate.Id,"cancel","Có thể trả đúng hệ số trước khi Locus cân bằng.");
         if(balanceCache.TryGetValue(region.Id,out var cached)&&cached.CandidateId==candidate.Id)return cached;
         if(scheduler is not IContentBalanceScheduler executor)return new(region.Id,candidate.Id,"Limit","Host chưa hỗ trợ cân bằng vùng.");
         var set=region.ResultOverride?.Result??region.Readings!;

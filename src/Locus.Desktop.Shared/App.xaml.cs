@@ -33,7 +33,7 @@ public partial class App : System.Windows.Application
         if(folder!=null)view.BlazorWebViewInitializing+=(_,args)=>args.UserDataFolder=folder;
         MainWindow=new Window{Title="Locus — Công thức",Width=440,Height=720,MinWidth=360,MinHeight=480,Content=view};
         desktopWindow=new DesktopWindow(MainWindow);instance.Listen(Dispatcher,desktopWindow.Show);
-        view.RootComponents.Add(new RootComponent{Selector="#app",ComponentType=typeof(EditorShell),Parameters=new Dictionary<string,object?>{{"Host","desktop"},{"DesktopWindow",desktopWindow}}});
+        view.RootComponents.Add(new RootComponent{Selector="#app",ComponentType=typeof(DesktopShell),Parameters=new Dictionary<string,object?>{{"DesktopWindow",desktopWindow}}});
         MainWindow.Closed+=async(_,_)=>
         {
             // PrepareClose has already saved the drafts. WebView teardown can wait

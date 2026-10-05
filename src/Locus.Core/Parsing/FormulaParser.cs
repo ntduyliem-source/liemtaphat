@@ -39,7 +39,7 @@ namespace Locus.Core.Parsing
                 if (state.AmbiguityCount > 1)
                     return Rejected(source, contentSpan, replacement, "AMBIGUITY_LIMIT", contentSpan, "Có nhiều vị trí chia–nhân ngầm; hãy thêm ngoặc để xác định phạm vi.");
 
-                if (state.MissingRootClose)
+                if (state.MissingClose)
                 {
                     var missing = new TextSpan(contentSpan.End, contentSpan.End);
                     if (state.AmbiguityCount != 0)
@@ -49,9 +49,9 @@ namespace Locus.Core.Parsing
                             new Diagnostic("AMBIGUOUS_INCOMPLETE_EXPRESSION", "warning", contentSpan)
                         });
                     var repair = MakeCandidate("repair", expression, source, contentSpan, replacement,
-                        edits: new[] { new SourceEdit(missing, ")") }, provenance: "repair/missing-root-close");
+                        edits: new[] { new SourceEdit(missing, ")") }, provenance: state.MissingCloseInRoot ? "repair/missing-root-close" : "repair/missing-close/ct4-1");
                     return new CandidateSet(source, contentSpan, replacement, new[] { repair },
-                        new[] { new Diagnostic("MISSING_CLOSE_PAREN", "error", missing, "Thiếu đúng một ngoặc đóng ở cuối lời gọi căn.") });
+                        new[] { new Diagnostic("MISSING_CLOSE_PAREN", "error", missing, state.MissingCloseInRoot ? "Thiếu đúng một ngoặc đóng ở cuối lời gọi căn." : "Thiếu đúng một ngoặc đóng ở cuối biểu thức.") });
                 }
 
                 var candidates = new List<Candidate>
@@ -73,8 +73,9 @@ namespace Locus.Core.Parsing
                 foreach (var proposal in proposals)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    candidates.Add(MakeCandidate("repair", proposal.Expression, source, contentSpan, replacement,
-                        new[] { new Diagnostic(proposal.Code, "info", contentSpan, proposal.Message) }, proposal.Edits, proposal.Provenance));
+                    var proposed = MakeCandidate("repair", proposal.Expression, source, contentSpan, replacement,
+                        new[] { new Diagnostic(proposal.Code, "info", contentSpan, proposal.Message) }, proposal.Edits, proposal.Provenance);
+                    if (!candidates.Any(c => Export.CandidateExporter.ToLatex(c) == Export.CandidateExporter.ToLatex(proposed))) candidates.Add(proposed);
                 }
                 return new CandidateSet(source, contentSpan, replacement, candidates);
             }
@@ -98,35 +99,37 @@ namespace Locus.Core.Parsing
             // The budget is a maximum, not a target. Each proposal is one independent,
             // declared edit; multiple repairs are never silently combined.
             if (proposals.Count >= 2 || current.Grouped) return;
-            if (current.Node.Type == "Binary" && current.Node.Operator == "add")
+            if (current.Node.Type == "Binary" && (current.Node.Operator == "add" || current.Node.Operator == "subtract"))
             {
                 var left = current.Parts[0];
                 var right = current.Parts[1];
-                if (!left.Grouped && !right.Grouped && left.Node.Type == "Symbol" &&
+                if (ScopeOperand(left) && !right.Grouped &&
                     right.Node.Type == "Binary" && right.Node.Operator == "divide" &&
-                    right.Parts.All(part => part.Node.Type == "Number" && !part.Grouped))
+                    right.Parts.All(ScopeOperand))
                 {
+                    bool legacy = current.Node.Operator == "add" && left.Node.Type == "Symbol" && right.Parts.All(p => p.Node.Type == "Number");
                     var numerator = MakeExpression("Binary", new[] { left, right.Parts[0] },
-                        new TextSpan(left.Span.Start, right.Parts[0].Span.End), "add", operatorSpan: current.OperatorSpan);
+                        new TextSpan(left.Span.Start, right.Parts[0].Span.End), current.Node.Operator, operatorSpan: current.OperatorSpan);
                     var rewritten = MakeExpression("Binary", new[] { numerator, right.Parts[1] }, current.Span,
                         "divide", operatorSpan: right.OperatorSpan);
                     proposals.Add(new RepairProposal(Replace(whole, current, rewritten), new[]
                     {
                         new SourceEdit(new TextSpan(left.Span.Start, left.Span.Start), "("),
                         new SourceEdit(new TextSpan(right.Parts[0].Span.End, right.Parts[0].Span.End), ")")
-                    }, "SUGGEST_FRACTION_SCOPE", "Có thể thêm ngoặc để đưa tổng vào tử số.", "repair/fraction-numerator-scope"));
+                    }, "SUGGEST_FRACTION_SCOPE", legacy ? "Có thể thêm ngoặc để đưa tổng vào tử số." : "Có thể thêm ngoặc để đưa toàn biểu thức vào tử số.", "repair/fraction-numerator-scope" + (legacy ? "" : "/ct4-1")));
                 }
                 else if (!left.Grouped && !right.Grouped && left.Node.Type == "Sqrt" && left.BareRoot &&
-                    left.Parts[0].Node.Type == "Symbol" && !left.Parts[0].Grouped && right.Node.Type == "Number")
+                    left.Parts[0].Node.Type == "Symbol" && ScopeOperand(left.Parts[0]) && ScopeOperand(right))
                 {
+                    bool legacy = current.Node.Operator == "add" && left.Parts[0].Node.Type == "Symbol" && right.Node.Type == "Number";
                     var radicand = MakeExpression("Binary", new[] { left.Parts[0], right },
-                        new TextSpan(left.Parts[0].Span.Start, right.Span.End), "add", operatorSpan: current.OperatorSpan);
+                        new TextSpan(left.Parts[0].Span.Start, right.Span.End), current.Node.Operator, operatorSpan: current.OperatorSpan);
                     var rewritten = MakeExpression("Sqrt", new[] { radicand }, current.Span);
                     proposals.Add(new RepairProposal(Replace(whole, current, rewritten), new[]
                     {
                         new SourceEdit(new TextSpan(left.Parts[0].Span.Start, left.Parts[0].Span.Start), "("),
                         new SourceEdit(new TextSpan(current.Span.End, current.Span.End), ")")
-                    }, "SUGGEST_ROOT_SCOPE", "Có thể thêm ngoặc để căn phủ toàn bộ tổng.", "repair/bare-root-scope"));
+                    }, "SUGGEST_ROOT_SCOPE", legacy ? "Có thể thêm ngoặc để căn phủ toàn bộ tổng." : "Có thể thêm ngoặc để mở rộng phạm vi căn.", "repair/bare-root-scope" + (legacy ? "" : "/ct4-1")));
                 }
             }
             foreach (var part in current.Parts)
@@ -135,6 +138,12 @@ namespace Locus.Core.Parsing
                 FindScopeRepairs(whole, part, proposals, cancellation);
             }
         }
+
+        // An explicit group is an intent boundary. A suggestion never removes or reaches through it.
+        private static bool ScopeOperand(Expression value) => !value.Grouped &&
+            (value.Node.Type == "Number" || value.Node.Type == "Symbol" ||
+             (value.Node.Type == "Power" || value.Node.Type == "Unary" || value.Node.Type == "Sqrt" ||
+              value.Node.Type == "Binary" && value.Node.Operator == "multiply") && value.Parts.All(ScopeOperand));
 
         private static Expression Replace(Expression whole, Expression target, Expression replacement)
         {
@@ -196,7 +205,8 @@ namespace Locus.Core.Parsing
             private readonly CancellationToken _cancellation;
             private int _position;
             internal int AmbiguityCount { get; private set; }
-            internal bool MissingRootClose { get; private set; }
+            internal bool MissingClose { get; private set; }
+            internal bool MissingCloseInRoot { get; private set; }
             private FormulaToken Current => _tokens[_position];
             private FormulaToken Previous => _tokens[Math.Max(0, _position - 1)];
 
@@ -321,10 +331,11 @@ namespace Locus.Core.Parsing
                 {
                     Take();
                     var child = ParseSum(depth + 1);
-                    if (Current.Kind != FormulaTokenKind.RightParen)
-                        Fail("MISSING_CLOSE_PAREN", "Thiếu ngoặc đóng.", new TextSpan(_content.End, _content.End));
-                    var close = Take();
-                    return MakeExpression(child.Node.Type, child.Parts, new TextSpan(token.Span.Start, close.Span.End),
+                    int end;
+                    if (Current.Kind == FormulaTokenKind.RightParen) end = Take().Span.End;
+                    else if (Current.Kind == FormulaTokenKind.End && !MissingClose) { MissingClose = true; end = _content.End; }
+                    else { Fail("MISSING_CLOSE_PAREN", "Không thể sửa nhiều ngoặc hoặc đoán ranh giới nhóm.", new TextSpan(_content.End, _content.End)); end = _content.End; }
+                    return MakeExpression(child.Node.Type, child.Parts, new TextSpan(token.Span.Start, end),
                         child.Node.Operator, child.Node.Value, child.Node.Name, grouped: true, operatorSpan: child.OperatorSpan);
                 }
                 if (token.Kind == FormulaTokenKind.Root)
@@ -335,9 +346,9 @@ namespace Locus.Core.Parsing
                     var radicand = ParseSum(depth + 1);
                     int end;
                     if (Current.Kind == FormulaTokenKind.RightParen) end = Take().Span.End;
-                    else if (Current.Kind == FormulaTokenKind.End && !MissingRootClose)
+                    else if (Current.Kind == FormulaTokenKind.End && !MissingClose)
                     {
-                        MissingRootClose = true;
+                        MissingClose = true; MissingCloseInRoot = true;
                         end = _content.End;
                     }
                     else

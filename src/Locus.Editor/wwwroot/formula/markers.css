@@ -1,0 +1,9 @@
+.formula-studio .studio-markers { padding: 12px 16px; border: 1px solid var(--studio-line); border-bottom: 0; background: var(--studio-subtle); }
+.formula-studio .marker-settings { padding: 0; border: 0; font-size: var(--studio-size-label); }
+.formula-studio .marker-settings summary { padding: 4px 0; color: var(--studio-ink); font: 700 11px var(--studio-mono); text-transform: uppercase; }
+.formula-studio .marker-settings p { font-size: var(--studio-size-control); }
+.formula-studio .marker-profiles { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: var(--studio-space-3); }
+.formula-studio .marker-profile-row { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1fr); gap: 6px; margin: 0 0 10px; }
+.formula-studio .marker-profile-name { grid-column: 1/-1; }
+.formula-studio .marker-profile-row label { font: 11px var(--studio-mono); }
+.formula-studio .marker-profile-row input:not([type='checkbox']) { padding: 5px 8px; border-radius: 0; background: var(--studio-surface); color: var(--studio-ink); font: 12px var(--studio-mono); }

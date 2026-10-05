@@ -1,5 +1,7 @@
 # Roadmap dài hạn Locus
 
+**Ưu tiên cập nhật 05/10/2026:** [tối ưu Công thức Web và design system có catalog](design-system/PLAN.md) trước các nhánh tính năng mới. CT0–CT4 đã triển khai và kiểm local; [kết quả CT4](design-system/CT4-VERIFICATION.md), [đặc tả](design-system/CT4-PLAN.md), [backlog core C01–C08](design-system/CT4-CORE-AUDIT.md). [Catalog 0.2.0 và source](design-system/README.md). Bước sau là review trải nghiệm và chốt đợt mở rộng lõi; Desktop là sản phẩm cài trên máy, có shell, gói và nghiệm thu riêng, chưa có bộ cài mới từ đợt này. Các mốc bên dưới giữ nguyên ngày và phạm vi lịch sử.
+
 Cập nhật 2026-09-30. **G đạt 14/14 task alpha local**, có Web local và Desktop x64 portable dùng thử được. [Báo cáo G](phase-g/REPORT.md), [cách dùng](phase-g/QUICKSTART.md), [biên bản máy](host-review/20260930.md). H/WEB2 chưa triển khai; D-FILE/SC1/Word đa DPI vẫn giữ các cổng còn thiếu. Không coi G hoàn tất là toàn sản phẩm hoàn tất.
 
 ## 1. Xuất phát

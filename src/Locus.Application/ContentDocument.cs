@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Locus.Core;
+using Locus.Core.Assistance;
 using Locus.Core.Detection;
 using Locus.Core.Export;
 
@@ -147,6 +148,8 @@ public static class ContentAnalyzer
         // Prefer the exact single-input path, including existing SC1 case and marker behavior.
         if (raw.Length <= FormulaSession.MaxSourceLength && !raw.Contains('\n') && !raw.Contains('\r') && settings.Mode != InputMode.Markers)
         {
+            if(scan.ReservedSpans.Count==0&&TryDraft(raw,0) is {} draft)
+                return new(raw,request.SourceRevision,ContentDocument.Reconcile(raw,[draft],previous),commands:previous?.Commands);
             var one = await scheduler.AnalyzeAsync(request with { Settings = settings with { Mode = InputMode.Explicit } }, token);
             token.ThrowIfCancellationRequested(); Verify(one, raw, request.SourceRevision);
             if (one.Regions.Count == 1 && raw[..one.Regions[0].ReplacementSpan.Start].Trim().Length == 0 && raw[one.Regions[0].ReplacementSpan.End..].Trim().Length == 0)
@@ -179,9 +182,41 @@ public static class ContentAnalyzer
                         while (stop < end && raw[stop] != '\r' && raw[stop] != '\n') stop++;
                     }
                 }
-                await Window(start, stop, InputMode.Passive, false);
+                // Reserve typed reactants with their separator before passive prose detection.
+                int gapStart=start,lineStart=start;
+                while(lineStart<stop)
+                {
+                    int lineEnd=raw.IndexOf('\n',lineStart,stop-lineStart);if(lineEnd<0)lineEnd=stop;
+                    if(lineEnd-lineStart<=FormulaSession.MaxSourceLength && (settings.EnabledDomains&DetectionDomains.Chemistry)!=0)
+                    {
+                        foreach (var span in ReactionDraftLocator.Find(new(raw[lineStart..lineEnd],request.SourceRevision),token))
+                        {
+                            int a=lineStart+span.Start,b=lineStart+span.End;
+                            if (TryDraft(raw[a..b],a) is not {} draft) continue;
+                            await Window(gapStart,a,InputMode.Passive,false);
+                            if(regions.Count<ContentDocument.RegionLimit)regions.Add(draft);
+                            else Notice("Đã tới giới hạn 256 vùng; phần còn lại được giữ là text.");
+                            gapStart=b;
+                        }
+                    }
+                    lineStart=lineEnd+1;
+                }
+                await Window(gapStart, stop, InputMode.Passive, false);
                 start = stop;
             }
+        }
+        ContentRegion? TryDraft(string window,int origin)
+        {
+            if((settings.EnabledDomains&DetectionDomains.Chemistry)==0)return null;
+            var trimmed=window.Trim();
+            if(trimmed.Length==0||!(trimmed.EndsWith('=')||trimmed.EndsWith("->",StringComparison.Ordinal)||trimmed.EndsWith('→')))return null;
+            int start=window.Length-window.TrimStart().Length,end=window.TrimEnd().Length;
+            var source=new SourceSnapshot(window,request.SourceRevision);var span=new TextSpan(start,end);
+            var parsed=ReactionDraftParser.Parse(new(source,span,span),token).Draft;
+            if(parsed==null)return null;
+            var reading=parsed.Reactants;
+            if(reading.Candidates.Count!=1||reading.Candidates[0].Document.Domain!="chemistry"||reading.Candidates[0].Diagnostics.Concat(reading.Diagnostics).Any(d=>d.Severity is "error" or "warning"))return null;
+            return new(Guid.NewGuid(),0,origin,origin+start,origin+end,window,null,null,Problem:"Bấm Cân bằng để điền sản phẩm và cân bằng phương trình.");
         }
         async Task Window(int start, int end, InputMode mode, bool marked)
         {

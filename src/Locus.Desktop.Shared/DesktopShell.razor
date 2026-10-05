@@ -1,0 +1,14 @@
+@using Microsoft.AspNetCore.Components
+@using Locus.Editor
+@using Locus.DesignSystem.Components
+<div class="locus-desktop">
+    <EditorShell Host="desktop" DesktopWindow="DesktopWindow">
+        <Header Context="shell">
+            <StudioHeader Active="@shell.Active" Theme="@shell.Theme" CanUndo="shell.CanUndo" CanRedo="shell.CanRedo"
+                          OnNavigate="shell.Navigate" OnHistory="shell.History" OnTheme="shell.ToggleTheme" />
+        </Header>
+    </EditorShell>
+</div>
+@code {
+    [Parameter] public Locus.Application.IEditorWindow? DesktopWindow { get; set; }
+}

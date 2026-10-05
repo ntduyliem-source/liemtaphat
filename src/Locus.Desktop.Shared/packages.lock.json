@@ -269,10 +269,17 @@
       "locus.core": {
         "type": "Project"
       },
+      "locus.designsystem": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.AspNetCore.Components.Web": "[10.0.11, )"
+        }
+      },
       "locus.editor": {
         "type": "Project",
         "dependencies": {
           "Locus.Application": "[1.0.0, )",
+          "Locus.DesignSystem": "[0.1.0, )",
           "Microsoft.AspNetCore.Components.Web": "[10.0.11, )"
         }
       }

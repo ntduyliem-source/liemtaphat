@@ -1,11 +1,11 @@
 {
   "schemaVersion": "locus-web1-delivery-scope/1",
-  "decidedOn": "2026-09-14",
-  "mode": "local-only",
-  "userInstruction": "tiếp đi bro, không cần phải lên sites đâu, tạm ở local là được",
-  "localUrl": "http://127.0.0.1:4183/",
-  "online": "deferred-by-user",
-  "futureOnlineAudience": "private-unless-user-changes-it",
+  "decidedOn": "2026-10-06",
+  "mode": "github-pages-public",
+  "userInstruction": "Công khai qua GitHub Pages",
+  "localUrl": "http://127.0.0.1:4202/",
+  "online": "https://ntduyliem-source.github.io/liemtaphat/",
+  "futureOnlineAudience": "public",
   "web104": [
     "Versioned static build with complete integrity-checked offline cache",
     "User-controlled update and source recovery; existing update tests remain required",

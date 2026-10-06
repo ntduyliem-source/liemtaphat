@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([switch]$WebOnly,[switch]$SkipNpm)
+param([switch]$WebOnly,[switch]$SkipNpm,[string]$BasePath='/')
 $ErrorActionPreference='Stop'
 $web1Workspace=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 Push-Location -LiteralPath $web1Workspace
@@ -21,7 +21,7 @@ try {
     New-Item -ItemType Directory -Force -Path $web1WorkerTarget | Out-Null
     Copy-Item -LiteralPath (Join-Path $web1Build 'worker/wwwroot/_framework') -Destination $web1WorkerTarget -Recurse
     Copy-Item -LiteralPath 'src/Locus.Worker/worker.js' -Destination $web1WorkerTarget
-    node tools/web1/stage.mjs $web1Build
+    node tools/web1/stage.mjs $web1Build $BasePath
     if($LASTEXITCODE -ne 0){throw 'Versioned static staging failed'}
     $web1Info=@{root=$web1Build;web=(Join-Path $web1Build 'site');desktop=(Join-Path $web1Build 'desktop');sdk=(& dotnet --version);createdUtc=[DateTime]::UtcNow.ToString('o')}
     $web1Info | ConvertTo-Json | Set-Content -LiteralPath artifacts/web1/current-build.json -Encoding utf8NoBOM

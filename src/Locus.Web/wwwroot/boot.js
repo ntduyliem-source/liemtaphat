@@ -8,7 +8,8 @@ function watch(){
 if('serviceWorker' in navigator&&isSecureContext){
   try{
     const hadController=!!navigator.serviceWorker.controller;
-    registration=await navigator.serviceWorker.register('/service-worker.js',{scope:'/',updateViaCache:'none'});
+    const siteRoot=new URL('../../',import.meta.url);
+    registration=await navigator.serviceWorker.register(new URL('service-worker.js',siteRoot),{scope:siteRoot.pathname,updateViaCache:'none'});
     navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)location.reload();});
     registration.addEventListener('updatefound',()=>{registration.installing?.addEventListener('statechange',watch);});
     await Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(Error('Offline cache unavailable')),25000))]);

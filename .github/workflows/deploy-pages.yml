@@ -1,0 +1,61 @@
+name: Deploy Locus Web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.400
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: tools/sh/package-lock.json
+      - name: Build versioned Web release
+        shell: pwsh
+        run: ./tools/web1/build.ps1 -WebOnly -BasePath /liemtaphat/
+      - name: Verify static release
+        shell: pwsh
+        run: node tools/web1/verify-static.mjs
+      - name: Locate Pages artifact
+        id: site
+        shell: pwsh
+        run: |
+          $site = (Get-Content artifacts/web1/current-build.json -Raw | ConvertFrom-Json).web
+          "path=$site" >> $env:GITHUB_OUTPUT
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ steps.site.outputs.path }}
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

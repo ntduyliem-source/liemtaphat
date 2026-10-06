@@ -1,5 +1,11 @@
 # Changelog
 
+## GitHub Pages — 06/10/2026
+
+- Thêm workflow build và deploy Locus Web từ `main` lên GitHub Pages công khai.
+- Stage release nhận base path `/liemtaphat/`; service worker, cache offline và các release bất biến dùng đúng project path.
+- Build local tiếp tục mặc định ở `/`; GitHub Pages tạo `.nojekyll` để phục vụ tài nguyên Blazor bắt đầu bằng dấu gạch dưới.
+
 ## 0.2.1 — 05/10/2026 · Gọn hàng gợi ý
 
 - Theo yêu cầu mới, bỏ nút và panel Chi tiết khỏi Công thức, cùng state/callback/CSS không còn dùng và mục tương ứng trong catalog.

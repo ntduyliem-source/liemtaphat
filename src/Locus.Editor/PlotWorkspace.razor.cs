@@ -10,6 +10,7 @@ namespace Locus.Editor;
 
 public partial class PlotWorkspace
 {
+    [Inject] public EditorAssetPaths AssetPaths { get; set; } = new();
     [Parameter] public string Host { get; set; } = "browser";
     [Parameter] public IEditorWindow? DesktopWindow { get; set; }
     private PlotDocument Doc => Session.Document;
@@ -42,7 +43,7 @@ public partial class PlotWorkspace
     protected override async Task OnAfterRenderAsync(bool first)
     {
         if (!first) return;
-        module = await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Locus.Editor/plot.js");
+        module = await Js.InvokeAsync<IJSObjectReference>("import", AssetPaths.Resolve("_content/Locus.Editor/plot.js"));
         reference = DotNetObjectReference.Create(this);
         var startup = await module.InvokeAsync<Startup>("start", Host);
         autoSave = startup.AutoSave; draftStatus = startup.Message;
@@ -259,7 +260,7 @@ public partial class PlotWorkspace
         try
         {
             byte[] bytes;
-            if (format == "png") { renderer ??= await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Locus.Editor/renderer.js"); bytes = await renderer.InvokeAsync<byte[]>("png", svg, 2); }
+            if (format == "png") { renderer ??= await Js.InvokeAsync<IJSObjectReference>("import", AssetPaths.Resolve("_content/Locus.Editor/renderer.js")); bytes = await renderer.InvokeAsync<byte[]>("png", svg, 2); }
             else bytes = Encoding.UTF8.GetBytes(svg);
             if (!Current()) return;
             var transfer = copy ? format == "png" ? await Clipboard.WritePngAsync(bytes, Current) : await Clipboard.WriteSvgAsync(svg, Current) : await Files.SaveAsync("do-thi." + format, format == "png" ? "image/png" : "image/svg+xml", bytes, Current);

@@ -63,3 +63,4 @@ Assert(suggestionHtml.Split("<math").Length-1==1&&!suggestionHtml.Contains("Thá»
 var input=await Render<FormulaSourcePanel>(new(){[nameof(FormulaSourcePanel.Raw)]=raw,[nameof(FormulaSourcePanel.Ready)]=false});
 Assert(input.Contains("id=\"source\"")&&input.Contains("readonly")&&input.Contains("source-ghost")&&input.Contains("ghost-hint"),"IME/ghost bridge contract changed");
 Console.WriteLine("PASS: result DOM offsets/text/candidate/selection, busy/IME stale result guard, export scope and source bridge.");
+await GeometryHistoryVerification.RunAsync();

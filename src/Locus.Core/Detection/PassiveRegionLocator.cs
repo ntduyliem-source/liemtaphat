@@ -41,7 +41,7 @@ namespace Locus.Core.Detection
                     position = protectedText[protectedIndex++].Span.End;
                     continue;
                 }
-                if (raw[position] == '\r' || raw[position] == '\n' || IsBoundary(raw, position))
+                if (FormulaDetectionSyntax.IsBoundary(raw, position))
                 {
                     var result = poisonedPrefix ? null : Complete(corridor); corridor.Clear();
                     poisonedPrefix = false; followsOpaqueToken = false; opaqueEndsOperator = false;
@@ -51,7 +51,7 @@ namespace Locus.Core.Detection
                 }
                 if (char.IsWhiteSpace(raw[position])) { position++; continue; }
                 int start = position;
-                while (position < raw.Length && !char.IsWhiteSpace(raw[position]) && !IsBoundary(raw, position))
+                while (position < raw.Length && !char.IsWhiteSpace(raw[position]) && !FormulaDetectionSyntax.IsBoundary(raw, position))
                 {
                     if ((position & 255) == 0) cancellationToken.ThrowIfCancellationRequested();
                     position++;
@@ -60,15 +60,15 @@ namespace Locus.Core.Detection
                 if (island.Diagnostics.Count > 0)
                 {
                     // Do not salvage x^2 from abc+x^2 or a URL-looking unsupported identifier.
-                    var result = poisonedPrefix || IsOperatorSymbol(raw[start]) ? null : Complete(corridor); corridor.Clear();
+                    var result = poisonedPrefix || FormulaDetectionSyntax.IsOperatorSymbol(raw[start]) ? null : Complete(corridor); corridor.Clear();
                     poisonedPrefix = false; followsOpaqueToken = true;
-                    opaqueEndsOperator = IsOperatorSymbol(raw[position - 1]);
+                    opaqueEndsOperator = FormulaDetectionSyntax.IsOperatorSymbol(raw[position - 1]);
                     if (result.HasValue) yield return result.Value;
                 }
                 else
                 {
                     if (corridor.Count == 0 && followsOpaqueToken && island.Tokens.Count > 0 &&
-                        (opaqueEndsOperator || IsLeadingOperator(island.Tokens[0].Kind)))
+                        (opaqueEndsOperator || FormulaDetectionSyntax.IsLeadingOperator(island.Tokens[0].Kind)))
                         poisonedPrefix = true;
                     foreach (var token in island.Tokens)
                         if (token.Kind != FormulaTokenKind.End) corridor.Add(token);
@@ -106,20 +106,5 @@ namespace Locus.Core.Detection
             return new TextSpan(tokens[0].Span.Start, tokens[tokens.Count - 1].Span.End);
         }
 
-        private static bool IsBoundary(string raw, int offset)
-        {
-            char current = raw[offset];
-            if (current == '.' || current == ',') return !(offset > 0 && offset + 1 < raw.Length && IsAsciiDigit(raw[offset - 1]) && IsAsciiDigit(raw[offset + 1]));
-            return current == ';' || current == ':' || current == '!' || current == '?' || current == '"' ||
-                current == '\'' || current == '\u201c' || current == '\u201d' || current == '\u2018' || current == '\u2019';
-        }
-        private static bool IsAsciiDigit(char value) => value >= '0' && value <= '9';
-        private static bool IsLeadingOperator(FormulaTokenKind kind) => kind == FormulaTokenKind.Plus ||
-            kind == FormulaTokenKind.Minus || kind == FormulaTokenKind.Multiply || kind == FormulaTokenKind.Divide ||
-            kind == FormulaTokenKind.Power || kind == FormulaTokenKind.Equal || kind == FormulaTokenKind.Less ||
-            kind == FormulaTokenKind.Greater || kind == FormulaTokenKind.LessEqual || kind == FormulaTokenKind.GreaterEqual;
-        private static bool IsOperatorSymbol(char value) => value == '+' || value == '-' || value == '\u2212' ||
-            value == '*' || value == '/' || value == '^' || value == '=' || value == '<' || value == '>' ||
-            value == '\u00d7' || value == '\u00b7' || value == '\u00f7' || value == '\u2264' || value == '\u2265';
     }
 }

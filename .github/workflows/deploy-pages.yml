@@ -30,12 +30,21 @@ jobs:
           node-version: 24
           cache: npm
           cache-dependency-path: tools/sh/package-lock.json
+      - name: Verify core, application and editor regressions
+        shell: pwsh
+        run: ./tools/review/verify-repairs.ps1
       - name: Build versioned Web release
         shell: pwsh
         run: ./tools/web1/build.ps1 -WebOnly -BasePath /liemtaphat/
       - name: Verify static release
         shell: pwsh
         run: node tools/web1/verify-static.mjs
+      - name: Install test browser
+        run: npx --prefix tools/sh playwright install --with-deps chromium
+      - name: Verify release navigation and updates
+        run: node tools/web1/verify-release-navigation.mjs
+      - name: Verify published app update and offline draft recovery
+        run: node tools/web1/verify-update.mjs
       - name: Locate Pages artifact
         id: site
         shell: pwsh

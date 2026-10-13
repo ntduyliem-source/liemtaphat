@@ -1,8 +1,8 @@
 @implements IAsyncDisposable
 @inject IJSRuntime Js
 @inject FormulaWorkspace FormulaModel
-<link rel="stylesheet" href="_content/Locus.Editor/formula.css" />
-<link rel="stylesheet" href="_content/Locus.Editor/legacy.css" />
+<link rel="stylesheet" href="@AssetPaths.Resolve("_content/Locus.Editor/formula.css")" />
+<link rel="stylesheet" href="@AssetPaths.Resolve("_content/Locus.Editor/legacy.css")" />
 @Header?.Invoke(new(active,theme,FormulaModel.Session.CanUndo,FormulaModel.Session.CanRedo,Switch,FormulaHistory,ToggleTheme))
 <div id="studio-content">
 @if(active=="plot"){<div class="legacy-editors"><PlotWorkspace @ref="plotView" Host="@Host" DesktopWindow="@DesktopWindow" /></div>}
@@ -11,6 +11,7 @@ else if(opened){<Workspace @ref="formulaView" Host="@Host" DesktopWindow="@Deskt
 else{<div class="closed-tab"><h1>Phiên công thức vẫn được giữ.</h1><p>Mở lại tab để tiếp tục. Nháp được giữ trên thiết bị nếu bạn đã bật tự lưu; tệp .locus giúp giữ bản sao riêng.</p><button id="reopen-editor-tab" @onclick="()=>opened=true">Mở lại công thức</button></div>}
 </div>
 @code{
+    [Inject] public EditorAssetPaths AssetPaths { get; set; } = new();
     [Parameter, EditorRequired] public RenderFragment<StudioShellState>? Header { get; set; }
     [Parameter] public string Host {get;set;}="browser";
     [Parameter] public Locus.Application.IEditorWindow? DesktopWindow {get;set;}
@@ -28,7 +29,7 @@ else{<div class="closed-tab"><h1>Phiên công thức vẫn được giữ.</h1><
     protected override async Task OnAfterRenderAsync(bool first)
     {
         if(!first)return;
-        themeModule=await Js.InvokeAsync<IJSObjectReference>("import","./_content/Locus.DesignSystem/theme.js");
+        themeModule=await Js.InvokeAsync<IJSObjectReference>("import",AssetPaths.Resolve("_content/Locus.DesignSystem/theme.js"));
         theme=await themeModule.InvokeAsync<string>("current");StateHasChanged();
     }
     private async Task ToggleTheme()

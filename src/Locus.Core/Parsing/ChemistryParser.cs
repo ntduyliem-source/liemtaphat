@@ -11,6 +11,26 @@ namespace Locus.Core.Parsing
     {
         private readonly bool allowAliases;
         public ChemistryParser(bool allowAliases = false) { this.allowAliases = allowAliases; }
+        internal static bool IsChemicalCharacter(char c) => c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' ||
+            "()[]{}+^-−₀₁₂₃₄₅₆₇₈₉⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻".IndexOf(c) >= 0;
+
+        /// <summary>A whitespace token may end/start at a reaction separator; the full corridor must still parse.</summary>
+        internal bool IsTokenFragment(SourceSnapshot source, TextSpan span, CancellationToken token)
+        {
+            if (Parse(source, span, cancellationToken: token).Candidates.Count > 0) return true;
+            string text = source.Slice(span);
+            var separators = new[] { "<->", "->", "→", "⇌", "=", "+" }.Where(s => s != "=" || allowAliases).ToArray();
+            if (separators.Contains(text)) return true;
+            var starts = new[] { 0 }.Concat(separators.Where(s => text.StartsWith(s, StringComparison.Ordinal)).Select(s => s.Length));
+            var ends = new[] { 0 }.Concat(separators.Where(s => text.EndsWith(s, StringComparison.Ordinal)).Select(s => s.Length));
+            foreach (int start in starts)
+            foreach (int end in ends)
+            {
+                if (start + end == 0 || start + end >= text.Length) continue;
+                if (Parse(source, new TextSpan(span.Start + start, span.End - end), cancellationToken: token).Candidates.Count > 0) return true;
+            }
+            return false;
+        }
         public CandidateSet Parse(SourceSnapshot source, TextSpan content, TextSpan? replacement = null, CancellationToken cancellationToken = default)
         {
             source.Validate(content); source.Validate(replacement ?? content);

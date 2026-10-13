@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([switch]$WebOnly,[switch]$SkipNpm,[string]$BasePath='/')
+param([switch]$WebOnly,[switch]$SkipNpm,[string]$BasePath='/',[string]$OutputRoot='artifacts/web1/builds')
 $ErrorActionPreference='Stop'
 $web1Workspace=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 Push-Location -LiteralPath $web1Workspace
@@ -7,7 +7,7 @@ try {
     if(-not $SkipNpm){npm --prefix tools/sh ci --ignore-scripts; if($LASTEXITCODE -ne 0){throw 'Locked renderer dependency restore failed'}}
     node tools/web1/vendor.mjs
     if($LASTEXITCODE -ne 0){throw 'Renderer assets failed'}
-    $web1Build=Join-Path $web1Workspace ('artifacts/web1/builds/'+[DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss-fff'))
+    $web1Build=Join-Path ([IO.Path]::GetFullPath($OutputRoot)) ([DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss-fff'))
     $web1Projects=@('Locus.Web','Locus.Worker')
     if(-not $WebOnly){$web1Projects+='Locus.Desktop.Shared'}
     foreach($web1Project in $web1Projects) {

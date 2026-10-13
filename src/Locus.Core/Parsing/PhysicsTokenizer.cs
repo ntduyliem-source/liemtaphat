@@ -126,6 +126,21 @@ namespace Locus.Core.Parsing
             int finish=offset;while(finish<end&&(char.IsLetter(raw[finish])||raw[finish]=='°'))finish++;
             return finish>offset && ScientificSymbols.IsUnit(raw.Substring(offset,finish-offset));
         }
+        private bool TryUnitFactor(int offset, int depth, out MathNode? factor, out int finish)
+        {
+            // Parse the complete operand before choosing unit or arithmetic grammar.
+            // Retain the parsed node on success so nested lookahead never reparses a
+            // subtree exponentially; either outcome restores the caller's cursor.
+            int saved = p; factor = null; finish = offset;
+            try
+            {
+                token.ThrowIfCancellationRequested(); p = offset; Skip();
+                factor = UnitFactor(depth); finish = p; return true;
+            }
+            catch (Failure failure) when (failure.Code == "UNKNOWN_UNIT" || failure.Code == "UNCLOSED_UNIT_GROUP")
+            { return false; }
+            finally { p = saved; }
+        }
         private MathNode UnitExpression(int depth)
         {
             if(depth>=32)Fail("UNIT_DEPTH_LIMIT",p);
@@ -135,10 +150,11 @@ namespace Locus.Core.Parsing
                 token.ThrowIfCancellationRequested();int before=p;Skip();if(p==end){p=before;break;}
                 var op=raw[p];bool implicitProduct=p>before&&StartsUnit(p);
                 if(op!='/'&&op!='*'&&op!='·'&&!implicitProduct){p=before;break;}
+                if(!TryUnitFactor(implicitProduct?p:p+1,depth,out var right,out var finish)){p=before;break;}
                 if(++count>64)Fail("UNIT_TERM_LIMIT",p);
                 if(op=='/'&&divided)Fail("AMBIGUOUS_UNIT_DIVISION",p);
-                if(!implicitProduct)p++;Skip();var right=UnitFactor(depth);
-                left=new MathNode("Binary",new[]{left,right},@operator:op=='/'?"divide":"multiply",sourceSpans:new[]{new TextSpan(left.SourceSpans[0].Start,p)});
+                p=finish;
+                left=new MathNode("Binary",new[]{left,right!},@operator:op=='/'?"divide":"multiply",sourceSpans:new[]{new TextSpan(left.SourceSpans[0].Start,p)});
                 if(op=='/')divided=true;
             }
             return left;
@@ -149,11 +165,14 @@ namespace Locus.Core.Parsing
             if(p<end&&raw[p]=='(')
             {
                 p++;Skip();n=UnitExpression(depth+1);Skip();if(p>=end||raw[p]!=')')Fail("UNCLOSED_UNIT_GROUP",start);p++;
-                return new MathNode(n.Type,n.Children,n.Value,n.Name,n.Operator,new[]{new TextSpan(start,p)});
+                n=new MathNode(n.Type,n.Children,n.Value,n.Name,n.Operator,new[]{new TextSpan(start,p)});
             }
-            while(p<end&&(char.IsLetter(raw[p])||raw[p]=='°'))p++;
-            var name=raw.Substring(start,p-start);if(!ScientificSymbols.IsUnit(name))Fail("UNKNOWN_UNIT",start);
-            n=new MathNode("Unit",name:name,sourceSpans:new[]{new TextSpan(start,p)});
+            else
+            {
+                while(p<end&&(char.IsLetter(raw[p])||raw[p]=='°'))p++;
+                var name=raw.Substring(start,p-start);if(!ScientificSymbols.IsUnit(name))Fail("UNKNOWN_UNIT",start);
+                n=new MathNode("Unit",name:name,sourceSpans:new[]{new TextSpan(start,p)});
+            }
             if(p<end&&(raw[p]=='^'||SupDigit(raw[p])>=0||raw[p]=='⁻'))
             {
                 bool unicode=raw[p]!='^';if(!unicode)p++;int exponentStart=p;
@@ -164,6 +183,12 @@ namespace Locus.Core.Parsing
                 MathNode exponent=new MathNode("Number",value:text.ToString(),sourceSpans:new[]{new TextSpan(numberStart,p)});
                 if(negative)exponent=new MathNode("Unary",new[]{exponent},@operator:"minus",sourceSpans:new[]{new TextSpan(exponentStart,p)});
                 n=new MathNode("Power",new[]{n,exponent},sourceSpans:new[]{new TextSpan(start,p)});
+                int following=p;
+                while(following<end&&char.IsWhiteSpace(raw[following])&&raw[following]!='\r'&&raw[following]!='\n')following++;
+                // Unit exponents are single integers. Leaving a second power token
+                // to the outer parser would raise the entire measured quantity.
+                if(following<end&&(raw[following]=='^'||SupDigit(raw[following])>=0||raw[following]=='⁻'))
+                    Fail("UNSUPPORTED_CHAINED_UNIT_EXPONENT",following);
             }
             return n;
         }

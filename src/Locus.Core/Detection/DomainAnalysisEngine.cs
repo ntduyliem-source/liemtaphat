@@ -91,22 +91,31 @@ namespace Locus.Core.Detection
         // A whitelisted unit after a numeric value is different from an opaque relative path.
         // URL/email and rooted paths never qualify; bare kg/m still remains protected.
         internal static bool QuantityUnitContext(SourceSnapshot source,ProtectedText item,CancellationToken token)
+            =>item.Code=="PROTECTED_PATH"&&QuantityContinuationContext(source,item.Span,token);
+
+        private static bool QuantityContinuationContext(SourceSnapshot source,TextSpan span,CancellationToken token)
         {
-            if(item.Code!="PROTECTED_PATH")return false;
-            var raw=source.Raw;int p=item.Span.Start;
+            var raw=source.Raw;int p=span.Start;
             while(p>0&&char.IsWhiteSpace(raw[p-1])&&raw[p-1]!='\r'&&raw[p-1]!='\n')p--;
-            if(p==item.Span.Start||p==0||raw[p-1]<'0'||raw[p-1]>'9')return false;
+            if(p==span.Start||p==0||raw[p-1]<'0'||raw[p-1]>'9')return false;
             while(p>0&&(raw[p-1]>='0'&&raw[p-1]<='9'||raw[p-1]=='.'||raw[p-1]==','))p--;
             if(p>0&&(char.IsLetterOrDigit(raw[p-1])||raw[p-1]=='_'||raw[p-1]=='/'||raw[p-1]=='\\'))return false;
-            int end=item.Span.End;
-            while(end>item.Span.Start)
+            int end=span.End;
+            while(end>span.Start)
             {
-                if(new PhysicsTokenizer().IsUnitFragment(source,new TextSpan(item.Span.Start,end),token))return true;
+                if(new PhysicsTokenizer().IsUnitFragment(source,new TextSpan(span.Start,end),token))return true;
+                // A numeric quantity may continue with arithmetic, e.g. 10 kg/t.
+                // Validate the complete numeric window and require a real Quantity;
+                // arbitrary relative paths after a number do not receive an exemption.
+                var arithmetic = new FormulaParser(true).Parse(source,new TextSpan(p,end),cancellationToken:token);
+                if(arithmetic.Candidates.Any(c=>c.Kind=="direct"&&ContainsQuantity(c.Document.Root)) &&
+                    !arithmetic.Diagnostics.Any(d=>d.Severity=="error"||d.Severity=="warning"))return true;
                 if(!".,;!?:)]}".Contains(raw[end-1]))break;
                 end--;
             }
             return false;
         }
+        private static bool ContainsQuantity(MathNode node)=>node.Type=="Quantity"||node.Children.Any(ContainsQuantity);
 
         internal static IEnumerable<TextSpan> Corridors(SourceSnapshot source,IReadOnlyList<ProtectedText> protectedText,DetectionDomains domains,CancellationToken token,bool chemistryAliases = false)
         {
@@ -114,32 +123,32 @@ namespace Locus.Core.Detection
             while(p<raw.Length)
             {
                 token.ThrowIfCancellationRequested();var protect=protectedText.FirstOrDefault(t=>t.Span.Start<=p&&p<t.Span.End);
-                if(protect!=null||Boundary(raw,p))
+                if(protect!=null||FormulaDetectionSyntax.IsBoundary(raw,p))
                 {
                     if(start>=0&&!poisoned)yield return new TextSpan(start,finish);
                     start=-1;poisoned=false;previousOpaque=protect!=null;opaqueOperator=false;p=protect?.Span.End??p+1;continue;
                 }
                 if(char.IsWhiteSpace(raw[p])){p++;continue;}
-                int a=p;while(p<raw.Length&&!char.IsWhiteSpace(raw[p])&&!Boundary(raw,p))p++;
+                int a=p;while(p<raw.Length&&!char.IsWhiteSpace(raw[p])&&!FormulaDetectionSyntax.IsBoundary(raw,p))p++;
                 var span=new TextSpan(a,p);var text=source.Slice(span);
-                bool allowed=new FormulaTokenizer().Tokenize(source,span,token).Diagnostics.Count==0;
-                if(!allowed&&(domains&DetectionDomains.Physics)!=0)allowed=new PhysicsTokenizer().Tokenize(source,span,token).Diagnostics.Count==0 || new PhysicsTokenizer().IsUnitFragment(source,span,token);
-                if(!allowed&&(domains&DetectionDomains.Chemistry)!=0)allowed=text=="->"||text=="<->"||text=="→"||text=="⇌"||new ChemistryParser(chemistryAliases).Parse(source,span,cancellationToken:token).Candidates.Count>0;
+                var lexical=new FormulaTokenizer().Tokenize(source,span,token);
+                bool allowed=lexical.Diagnostics.Count==0;
+                if(!allowed&&(domains&DetectionDomains.Physics)!=0)allowed=new PhysicsTokenizer().Tokenize(source,span,token).Diagnostics.Count==0 ||
+                    new PhysicsTokenizer().IsUnitFragment(source,span,token) || QuantityContinuationContext(source,span,token);
+                if(!allowed&&(domains&DetectionDomains.Chemistry)!=0)allowed=text=="->"||text=="<->"||text=="→"||text=="⇌"||new ChemistryParser(chemistryAliases).IsTokenFragment(source,span,token);
                 if(allowed)
                 {
-                    if(start<0){start=a;poisoned=previousOpaque&&(opaqueOperator||Operator(raw[a]));}
+                    if(start<0){start=a;poisoned=previousOpaque&&(opaqueOperator||FormulaDetectionSyntax.IsOperatorSymbol(raw[a])||
+                        lexical.Tokens[0].Span.Start==a&&FormulaDetectionSyntax.IsLeadingOperator(lexical.Tokens[0].Kind));}
                     finish=p;previousOpaque=false;
                 }
                 else
                 {
-                    if(start>=0&&!poisoned&&!Operator(raw[a]))yield return new TextSpan(start,finish);
-                    start=-1;poisoned=false;previousOpaque=true;opaqueOperator=Operator(raw[p-1]);
+                    if(start>=0&&!poisoned&&!FormulaDetectionSyntax.IsOperatorSymbol(raw[a]))yield return new TextSpan(start,finish);
+                    start=-1;poisoned=false;previousOpaque=true;opaqueOperator=FormulaDetectionSyntax.IsOperatorSymbol(raw[p-1]);
                 }
             }
             if(start>=0&&!poisoned)yield return new TextSpan(start,finish);
         }
-        private static bool Operator(char c)=>"+-*/^=<>×÷−".Contains(c);
-        private static bool Boundary(string text,int i)=>text[i]=='\r'||text[i]=='\n'||text[i]==';'||text[i]==':'||text[i]=='!'||text[i]=='?'||
-            (text[i]=='.'||text[i]==',')&&!(i>0&&i+1<text.Length&&char.IsDigit(text[i-1])&&char.IsDigit(text[i+1]));
     }
 }

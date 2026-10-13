@@ -43,7 +43,15 @@ public static class Ct4Verification
             }
         }));
         await Check("inline-drafts-retain-exact-source-boundaries",async()=>{
-            using var s=await Ready("🧪 Xét H2+O2= trong bài. Sau đó HCl+NaOH=, kết thúc.");
+            // FIX1: text after '=' is occupied/unknown RHS unless a delimiter
+            // closes the reaction; do not infer products over arbitrary words.
+            const string occupied="🧪 Xét H2+O2= trong bài. Sau đó HCl+NaOH=, kết thúc.";
+            using(var untouched=await Ready(occupied)){
+                Assert(untouched.State.Content!.Regions.Count==1&&untouched.State.Content.Regions[0].Raw=="HCl+NaOH=");
+                Assert(await untouched.StudioBalanceAsync());
+                Assert(untouched.State.Raw==occupied&&untouched.State.Content.ResultText(0,occupied.Length).StartsWith("🧪 Xét H2+O2= trong bài."));
+            }
+            using var s=await Ready("🧪 Xét H2+O2=; trong bài. Sau đó HCl+NaOH=, kết thúc.");
             Assert(s.State.Content!.Regions.Count==2,string.Join(" | ",s.State.Content.Regions.Select(r=>r.Raw)));
             Assert(s.State.Content.Regions[0].Raw=="H2+O2="&&s.State.Content.Regions[1].Raw=="HCl+NaOH=");
             Assert(await s.StudioBalanceAsync());Assert(s.State.Content.ResultText(0,s.State.Raw.Length).StartsWith("🧪 Xét "));
@@ -108,6 +116,38 @@ public static class Ct4Verification
             Assert(gate.Calls.Count==2&&gate.Calls[0].Token.IsCancellationRequested);
             gate.Complete(1);Assert(await latest);var expected=s.State;gate.Complete(0);Assert(!await old&&ReferenceEquals(expected,s.State));
             Assert(s.State.Content!.Regions.Single().Display?.Document.Domain=="chemistry");
+        });
+        await Check("typing-during-mode-change-keeps-choice-and-history",async()=>{
+            using var initial=await Ready("x^2");await initial.ReanalyzeWithSettingsAsync(Settings(DetectionDomains.Math));
+            var before=initial.State;var gate=new Deferred();using var s=new FormulaSession(gate);s.Load(before);
+            var changing=s.ReanalyzeWithSettingsAsync(Settings(DetectionDomains.Physics));
+            s.UpdateSource("5 m/s^2");
+            Assert(s.State.Settings.EnabledDomains==DetectionDomains.Physics,"Typing discarded the requested detection mode");
+            Assert(s.State.Raw=="5 m/s^2"&&s.State.Content==null&&gate.Calls[0].Token.IsCancellationRequested);
+            gate.Complete(0);Assert(!await changing&&s.State.Content==null,"Old mode result replaced newer input");
+            var analysis=s.AnalyzeContentAsync();gate.Complete(1);Assert(await analysis);
+            Assert(s.State.Content!.Regions.Single().Display?.Document.Domain=="physics");var latest=s.State;
+            Assert(s.Undo()&&s.State.Raw=="x^2"&&s.State.Settings.EnabledDomains==DetectionDomains.Physics,"Undo typing also undid mode choice");
+            Assert(s.Undo()&&ReferenceEquals(s.State,before),"Mode change must be exactly one Undo action");
+            Assert(s.Redo()&&s.State.Settings.EnabledDomains==DetectionDomains.Physics&&s.Redo()&&ReferenceEquals(s.State,latest));
+        });
+        await Check("mode-analysis-error-retains-choice-and-source",async()=>{
+            using var initial=await Ready("x^2");var before=initial.State;
+            var gate=new Deferred();using var s=new FormulaSession(gate);s.Load(before);
+            var changing=s.ReanalyzeWithSettingsAsync(Settings(DetectionDomains.Physics));
+            gate.Calls[0].Completion.SetException(new TimeoutException());
+            Assert(!await changing&&!s.IsBusy&&s.Error.Length>0);
+            Assert(s.State.Settings.EnabledDomains==DetectionDomains.Physics&&s.State.Raw==before.Raw,"Analysis failure discarded user preference/source");
+            Assert(s.State.Content==null&&s.State.Analysis==null&&!s.CanExport,"A failed reanalysis must not expose a stale result");
+            Assert(s.Undo()&&ReferenceEquals(s.State,before));
+        });
+        await Check("undo-pending-mode-change-restores-exact-snapshot",async()=>{
+            using var initial=await Ready("x^2");var before=initial.State;
+            var gate=new Deferred();using var s=new FormulaSession(gate);s.Load(before);
+            var changing=s.ReanalyzeWithSettingsAsync(Settings(DetectionDomains.Physics));
+            Assert(s.IsBusy&&s.CanUndo&&s.Undo()&&ReferenceEquals(s.State,before));
+            gate.Complete(0);Assert(!await changing&&ReferenceEquals(s.State,before)&&!s.IsBusy);
+            Assert(s.Redo()&&s.State.Settings.EnabledDomains==DetectionDomains.Physics&&s.State.Raw==before.Raw);
         });
         var report=new{status=failed==0?"PASSED":"FAILED",total=checks.Count,failed,checks};
         File.WriteAllText(Path.Combine(output,"ct4-contracts.json"),JsonSerializer.Serialize(report,new JsonSerializerOptions{WriteIndented=true}));

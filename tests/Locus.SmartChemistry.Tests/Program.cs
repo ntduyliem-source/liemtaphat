@@ -154,6 +154,7 @@ failed+=BalanceVerification.Run(root,output);
 failed+=await AssistanceSessionVerification.Run(output);
 failed+=await CatalogVerification.Run(root,output);
 failed+=await GhostTransactionVerification.Run(output);
+failed+=await ReactionDraftRepairVerification.Run(output);
 return failed==0?0:1;
 
 sealed class HeldScheduler : IAnalysisScheduler

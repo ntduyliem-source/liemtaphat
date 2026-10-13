@@ -92,4 +92,5 @@ File.WriteAllText(Path.Combine(output,"core-verification.json"),JsonSerializer.S
 File.WriteAllText(Path.Combine(output,"worker-fixtures.json"),JsonSerializer.Serialize(workerFixtures));
 Console.WriteLine($"E3 core: {checks.Count-failed}/{checks.Count} passed; reports in {output}");
 failed+=await ApplicationVerification.Run(root,output);
+failed+=await PhysicsRepairVerification.Run(output);
 return failed==0?0:1;

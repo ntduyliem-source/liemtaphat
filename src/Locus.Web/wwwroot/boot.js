@@ -1,4 +1,6 @@
 const state=globalThis.locusBoot={status:'Đang chuẩn bị bản offline…',waiting:false};
+const siteRoot=new URL('../../',import.meta.url);
+state.assetRoot=new URL('./',import.meta.url).href;
 let registration,reloading=false;
 state.update=()=>{if(registration?.waiting){reloading=true;registration.waiting.postMessage({type:'ACTIVATE'});}};
 function watch(){
@@ -8,7 +10,6 @@ function watch(){
 if('serviceWorker' in navigator&&isSecureContext){
   try{
     const hadController=!!navigator.serviceWorker.controller;
-    const siteRoot=new URL('../../',import.meta.url);
     registration=await navigator.serviceWorker.register(new URL('service-worker.js',siteRoot),{scope:siteRoot.pathname,updateViaCache:'none'});
     navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)location.reload();});
     registration.addEventListener('updatefound',()=>{registration.installing?.addEventListener('statechange',watch);});
@@ -20,5 +21,6 @@ if('serviceWorker' in navigator&&isSecureContext){
     registration.update().catch(()=>{});
   }catch{state.status='Chưa lưu được bản offline. Bạn vẫn có thể dùng khi có mạng.';}
 }else state.status='Trình duyệt này chưa hỗ trợ bản offline.';
-history.replaceState(null,'',new URL(document.baseURI).pathname);
+// Navigation uses the stable app root. Resource URLs separately pin this tab's release.
+history.replaceState(null,'',siteRoot.pathname+location.search+location.hash);
 const script=document.createElement('script');script.src=document.querySelector('#locus-runtime').dataset.src;document.body.append(script);

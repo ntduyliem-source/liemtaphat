@@ -111,7 +111,7 @@ namespace Locus.Core.Domains
         private static bool PositiveInteger(MathNode n) => n.Type == "Number" && n.Value != null && Regex.IsMatch(n.Value, @"\A[1-9][0-9]*\z");
         private static bool IsFormula(MathNode n) => new[] { "ChemElement", "ChemConcat", "ChemGroup", "ChemSubscript" }.Contains(n.Type);
         private static bool IsSide(MathNode n) => IsFormula(n) || n.Type == "ChemCharge" || n.Type == "ChemCoefficient" || n.Type == "ChemSum";
-        internal static bool IsUnitTree(MathNode n) => n.Type == "Unit" || n.Type == "Power" && n.Children[0].Type == "Unit" && IsInteger(n.Children[1]) ||
+        internal static bool IsUnitTree(MathNode n) => n.Type == "Unit" || n.Type == "Power" && IsUnitTree(n.Children[0]) && IsInteger(n.Children[1]) ||
             n.Type == "Binary" && (n.Operator == "multiply" || n.Operator == "divide") && n.Children.All(IsUnitTree);
         private static bool IsInteger(MathNode n) => n.Type == "Number" && !n.Value!.Contains('.') || n.Type == "Unary" && n.Children[0].Type == "Number" && !n.Children[0].Value!.Contains('.');
         internal static void ValidateDocument(MathNode root, string domain)

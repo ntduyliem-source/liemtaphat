@@ -9,6 +9,7 @@ using Microsoft.JSInterop;
 namespace Locus.Editor;
 public partial class Workspace
 {
+    [Inject] public EditorAssetPaths AssetPaths {get;set;}=new();
     [Parameter] public string Host {get;set;}="browser";
     [Parameter] public IEditorWindow? DesktopWindow {get;set;}
     private FormulaSession session=>Model.Session;
@@ -34,8 +35,8 @@ public partial class Workspace
     protected override async Task OnAfterRenderAsync(bool first)
     {
         if(!first){await SyncGhost();return;}
-        module=await Js.InvokeAsync<IJSObjectReference>("import","./_content/Locus.Editor/editor.js");
-        renderer=await Js.InvokeAsync<IJSObjectReference>("import","./_content/Locus.Editor/renderer.js");
+        module=await Js.InvokeAsync<IJSObjectReference>("import",AssetPaths.Resolve("_content/Locus.Editor/editor.js"));
+        renderer=await Js.InvokeAsync<IJSObjectReference>("import",AssetPaths.Resolve("_content/Locus.Editor/renderer.js"));
         await InitializeLocal();
         reference=DotNetObjectReference.Create(this);await module.InvokeVoidAsync("wire",sourceElement,reference);
         await module.InvokeVoidAsync("wireResult",resultElement,reference);

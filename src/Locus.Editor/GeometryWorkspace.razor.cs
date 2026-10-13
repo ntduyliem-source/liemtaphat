@@ -9,6 +9,7 @@ namespace Locus.Editor;
 
 public partial class GeometryWorkspace
 {
+    [Inject]public EditorAssetPaths AssetPaths{get;set;}=new();
     [Parameter]public string Host{get;set;}="browser";
     [Parameter]public IEditorWindow? DesktopWindow{get;set;}
     private int dimension=2;
@@ -61,7 +62,7 @@ public partial class GeometryWorkspace
     protected override async Task OnAfterRenderAsync(bool first)
     {
         if(!first)return;
-        module=await Js.InvokeAsync<IJSObjectReference>("import","./_content/Locus.Editor/geometry.js");
+        module=await Js.InvokeAsync<IJSObjectReference>("import",AssetPaths.Resolve("_content/Locus.Editor/geometry.js"));
         reference=DotNetObjectReference.Create(this);storage=await module.InvokeAsync<IJSObjectReference>("createStorage",Host);
         var startup=await storage.InvokeAsync<Startup>("read");autoSave=startup.AutoSave;draftStatus=startup.Message;
         foreach(var (json,session) in new[]{(startup.Plane,Model.Plane),(startup.Space,Model.Space)})
@@ -83,7 +84,15 @@ public partial class GeometryWorkspace
     private void Select(string id){Cancel();tool="select";selected=id;Render();}
     private void Cancel(){Session.EndGesture(true);pending.Clear();dragDocument=null;dragResolved=null;dragId=null;dragLabel=null;snap=null;pointer=null;Render();QueueSave();}
     private async Task SwitchDimension(int next){if(!await CanLeaveAsync())return;await Persist();dimension=next;Model.Dimension=next;selected=null;tool="select";Render();}
-    private void History(bool forward){Cancel();if(Session.History(forward)){selected=null;Render();QueueSave();}}
+    private void History(bool forward)
+    {
+        if(Session.InGesture)
+        {
+            if(forward){notice="Hoàn tất hoặc hủy thao tác đang dựng trước khi Làm lại.";return;}
+            Cancel();return;
+        }
+        Cancel();if(Session.History(forward)){selected=null;Render();QueueSave();}
+    }
     private void Delete(){if(selected==null)return;Cancel();Session.Remove(selected);selected=null;Render();QueueSave();}
     private void Complete(){Session.EndGesture();pending.Clear();snap=null;pointer=null;tool="select";Render();QueueSave();}
     private string TakePoint(string? id,Position world,bool alt)
@@ -285,7 +294,7 @@ public partial class GeometryWorkspace
     {
         if(!CanExport)return;var session=Session;long version=session.Version;string svg=GeometrySvg.Render(Doc);
         bool Current()=>!disposed&&Session==session&&session.Version==version&&CanExport;
-        try{byte[] bytes;if(format=="png"){renderer??=await Js.InvokeAsync<IJSObjectReference>("import","./_content/Locus.Editor/renderer.js");bytes=await renderer.InvokeAsync<byte[]>("png",svg,2);}else bytes=Encoding.UTF8.GetBytes(svg);if(!Current())return;var transfer=copy?format=="png"?await Clipboard.WritePngAsync(bytes,Current):await Clipboard.WriteSvgAsync(svg,Current):await Files.SaveAsync($"hinh-{dimension}d."+format,format=="png"?"image/png":"image/svg+xml",bytes,Current);if(Current())notice=Transfer(transfer);contextMenu=false;}catch(JSException){notice="Chưa xuất được ảnh. Hãy thử Tải SVG.";}
+        try{byte[] bytes;if(format=="png"){renderer??=await Js.InvokeAsync<IJSObjectReference>("import",AssetPaths.Resolve("_content/Locus.Editor/renderer.js"));bytes=await renderer.InvokeAsync<byte[]>("png",svg,2);}else bytes=Encoding.UTF8.GetBytes(svg);if(!Current())return;var transfer=copy?format=="png"?await Clipboard.WritePngAsync(bytes,Current):await Clipboard.WriteSvgAsync(svg,Current):await Files.SaveAsync($"hinh-{dimension}d."+format,format=="png"?"image/png":"image/svg+xml",bytes,Current);if(Current())notice=Transfer(transfer);contextMenu=false;}catch(JSException){notice="Chưa xuất được ảnh. Hãy thử Tải SVG.";}
     }
     private void QueueSave(){saveDelay?.Cancel();saveDelay?.Dispose();saveDelay=new();if(storage!=null)_=storage.InvokeVoidAsync("dirty");_=SaveAfterPause(saveDelay.Token);}
     private async Task SaveAfterPause(CancellationToken token){try{await Task.Delay(300,token);if(!token.IsCancellationRequested&&!disposed&&pending.Count==0&&dragDocument==null){await Persist();await InvokeAsync(StateHasChanged);}}catch(OperationCanceledException){}}

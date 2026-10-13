@@ -52,7 +52,8 @@ public static class GeometrySvg
         ScreenPosition? Point(string id)=>resolved.Points.TryGetValue(id,out var p)&&p.HasValue?projection.Project(p.Value):null;
         string Hit(string id)=>editing?$" data-geo-id=\"{id}\"":"";
         var svg=new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1000\" height=\"640\" viewBox=\"0 0 1000 640\" data-background=\"white\" role=\"img\" aria-label=\"Hình học\"><rect width=\"1000\" height=\"640\" fill=\"white\"/><defs><marker id=\"geo-arrow\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10Z\" fill=\"context-stroke\"/></marker></defs>");
-        var faces=(d.Faces??[]).Where(f=>f.Visible&&f.Vertices.All(v=>Point(v)!=null)).Select(f=>(Face:f,Points:f.Vertices.Select(v=>Point(v)!.Value).ToArray())).ToArray();
+        var faces=(d.Faces??[]).Where(f=>f.Visible&&f.Vertices.All(v=>Point(v)!=null)).Select(f=>(Face:f,Points:f.Vertices.Select(v=>Point(v)!.Value).ToArray(),Mesh:GeometryFaces.Triangulate(f.Vertices.Select(v=>resolved.Points[v]!.Value).ToArray()))).Where(f=>f.Mesh.Problem==null).ToArray();
+        var triangles=faces.SelectMany(f=>f.Mesh.Triangles.Select(t=>t.Select(i=>f.Points[i]).ToArray())).ToArray();
         foreach(var face in faces.OrderBy(f=>f.Points.Average(p=>p.Depth)))svg.Append($"<polygon{Hit(face.Face.Id)} points=\"{string.Join(" ",face.Points.Select(p=>N(p.X)+","+N(p.Y)))}\" fill=\"{face.Face.Color}\" fill-opacity=\"{N(face.Face.Opacity)}\" stroke=\"{(selected==face.Face.Id&&editing?"#73a892":"none")}\"/>");
         foreach(var c in d.Circles??[])
         {
@@ -65,21 +66,18 @@ public static class GeometrySvg
         {
             if(Point(s.Start) is not {} a||Point(s.End) is not {} b)continue;
             double dx=b.X-a.X,dy=b.Y-a.Y,len=Math.Sqrt(dx*dx+dy*dy);if(len<1e-8)continue;
-            if(s.Kind is "line" or "ray")
-            {
-                double start=s.Kind=="line"?-3000/len:0,end=3000/len;
-                double depth=b.Depth-a.Depth;
-                b=new(a.X+dx*end,a.Y+dy*end,a.Depth+depth*end);a=new(a.X+dx*start,a.Y+dy*start,a.Depth+depth*start);
-            }
-            var fragments=d.Dimension==3&&s.Hidden=="auto"?Visibility(a,b,faces.Select(f=>f.Points)):new[]{(Start:0d,End:1d,Hidden:s.Hidden=="hidden")};
+            var midpoint=Lerp(a,b,0.5);
+            if(!Clip(a,b,s.Kind,out var clippedA,out var clippedB,out bool includesEnd))continue;
+            a=clippedA;b=clippedB;
+            var fragments=d.Dimension==3&&s.Hidden=="auto"?Visibility(a,b,triangles):new[]{(Start:0d,End:1d,Hidden:s.Hidden=="hidden")};
             foreach(var fragment in fragments)
             {
                 var p=Lerp(a,b,fragment.Start);var q=Lerp(a,b,fragment.End);string style=fragment.Hidden?"dashed":s.LineStyle;
-                svg.Append($"<path{Hit(s.Id)} data-edge=\"{s.Id}\" data-hidden=\"{fragment.Hidden.ToString().ToLowerInvariant()}\" d=\"M{N(p.X)} {N(p.Y)}L{N(q.X)} {N(q.Y)}\" fill=\"none\" stroke=\"{s.Color}\" stroke-width=\"{N(s.Width)}\" stroke-dasharray=\"{Dash(style)}\"{(s.Kind=="vector"&&fragment.End==1?" marker-end=\"url(#geo-arrow)\"":"")}/>");
+                svg.Append($"<path{Hit(s.Id)} data-edge=\"{s.Id}\" data-hidden=\"{fragment.Hidden.ToString().ToLowerInvariant()}\" d=\"M{N(p.X)} {N(p.Y)}L{N(q.X)} {N(q.Y)}\" fill=\"none\" stroke=\"{s.Color}\" stroke-width=\"{N(s.Width)}\" stroke-dasharray=\"{Dash(style)}\"{(s.Kind=="vector"&&includesEnd&&fragment.End==1?" marker-end=\"url(#geo-arrow)\"":"")}/>");
             }
             for(int m=0;m<s.Marks;m++)
             {
-                double offset=(m-(s.Marks-1)/2d)*6,x=(a.X+b.X)/2+dx/len*offset,y=(a.Y+b.Y)/2+dy/len*offset;
+                double offset=(m-(s.Marks-1)/2d)*6,x=midpoint.X+dx/len*offset,y=midpoint.Y+dy/len*offset;
                 svg.Append($"<path d=\"M{N(x-dy/len*5)} {N(y+dx/len*5)}L{N(x+dy/len*5)} {N(y-dx/len*5)}\" stroke=\"{s.Color}\" stroke-width=\"1.5\"/>");
             }
             if(editing)svg.Append($"<path{Hit(s.Id)} d=\"M{N(a.X)} {N(a.Y)}L{N(b.X)} {N(b.Y)}\" stroke=\"{(s.Id==selected?"#55997738":"transparent")}\" stroke-width=\"14\" fill=\"none\"/>");
@@ -118,14 +116,31 @@ public static class GeometrySvg
         return svg.Append("</svg>").ToString();
     }
     private static ScreenPosition Lerp(ScreenPosition a,ScreenPosition b,double t)=>new(a.X+(b.X-a.X)*t,a.Y+(b.Y-a.Y)*t,a.Depth+(b.Depth-a.Depth)*t);
+    private static bool Clip(ScreenPosition a,ScreenPosition b,string kind,out ScreenPosition start,out ScreenPosition end,out bool includesEnd)
+    {
+        double first=kind=="line"?double.NegativeInfinity:0,last=kind is "line" or "ray"?double.PositiveInfinity:1;
+        bool Axis(double origin,double delta,double limit)
+        {
+            if(delta==0)return origin>=0&&origin<=limit;
+            double low=-origin/delta,high=(limit-origin)/delta;if(low>high)(low,high)=(high,low);
+            first=Math.Max(first,low);last=Math.Min(last,high);return first<=last;
+        }
+        start=end=default;includesEnd=false;
+        if(!Axis(a.X,b.X-a.X,GeometryProjection.Width)||!Axis(a.Y,b.Y-a.Y,GeometryProjection.Height)||!double.IsFinite(first)||!double.IsFinite(last)||last<=first)return false;
+        start=Lerp(a,b,first);end=Lerp(a,b,last);includesEnd=last==1;
+        // Roundoff at a clipped boundary must not put a valid endpoint just outside the canvas.
+        start=start with{X=Math.Clamp(start.X,0,GeometryProjection.Width),Y=Math.Clamp(start.Y,0,GeometryProjection.Height)};
+        end=end with{X=Math.Clamp(end.X,0,GeometryProjection.Width),Y=Math.Clamp(end.Y,0,GeometryProjection.Height)};
+        return true;
+    }
     /// <summary>Orthographic edge clipping against projected face triangles, splitting at exact depth crossings.</summary>
     internal static (double Start,double End,bool Hidden)[] Visibility(ScreenPosition a,ScreenPosition b,IEnumerable<ScreenPosition[]> faces)
     {
         var intervals=new List<(double Start,double End)>();
         static double Cross(ScreenPosition p,ScreenPosition q,ScreenPosition r)=>(q.X-p.X)*(r.Y-p.Y)-(q.Y-p.Y)*(r.X-p.X);
-        foreach(var face in faces)for(int i=1;i+1<face.Length;i++)
+        foreach(var tri in faces)
         {
-            var tri=new[]{face[0],face[i],face[i+1]};double area=Cross(tri[0],tri[1],tri[2]);if(Math.Abs(area)<1e-8)continue;
+            double area=Cross(tri[0],tri[1],tri[2]);if(Math.Abs(area)<1e-8)continue;
             double lo=0,hi=1;bool rejected=false;
             for(int j=0;j<3;j++)
             {

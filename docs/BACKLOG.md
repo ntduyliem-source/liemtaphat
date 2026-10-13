@@ -1,5 +1,7 @@
 # Backlog thực hiện Locus
 
+**Cập nhật 13/10/2026:** FIX0–FIX4 DONE cho 13 lỗi review; FIX5 logic/Web đạt, native Desktop/Word còn mở. [Kế hoạch](review/REPAIR-PLAN-20261013.md), [biên bản triển khai](review/REPAIR-VERIFICATION-20261013.md). Cổng còn lại: host mới đúng DLL, IME/clipboard và Word transaction/focus thực tế; không đổi trạng thái DONE hoặc tỷ lệ của các mốc lịch sử bên dưới.
+
 Cập nhật 2026-09-30. **G đạt 14/14 task alpha local.** Desktop đã kiểm chuột/phím, kéo/Undo, lưu/mở, Telex/VNI, tray và Copy sang Microsoft Word. D-CLIP-01 đã đạt; D-FILE/ma trận IME và WD1 highlight/nhiều DPI còn mở. SC1 giữ 8/10, W0 4/6; không lấy tỷ lệ G làm tiến độ toàn dự án. [Biên bản và giới hạn](host-review/20260930.md), [roadmap](ROADMAP.md).
 
 Các task đã DONE giữ nguyên ID và bằng chứng. UX1/DOC1/BAL1/WD1/WEB2 là phần mở rộng mới; viết kế hoạch không tính là hoàn thành tính năng. Không cộng số task mới vào mẫu số SC1 hoặc lấy % SC1 làm % toàn dự án.

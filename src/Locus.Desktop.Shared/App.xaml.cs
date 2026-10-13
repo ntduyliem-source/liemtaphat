@@ -24,6 +24,7 @@ public partial class App : System.Windows.Application
         if(debug>=0 && debug+1<e.Args.Length && int.TryParse(e.Args[debug+1],out int port) && port is >=1024 and <=65535)
             Environment.SetEnvironmentVariable("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",$"--remote-debugging-port={port} --remote-debugging-address=127.0.0.1");
         var services=new ServiceCollection();services.AddWpfBlazorWebView();
+        services.AddScoped<EditorAssetPaths>();
         services.AddScoped<IAnalysisScheduler,NativeAnalysisScheduler>();services.AddScoped<FormulaWorkspace>();
         services.AddScoped<PlotSession>();
         services.AddScoped<GeometryWorkspaceModel>();

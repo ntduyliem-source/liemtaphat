@@ -21,7 +21,7 @@ public partial class Workspace
         {
             var projection=ContentExport.Capture(session.State,resultSelection);
             var parts=projection.Parts.Select(p=>new {text=p.Text,mathMl=p.Formula is {} c?CandidateExporter.ToMathMl(c):null,candidateId=p.Formula?.Id}).ToArray();
-            await using var composer=await Js.InvokeAsync<IJSObjectReference>("import","./_content/Locus.Editor/formula/result-image.js");
+            await using var composer=await Js.InvokeAsync<IJSObjectReference>("import",AssetPaths.Resolve("_content/Locus.Editor/formula/result-image.js"));
             var scene=await composer.InvokeAsync<ResultImage>("compose",parts,options,resultElement);
             if(!Current()){notice="Nguồn hoặc vùng chọn đã đổi; bấm xuất lại để lấy kết quả hiện tại.";return;}
             byte[] bytes=request.Format=="svg"?Encoding.UTF8.GetBytes(scene.Svg):await renderer.InvokeAsync<byte[]>("png",scene.Svg,request.Scale);

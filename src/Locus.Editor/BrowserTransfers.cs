@@ -4,14 +4,14 @@ using Microsoft.JSInterop;
 namespace Locus.Editor;
 
 /// <summary>The file input remains a shared Blazor component; host side effects go through these ports.</summary>
-public sealed class BrowserTransfers(IJSRuntime js) : IEditorFiles, IEditorClipboard, IAsyncDisposable
+public sealed class BrowserTransfers(IJSRuntime js, EditorAssetPaths assets) : IEditorFiles, IEditorClipboard, IAsyncDisposable
 {
     private IJSObjectReference? module;
     private async Task<TransferResult> Send(string method, Func<bool> isCurrent, CancellationToken token, params object?[] values)
     {
         try
         {
-            module ??= await js.InvokeAsync<IJSObjectReference>("import", token, "./_content/Locus.Editor/editor.js");
+            module ??= await js.InvokeAsync<IJSObjectReference>("import", token, assets.Resolve("_content/Locus.Editor/editor.js"));
             if (!isCurrent()) return new(TransferStatus.Cancelled);
             await module.InvokeVoidAsync(method, token, values);
             return new(TransferStatus.Completed);
@@ -24,7 +24,7 @@ public sealed class BrowserTransfers(IJSRuntime js) : IEditorFiles, IEditorClipb
     public Task<TransferResult> WritePngAsync(byte[] bytes, Func<bool> isCurrent, CancellationToken token = default) => Send("clipboardPng", isCurrent, token, bytes);
     public async Task<ClipboardCapabilities> CapabilitiesAsync()
     {
-        module ??= await js.InvokeAsync<IJSObjectReference>("import", "./_content/Locus.Editor/editor.js");
+        module ??= await js.InvokeAsync<IJSObjectReference>("import", assets.Resolve("_content/Locus.Editor/editor.js"));
         return await module.InvokeAsync<ClipboardCapabilities>("capabilities");
     }
     public async Task<TransferResult> WriteSvgAsync(string svg, Func<bool> isCurrent, CancellationToken token = default)
@@ -37,7 +37,7 @@ public sealed class BrowserTransfers(IJSRuntime js) : IEditorFiles, IEditorClipb
     {
         try
         {
-            module ??= await js.InvokeAsync<IJSObjectReference>("import", token, "./_content/Locus.Editor/editor.js");
+            module ??= await js.InvokeAsync<IJSObjectReference>("import", token, assets.Resolve("_content/Locus.Editor/editor.js"));
             if (!isCurrent()) return new(TransferStatus.Cancelled);
             return await module.InvokeAsync<TransferResult>("saveAs", token, name, mediaType, content);
         }

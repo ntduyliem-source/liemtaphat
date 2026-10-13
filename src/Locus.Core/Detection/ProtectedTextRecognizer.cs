@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Locus.Core.Parsing;
@@ -17,7 +18,7 @@ namespace Locus.Core.Detection
     /// <summary>Recognizes opaque address/path tokens before any mathematical substring search.</summary>
     internal static class ProtectedTextRecognizer
     {
-        public static List<ProtectedText> Find(string raw, CancellationToken cancellationToken, bool protectDates = false)
+        public static List<ProtectedText> Find(string raw, CancellationToken cancellationToken, bool passive = false)
         {
             var result = new List<ProtectedText>();
             int i = 0;
@@ -39,10 +40,23 @@ namespace Locus.Core.Detection
                 while (i < raw.Length && !char.IsWhiteSpace(raw[i]))
                 { if ((i & 255) == 0) cancellationToken.ThrowIfCancellationRequested(); i++; }
                 string? code = Classify(raw, start, i);
-                if (code == null && protectDates && LooksLikeDate(raw, start, i)) code = "PROTECTED_DATE";
+                if (code == null && passive && LooksLikeDate(raw, start, i)) code = "PROTECTED_DATE";
                 if (code != null) result.Add(new ProtectedText(new TextSpan(start, i), code));
             }
-            return result;
+            if (!passive) return result;
+            result.AddRange(FormulaDetectionSyntax.UnsupportedFunctionCalls(raw, cancellationToken)
+                .Select(span => new ProtectedText(span, "UNSUPPORTED_FUNCTION")));
+            var ordered = new List<ProtectedText>();
+            foreach (var item in result.OrderBy(item => item.Span.Start))
+            {
+                if (ordered.Count == 0 || ordered[ordered.Count - 1].Span.End <= item.Span.Start) ordered.Add(item);
+                else
+                {
+                    var previous = ordered[ordered.Count - 1];
+                    ordered[ordered.Count - 1] = new ProtectedText(new TextSpan(previous.Span.Start, Math.Max(previous.Span.End, item.Span.End)), previous.Code);
+                }
+            }
+            return ordered;
         }
 
         // Only passive prose uses this guard. Explicit input and wrappers can still
@@ -56,8 +70,8 @@ namespace Locus.Core.Detection
             int before = start, after = right;
             while (before > 0 && char.IsWhiteSpace(raw[before - 1]) && raw[before - 1] != '\r' && raw[before - 1] != '\n') before--;
             while (after < raw.Length && char.IsWhiteSpace(raw[after]) && raw[after] != '\r' && raw[after] != '\n') after++;
-            if (before > 0 && "+-*/^=<>×÷−".IndexOf(raw[before - 1]) >= 0 ||
-                after < raw.Length && "+-*/^=<>×÷−".IndexOf(raw[after]) >= 0) return false;
+            if (before > 0 && FormulaDetectionSyntax.IsOperatorSymbol(raw[before - 1]) ||
+                after < raw.Length && FormulaDetectionSyntax.IsOperatorSymbol(raw[after])) return false;
             int wordStart = before;
             while (wordStart > 0 && (char.IsLetter(raw[wordStart - 1]) || CharUnicodeInfo.GetUnicodeCategory(raw[wordStart - 1]) == UnicodeCategory.NonSpacingMark)) wordStart--;
             if (wordStart < before && FormulaLexicon.IsSupportedWord(raw.Substring(wordStart, before - wordStart).Normalize(NormalizationForm.FormC))) return false;
@@ -125,7 +139,7 @@ namespace Locus.Core.Detection
                     wordDirectory = char.IsLetterOrDigit(text[j]) || text[j] == '_' || text[j] == '-' || text[j] == '.';
                 string firstPart = text.Substring(contentStart, slash - contentStart);
                 if (wordDirectory && !FormulaLexicon.IsSupportedWord(firstPart) && !FormulaLexicon.IsCompactRootNumber(firstPart) &&
-                    !IsSubtractionWithDivision(text, contentStart, end, firstPart)) return "PROTECTED_PATH";
+                    !IsSubtractionWithDivision(text, start, end, firstPart)) return "PROTECTED_PATH";
             }
             return null;
         }
@@ -138,6 +152,10 @@ namespace Locus.Core.Detection
             var left = new FormulaParser().Parse(before, new TextSpan(0, prefix.Length));
             if (left.Candidates.Count == 0 || left.Candidates[0].Document.Root.Type != "Binary" || left.Candidates[0].Document.Root.Operator != "subtract") return false;
             while (end > start && ",;.!?".IndexOf(text[end - 1]) >= 0) end--;
+            // Address classification skips leading punctuation, but the math exemption must retain
+            // balanced parentheses. Only paired surrounding quotes are outside the expression.
+            while (end - start >= 2 && (text[start] == '"' || text[start] == '\'') && text[start] == text[end - 1])
+            { start++; end--; }
             var source = new SourceSnapshot(text.Substring(start, end - start));
             var parsed = new FormulaParser().Parse(source, new TextSpan(0, source.Raw.Length));
             return parsed.Candidates.Count > 0 && parsed.Candidates[0].Kind == "direct";

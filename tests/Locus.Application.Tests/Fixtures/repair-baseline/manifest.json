@@ -1,0 +1,40 @@
+{
+  "baseline": "4d4f91e4ca587dece7909596568f01e545b19a46",
+  "source": "Pre-repair Release assemblies, copied before edits and builds; snapshots are historical and must not be reparsed on open.",
+  "assemblies": [
+    {
+      "name": "Locus.Core.dll",
+      "sha256": "99156512f651f856ec1303ad67823cdb2a4d574118156f5c151779fe1cb2f5dc"
+    },
+    {
+      "name": "Locus.Application.dll",
+      "sha256": "3faeee15a80d3e90cf4f244a42403d15403e577dd80c056efa7c7fc2db2c2049"
+    }
+  ],
+  "fixtures": [
+    {
+      "file": "math-repair.locus",
+      "sha256": "1d115dc7a3d5e26a30b41ada708af54be7e618b15ef7e2d73f1f9749a0fdbfb7",
+      "raw": "x^2\u002B1/2",
+      "result": null
+    },
+    {
+      "file": "mixed-chemistry.locus",
+      "sha256": "b96edfd4f732b16389da6d339f6429d4c461aea2d2cba10842748146bb7c638b",
+      "raw": "\uD83D\uDC69\u200D\uD83C\uDFEB B\u00E0i e\u0301\r\nCho toan-[x\u002B1/2].\nPh\u1EA3n \u1EE9ng hoa-[H2\u002BO2=] v\u00E0 hoa-[N2\u002BH2=NH3].\nGi\u1EEF https://example.org/x^2.",
+      "result": "\uD83D\uDC69\u200D\uD83C\uDFEB B\u00E0i e\u0301\r\nCho toan-[x\u002B1/2].\nPh\u1EA3n \u1EE9ng 2\\,{\\mathrm{H}}_{2}\u002B{\\mathrm{O}}_{2} \\rightarrow 2\\,{\\mathrm{H}}_{2}\\mathrm{O} v\u00E0 {\\mathrm{N}}_{2}\u002B3\\,{\\mathrm{H}}_{2} \\rightarrow 2\\,\\mathrm{N}{\\mathrm{H}}_{3}.\nGi\u1EEF https://example.org/x^2."
+    },
+    {
+      "file": "historical-physics.locus",
+      "sha256": "b4fc2526e3274c8fe9b6060a592b329f079a5222e98b053717567baf55135b45",
+      "raw": "10 kg*(m/s)^2",
+      "result": "{10\\,\\mathrm{kg} \\cdot \\frac{\\mathrm{m}}{\\mathrm{s}}}^{2}"
+    },
+    {
+      "file": "geometry-concave.locus",
+      "sha256": "666b407605e7ac77841bac4eb2ddb221393c2452a63038e650be06ea9e36a860",
+      "raw": null,
+      "result": null
+    }
+  ]
+}

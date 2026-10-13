@@ -7,7 +7,7 @@
 <div class="geometry-workspace" @ref="root">
     <header class="plot-header"><div><strong>Hình học</strong><small>Đặt điểm, nối và kéo trực tiếp trên canvas</small></div><div class="plot-actions">
         <button class="@(dimension==2?"geo-active":"")" @onclick="()=>SwitchDimension(2)">2D</button><button class="@(dimension==3?"geo-active":"")" @onclick="()=>SwitchDimension(3)">3D</button>
-        <button aria-label="Hoàn tác hình học" disabled="@(!Session.CanUndo)" @onclick="()=>History(false)">↶</button><button aria-label="Làm lại hình học" disabled="@(!Session.CanRedo)" @onclick="()=>History(true)">↷</button><button @onclick="Save">Lưu .locus</button><label class="plot-open">Mở<InputFile OnChange="Open" accept=".locus" /></label>
+        <button aria-label="Hoàn tác hình học" disabled="@(!Session.CanUndo)" @onclick="()=>History(false)">↶</button><button aria-label="Làm lại hình học" disabled="@(!Session.CanRedo||Session.InGesture)" @onclick="()=>History(true)">↷</button><button @onclick="Save">Lưu .locus</button><label class="plot-open">Mở<InputFile OnChange="Open" accept=".locus" /></label>
         @if(DesktopWindow!=null){<button aria-label="Đổi kích thước cửa sổ" @onclick="DesktopWindow.ToggleSizeAsync">⛶</button>}
     </div></header>
     <div class="geo-toolbar" role="toolbar" aria-label="Công cụ hình học">

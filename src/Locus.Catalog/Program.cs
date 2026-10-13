@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<Catalog>("#app");
+builder.Services.AddScoped<EditorAssetPaths>();
 builder.Services.AddScoped<IAnalysisScheduler, BrowserAnalysisScheduler>();
 builder.Services.AddScoped<FormulaWorkspace>();
 builder.Services.AddScoped<PlotSession>();

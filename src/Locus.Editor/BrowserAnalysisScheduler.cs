@@ -4,7 +4,7 @@ using Microsoft.JSInterop;
 
 namespace Locus.Editor;
 
-public sealed class BrowserAnalysisScheduler(IJSRuntime js) : IAnalysisScheduler, IChemistryAssistanceScheduler, IContentBalanceScheduler, IPlotScheduler, IAsyncDisposable
+public sealed class BrowserAnalysisScheduler(IJSRuntime js, EditorAssetPaths assets) : IAnalysisScheduler, IChemistryAssistanceScheduler, IContentBalanceScheduler, IPlotScheduler, IAsyncDisposable
 {
     public async Task<PlotResult> PlotAsync(PlotRequest request, CancellationToken token)
     {
@@ -20,8 +20,8 @@ public sealed class BrowserAnalysisScheduler(IJSRuntime js) : IAnalysisScheduler
     public Task InitializeAsync() => initialization ??= InitializeCoreAsync();
     private async Task InitializeCoreAsync()
     {
-        module = await js.InvokeAsync<IJSObjectReference>("import", "./_content/Locus.Editor/worker-client.js");
-        manager = await module.InvokeAsync<IJSObjectReference>("create", "./worker/worker.js");
+        module = await js.InvokeAsync<IJSObjectReference>("import", assets.Resolve("_content/Locus.Editor/worker-client.js"));
+        manager = await module.InvokeAsync<IJSObjectReference>("create", assets.Resolve("worker/worker.js"));
     }
     public async Task<AnalysisResult> AnalyzeAsync(AnalysisRequest request, CancellationToken cancellationToken)
     {

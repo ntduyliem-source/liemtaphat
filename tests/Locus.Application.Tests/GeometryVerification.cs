@@ -35,6 +35,61 @@ internal static class GeometryVerification
             var svg=GeometrySvg.Render(d);Assert(svg.Contains("data-hidden=\"true\"")&&svg.Contains("data-hidden=\"false\""));File.WriteAllText(Path.Combine(directory,"hidden-clipping.svg"),svg);
             svg=GeometrySvg.Render(d with{Segments=[d.Segments[0] with{Hidden="visible"}]});Assert(!svg.Contains("data-hidden=\"true\""));
         });
+        Check("r10-infinite-lines-intersect-viewport-from-distant-anchors",()=>{
+            foreach(var (a,b,expected) in new[]{(new Position(100,0),new Position(101,0),"M0 320L1000 320"),(new Position(0,100),new Position(0,101),"M500 640L500 0"),(new Position(100,100),new Position(101,101),"M180 640L820 0")})
+            {
+                var d=new GeometryDocument(Guid.NewGuid(),0,[new("A",a.X,a.Y,"A"),new("B",b.X,b.Y,"B")],[new("AB","A","B",Kind:"line")]);
+                string Path(string svg)=>System.Xml.Linq.XDocument.Parse(svg).Descendants().Single(e=>e.Attribute("data-edge")?.Value=="AB").Attribute("d")!.Value;
+                Assert(Path(GeometrySvg.Render(d))==expected,"Infinite line missed the viewport: "+Path(GeometrySvg.Render(d)));
+                Assert(Path(GeometrySvg.Render(d,null,true))==expected,"Preview and exported line differ.");
+            }
+        });
+        Check("r10-ray-direction-segment-bounds-and-degenerate-points",()=>{
+            GeometryDocument Make(Position a,Position b,string kind)=>new(Guid.NewGuid(),0,[new("A",a.X,a.Y,"A"),new("B",b.X,b.Y,"B")],[new("AB","A","B",Kind:kind)]);
+            string[] Paths(GeometryDocument d)=>System.Xml.Linq.XDocument.Parse(GeometrySvg.Render(d)).Descendants().Where(e=>e.Attribute("data-edge")?.Value=="AB").Select(e=>e.Attribute("d")!.Value).ToArray();
+            Assert(Paths(Make(new(100,0),new(99,0),"ray")).SequenceEqual(new[]{"M1000 320L0 320"}),"A ray pointing toward the viewport must reach it.");
+            Assert(Paths(Make(new(100,0),new(101,0),"ray")).Length==0,"A ray pointing away must stay outside.");
+            Assert(Paths(Make(new(100,0),new(101,0),"segment")).Length==0,"A finite segment must not become a line.");
+            Assert(Paths(Make(new(0,0),new(0,0),"line")).Length==0,"Coincident points do not define a line.");
+            Assert(Paths(Make(new(100,6),new(101,6),"line")).Length==0,"Parallel line outside the view must remain outside.");
+            var panned=Make(new(100,0),new(101,0),"line") with{Viewport=new(-2,1,2,-1)};
+            Assert(Paths(panned).SequenceEqual(new[]{"M0 320L1000 320"}),"Zoom must retain the visible line intersection.");
+            Assert(Paths(Make(new(100,5),new(101,5),"line")).SequenceEqual(new[]{"M0 0L1000 0"}),"A line on a viewport boundary must stay visible.");
+            Assert(!GeometrySvg.Render(Make(new(0,0),new(100,0),"vector")).Contains("marker-end="),"Clipping a vector must not invent an arrowhead at the viewport edge.");
+            Assert(GeometrySvg.Render(Make(new(100,0),new(0,0),"vector")).Contains("marker-end="),"A visible vector endpoint must keep its arrowhead.");
+        });
+        Check("r11-concave-face-notch-stays-visible-in-both-windings",()=>{
+            double[][] xy=[[0,0],[3,0],[3,3],[2,3],[2,1],[1,1],[1,3],[0,3]];
+            var points=xy.Select((p,i)=>new GeometryPoint("P"+i,p[0],p[1],"P"+i,1)).ToArray();
+            foreach(bool reverse in new[]{false,true})foreach(double azimuth in new[]{0d,35d,90d})
+            {
+                var ids=points.Select(p=>p.Id).ToArray();if(reverse)Array.Reverse(ids);
+                var d=new GeometryDocument(Guid.NewGuid(),0,[..points,new("A",1.4,2,"A"),new("B",1.6,2,"B")],[new("AB","A","B")],Faces:[new("face",ids)],Dimension:3,Camera:new(azimuth,90,65));
+                Assert(GeometryEngine.Resolve(d).Problems.Length==0,"A valid concave face must remain supported.");
+                var edges=System.Xml.Linq.XDocument.Parse(GeometrySvg.Render(d)).Descendants().Where(e=>e.Attribute("data-edge")?.Value=="AB").ToArray();
+                Assert(edges.Length>0&&edges.All(e=>e.Attribute("data-hidden")?.Value=="false"),"Empty concave notch falsely hides an edge.");
+                var boundary=d with{Points=d.Points.Select(p=>p.Id=="A"?p with{X=1,Y=1,Z=1}:p.Id=="B"?p with{X=1,Y=3,Z=1}:p).ToArray()};
+                Assert(!GeometrySvg.Render(boundary).Contains("data-hidden=\"true\""),"An edge on the face boundary must not hide itself.");
+                var covered=d with{Points=d.Points.Select(p=>p.Id is "A" or "B"?p with{Y=0.5}:p).ToArray()};
+                var coveredEdges=System.Xml.Linq.XDocument.Parse(GeometrySvg.Render(covered)).Descendants().Where(e=>e.Attribute("data-edge")?.Value=="AB").ToArray();
+                Assert(coveredEdges.Length>0&&coveredEdges.All(e=>e.Attribute("data-hidden")?.Value=="true"),"The solid part of a concave face must still occlude edges behind it.");
+            }
+        });
+        Check("r11-collinear-boundary-vertices-preserve-valid-face",()=>{
+            var d=new GeometryDocument(Guid.NewGuid(),0,[new("A",0,0,"A",1),new("B",1,0,"B",1),new("C",2,0,"C",1),new("D",2,2,"D",1),new("E",0,2,"E",1),new("P",0.5,1,"P"),new("Q",1.5,1,"Q")],[new("PQ","P","Q")],Faces:[new("face",["A","B","C","D","E"])],Dimension:3,Camera:new(0,90));
+            Assert(GeometryEngine.Resolve(d).Problems.Length==0,"Collinear boundary vertices are valid.");
+            Assert(GeometrySvg.Render(d).Contains("data-hidden=\"true\""),"The valid face must retain its surface after triangulation.");
+            var duplicate=d with{Points=d.Points.Select(p=>p.Id=="B"?p with{X=0}:p).ToArray()};
+            Assert(GeometryEngine.Resolve(duplicate).Problems.Any(p=>p.Contains("trùng")),"Duplicate face vertices must be reported.");
+            var nonplanar=d with{Points=d.Points.Select(p=>p.Id=="D"?p with{Z=2}:p).ToArray()};
+            Assert(GeometryEngine.Resolve(nonplanar).Problems.Any(p=>p.Contains("đồng phẳng"))&&!GeometrySvg.Render(nonplanar).Contains("data-hidden=\"true\""),"A nonplanar face must not silently become a different occluding surface.");
+        });
+        Check("r11-invalid-face-retains-source-and-does-not-occlude",()=>{
+            var d=new GeometryDocument(Guid.NewGuid(),0,[new("A",0,0,"A",1),new("B",2,2,"B",1),new("C",0,2,"C",1),new("D",2,0,"D",1),new("E",0.8,1,"E"),new("F",1.2,1,"F")],[new("EF","E","F")],Faces:[new("face",["A","B","C","D"])],Dimension:3,Camera:new(0,90));
+            GeometryEngine.Validate(d);Assert(GeometryEngine.Resolve(d).Problems.Any(p=>p.Contains("tự cắt")),"Self-intersecting face must be reported.");
+            Assert(!GeometrySvg.Render(d).Contains("data-hidden=\"true\""),"Invalid face must not invent an occluding surface.");
+            var json=DocumentCodec.Serialize(d);Assert(DocumentCodec.Serialize(DocumentCodec.Open(json).Document!)==json,"Invalid construction data must remain recoverable.");
+        });
         Check("3d-extended-line-preserves-depth",()=>{
             var a=new Position(-2,1);var b=new Position(2,-1);
             var d=new GeometryDocument(Guid.NewGuid(),0,[new("A",a.X,a.Y,"A"),new("B",b.X,b.Y,"B"),new("P",-4,-1.8,"P",-1),new("Q",4,-1.8,"Q",-1),new("R",4,-1.8,"R",1),new("S",-4,-1.8,"S",1)],[new("AB","A","B",Kind:"line")],Faces:[new("face",["P","Q","R","S"])],Dimension:3,Camera:new(0,0));

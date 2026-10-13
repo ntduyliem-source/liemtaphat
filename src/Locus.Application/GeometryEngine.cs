@@ -85,10 +85,8 @@ public static class GeometryEngine
         {
             var vertices=face.Vertices.Select(Get).ToArray();
             if(vertices.Any(p=>p==null)){problems.Add("Mặt có đỉnh không xác định.");continue;}
-            var points=vertices.Select(p=>p!.Value).ToArray();var normal=new Position();
-            for(int i=1;i+1<points.Length&&normal.Length<1e-10;i++)normal=(points[i]-points[0]).Cross(points[i+1]-points[0]);
-            if(normal.Length<1e-10){problems.Add("Mặt / đa giác suy biến: các đỉnh thẳng hàng.");continue;}
-            if(d.Dimension==3&&points.Any(p=>Math.Abs((p-points[0]).Dot(normal))>normal.Length*1e-7))problems.Add("Mặt "+string.Join("",face.Vertices.Select(id=>map[id].Label))+" không còn đồng phẳng; bản xem trước chia mặt thành tam giác. Chỉnh lại đỉnh trước khi xuất.");
+            var mesh=GeometryFaces.Triangulate(vertices.Select(p=>p!.Value).ToArray());
+            if(mesh.Problem is {} problem)problems.Add(problem);
         }
         return new(resolved,problems.ToArray());
     }
@@ -125,7 +123,7 @@ public sealed class GeometrySession
     public GeometryDocument Document{get;private set;}
     public long Version{get;private set;}
     private readonly List<GeometryDocument> undo=[],redo=[];private GeometryDocument? gesture;
-    public bool CanUndo=>undo.Count>0||gesture!=null;public bool CanRedo=>redo.Count>0;
+    public bool CanUndo=>undo.Count>0||gesture!=null;public bool CanRedo=>redo.Count>0;public bool InGesture=>gesture!=null;
     public GeometrySession(int dimension=2){Document=new(Guid.NewGuid(),0,[],[],[],[],[],[],new(-7.5,5,7.5,-5),dimension,new());}
     public void BeginGesture(){gesture??=Document;}
     public void EndGesture(bool cancel=false){if(gesture==null)return;if(cancel){Document=gesture;Version++;}else if(gesture!=Document)Push(gesture);gesture=null;}

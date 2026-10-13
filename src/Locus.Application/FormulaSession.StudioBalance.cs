@@ -77,7 +77,10 @@ public sealed partial class FormulaSession
                     }
                     else if (region.Display == null && ContentReactionDrafts.IsDraft(region.Raw, before.Settings, before.SourceRevision) && scheduler is IChemistryAssistanceScheduler executor)
                     {
-                        var settings = before.Settings with { Mode = Locus.Core.Detection.InputMode.Explicit };
+                        // This explicit Chemistry command resolves an already-detected
+                        // draft as chemistry; Unicode subscripts can also be physics
+                        // symbols in the general/ghost interpretation path.
+                        var settings = before.Settings with { Mode = Locus.Core.Detection.InputMode.Explicit, EnabledDomains = DetectionDomains.Chemistry };
                         var request = new ChemistryAssistanceRequest(new(region.Raw, before.SourceRevision, settings), 0, [], UseUniqueCatalogConditions: true);
                         var reply = await executor.AssistAsync(request, cancellation.Token);
                         if (!BalanceCurrent(before, version, epoch, cancellation.Token)) return false;

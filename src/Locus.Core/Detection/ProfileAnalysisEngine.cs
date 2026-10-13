@@ -25,7 +25,7 @@ namespace Locus.Core.Detection
 
             if (options.InputMode == InputMode.Passive && options.EnabledDomains != DetectionDomains.None)
             {
-                var protectedText = ProtectedTextRecognizer.Find(source.Raw, token, protectDates: true);
+                var protectedText = ProtectedTextRecognizer.Find(source.Raw, token, passive: true);
                 if ((options.EnabledDomains & DetectionDomains.Physics) != 0)
                     protectedText.RemoveAll(p => DomainAnalysisEngine.QuantityUnitContext(source, p, token));
                 protectedText.AddRange(scan.ReservedSpans.Select(s => new ProtectedText(s, "PROTECTED_MARKER")));

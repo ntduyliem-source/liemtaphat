@@ -24,9 +24,11 @@ namespace Locus.Core.Assistance
                 int end = p + separatorLength;
                 if (end < raw.Length && !char.IsWhiteSpace(raw[end]) && ".,;!?".IndexOf(raw[end]) < 0) continue;
                 int next = end; while (next < raw.Length && raw[next] != '\r' && raw[next] != '\n' && char.IsWhiteSpace(raw[next])) next++;
-                int wordEnd = next; while (wordEnd < raw.Length && !char.IsWhiteSpace(raw[wordEnd]) && ".,;!?".IndexOf(raw[wordEnd]) < 0) wordEnd++;
-                // A product following a space still belongs to a complete equation.
-                if (wordEnd > next && new ChemistryParser(true).Parse(source, new TextSpan(next, wordEnd), cancellationToken: token).Candidates.Count > 0) continue;
+                // Only an empty RHS is a draft. A number, unsupported species or
+                // malformed product still occupies this side and must not be replaced
+                // by inferred products. Newlines/punctuation end this reaction window.
+                if (next < raw.Length && raw[next] != '\r' && raw[next] != '\n' &&
+                    (".,;!?".IndexOf(raw[next]) < 0 || (raw[next] == '.' || raw[next] == ',') && next + 1 < raw.Length && char.IsLetterOrDigit(raw[next + 1]))) continue;
                 int left = p;
                 while (left > previousEnd && ChemicalCharacter(raw[left - 1])) left--;
                 int attempts = 0;
@@ -46,7 +48,6 @@ namespace Locus.Core.Assistance
             }
             return result;
         }
-        private static bool ChemicalCharacter(char c) => c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || char.IsDigit(c) ||
-            "()[]+^-⁺⁻".IndexOf(c) >= 0 || c == ' ' || c == '\t';
+        private static bool ChemicalCharacter(char c) => ChemistryParser.IsChemicalCharacter(c) || c == ' ' || c == '\t';
     }
 }

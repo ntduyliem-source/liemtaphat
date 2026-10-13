@@ -5,6 +5,91 @@ public static class DetectionContractTests
 {
     public static void Run(Action<string, Action> check)
     {
+        check("review-R01-unsupported-function-call-keeps-whole-scope", () =>
+        {
+            foreach (var domains in new[] { DetectionDomains.Math, DetectionDomains.All })
+            foreach (var call in new[] { "sin(x+1)", "sin (x+1)", "log (x+1)", "sin\u00a0((x + 1)/2)", "cos\t(x + 1)", "sin (x+1", "log (x + 1; x^2)" })
+            {
+                var raw = call + "; y=2";
+                // An unclosed call is protected through its line, rather than salvaging an argument.
+                var result = WithDomains(raw, domains);
+                if (call == "sin (x+1") Assert(result.Regions.Count == 0, "Salvaged an unclosed unsupported call.");
+                else One(result, "y=2");
+            }
+            foreach (var domains in new[] { DetectionDomains.Math, DetectionDomains.All })
+            {
+                One(WithDomains("Tính (x+1).", domains), "(x+1)");
+                One(WithDomains("sin (x + 1)\ny=2", domains), "y=2");
+                var wrapped = new AnalysisEngine().Analyze(new SourceSnapshot("lc[sin (x+1)]"),
+                    new AnalysisOptions(InputMode.Markers, enabledDomains: domains));
+                Assert(wrapped.Regions.Count == 0, "Wrapper bypassed unsupported function grammar.");
+            }
+        });
+        check("review-R04-parenthesized-subtraction-is-not-a-path", () =>
+        {
+            foreach (var domains in new[] { DetectionDomains.Math, DetectionDomains.All })
+            foreach (var formula in new[] { "(x-1/2)", "((x-1/2))", "(x-1/2)+y" })
+            {
+                var explicitResult = new AnalysisEngine().Analyze(new SourceSnapshot(formula), new AnalysisOptions(enabledDomains: domains));
+                One(explicitResult, formula);
+                One(WithDomains("Tính " + formula + ".", domains), formula);
+                var marked = new AnalysisEngine().Analyze(new SourceSnapshot("lc[" + formula + "]"), new AnalysisOptions(InputMode.Markers, enabledDomains: domains));
+                One(marked, formula);
+                Assert(marked.Regions[0].OriginalReplacement == "lc[" + formula + "]", "Wrapper/source changed.");
+            }
+        });
+        check("review-R05-quoted-prose-keeps-exact-formula-spans", () =>
+        {
+            foreach (var domains in new[] { DetectionDomains.Math, DetectionDomains.All })
+            foreach (var pair in new[] { ("\"", "\""), ("'", "'"), ("“", "”"), ("‘", "’") })
+            {
+                const string formula = "x mu\u0303 2 cộng 1";
+                string raw = "😀 Tính " + pair.Item1 + formula + pair.Item2 + ".";
+                var result = WithDomains(raw, domains);
+                One(result, formula);
+                Assert(result.Regions[0].ReplacementSpan.Start == raw.IndexOf(formula, StringComparison.Ordinal), "Wrong UTF-16 boundary.");
+                Assert(result.Regions[0].ContentSpan.Equals(result.Regions[0].ReplacementSpan), "Quote included in replacement.");
+            }
+        });
+        check("review-R06-alias-operators-do-not-salvage-opaque-prefix", () =>
+        {
+            foreach (var domains in new[] { DetectionDomains.Math, DetectionDomains.All })
+            foreach (var invalid in new[] { "A1 trừ x^2", "abc cộng x^2", "abc tru x^2", "abc co\u0323\u0302ng x^2", "abc + x^2", "abc − x^2" })
+                One(WithDomains(invalid + "; y=2", domains), "y=2");
+            foreach (var domains in new[] { DetectionDomains.Math, DetectionDomains.All })
+            {
+                One(WithDomains("-x^2", domains), "-x^2");
+                One(WithDomains("trừ x^2", domains), "trừ x^2");
+                One(WithDomains("Tính: -x^2.", domains), "-x^2");
+            }
+        });
+        check("review-R09-unicode-operators-disambiguate-date-like-operands", () =>
+        {
+            foreach (var domains in new[] { DetectionDomains.Math, DetectionDomains.All })
+            foreach (var op in new[] { "·", "×", "*", "≤", "<=", "≥", ">=", "÷", "−" })
+            {
+                var formula = "x " + op + " 28/09";
+                One(WithDomains("Xét " + formula + ".", domains), formula);
+                formula = "28/09 " + op + " x";
+                One(WithDomains("Xét " + formula + ".", domains), formula);
+            }
+            foreach (var domains in new[] { DetectionDomains.Math, DetectionDomains.All })
+            foreach (var opaque in new[] { "Ngày 28/09", "Ngày 1/2", "https://e.test/x^2", "hello@example.org", "C:\\toan\\x^2", "/home/x^2", "data-set/1", "(data-set/1)" })
+                One(WithDomains(opaque + "; y=2", domains), "y=2");
+        });
+        check("review-R07-quantity-arithmetic-is-not-a-relative-path", () =>
+        {
+            foreach (var domains in new[] { DetectionDomains.Physics, DetectionDomains.All })
+            foreach (var formula in new[] { "10 kg/t", "10 kg/(x+1)", "10 kg/t^2", "-10 kg/t" })
+            {
+                var explicitResult = new AnalysisEngine().Analyze(new SourceSnapshot(formula), new AnalysisOptions(enabledDomains: domains));
+                One(explicitResult, formula);
+                Assert(explicitResult.Regions[0].Candidates[0].Document.Domain == "physics", "Quantity was reinterpreted as math.");
+                One(WithDomains("Giá trị: " + formula + ".", domains), formula);
+            }
+            foreach (var opaque in new[] { "10 kg/file.txt", "10 data/file.txt", "10 https://e.test/x^2", "10 /home/x^2", "10 C:\\toan\\x^2" })
+                One(WithDomains(opaque + "; y=2", DetectionDomains.All), "y=2");
+        });
         check("invalid-marker-config-and-surrogates", () =>
         {
             var configs = new[] { new MarkerConfiguration("", "]"), new MarkerConfiguration("#", "#"),
@@ -185,6 +270,8 @@ public static class DetectionContractTests
 
     private static AnalysisResult Analyze(string raw, InputMode mode, MarkerConfiguration? markers = null) =>
         new AnalysisEngine().Analyze(new SourceSnapshot(raw), new AnalysisOptions(mode, markers: markers));
+    private static AnalysisResult WithDomains(string raw, DetectionDomains domains) =>
+        new AnalysisEngine().Analyze(new SourceSnapshot(raw), new AnalysisOptions(InputMode.Passive, enabledDomains: domains));
     private static bool Has(AnalysisResult result, string code) => result.Diagnostics.Any(d => d.Code == code);
     private static void One(AnalysisResult result, string content)
     {

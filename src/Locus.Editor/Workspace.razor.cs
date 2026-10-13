@@ -21,7 +21,7 @@ public partial class Workspace
 
     private async Task InitializeLocal()
     {
-        local = await Js.InvokeAsync<IJSObjectReference>("import", "./_content/Locus.Editor/local-state.js");
+        local = await Js.InvokeAsync<IJSObjectReference>("import", AssetPaths.Resolve("_content/Locus.Editor/local-state.js"));
         try
         {
             var state = await local.InvokeAsync<LocalStartup>("start", Host);

@@ -56,6 +56,8 @@ Corpus hiện hành còn 8 mục pending có sẵn; các guard native Word khôn
 Lệnh chính:
 
 ```powershell
+npm --prefix tools/sh ci --ignore-scripts
+node tools/web1/vendor.mjs
 ./tools/review/verify-repairs.ps1
 ./tools/web1/build.ps1 -WebOnly
 node tools/web1/verify-static.mjs
@@ -70,7 +72,7 @@ $env:LOCUS_REPAIR_URL='http://127.0.0.1:4204/'
 node tools/review/verify-web-repairs.mjs
 ```
 
-Workflow Pages nay chạy regression portable, static validation, navigation và cập nhật ứng dụng thật trước upload/deploy. Lỗi kiểm phải dừng phát hành.
+Workflow Pages chuẩn bị dependency renderer từ lockfile trước khi build Editor tests trên checkout sạch, rồi chạy regression portable, static validation, navigation và cập nhật ứng dụng thật trước upload/deploy. Lượt CI đầu đã chặn vì thứ tự chuẩn bị renderer thiếu; đã sửa thứ tự, không bỏ cổng test. Lỗi kiểm phải dừng phát hành.
 
 ## Phạm vi từng sản phẩm
 

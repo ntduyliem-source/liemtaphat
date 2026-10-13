@@ -74,6 +74,8 @@ node tools/review/verify-web-repairs.mjs
 
 Workflow Pages chuẩn bị dependency renderer từ lockfile trước khi build Editor tests trên checkout sạch, rồi chạy regression portable, static validation, navigation và cập nhật ứng dụng thật trước upload/deploy. Lượt CI đầu đã chặn vì thứ tự chuẩn bị renderer thiếu; đã sửa thứ tự, không bỏ cổng test. Lỗi kiểm phải dừng phát hành.
 
+Hai fixture Web1 lịch sử vốn nằm trong `artifacts` đã chuyển vào `tests/Locus.Science.Tests/Fixtures` và `tests/Locus.SmartChemistry.Tests/Fixtures`. Giữ nguyên bytes của file đã dùng trong kiểm local, không tạo expected mới từ parser đã sửa. Suite Science sinh parity hiện tại trước khi SmartChemistry đọc; phần đó được ghi đúng là parity hiện tại, còn fixture Web1 được cố định trong Git. Nhờ vậy checkout sạch có đủ dữ liệu kiểm tương thích.
+
 ## Phạm vi từng sản phẩm
 
 **Web:** bản local chốt `20261013-045105-617`, ứng dụng phục vụ ở `http://127.0.0.1:4204/` sau khi cập nhật server. Release online sẽ có ID riêng do workflow dựng từ commit; lấy commit, kết quả job và ID trên trang để xác định bản live. URL chia sẻ chính là `https://ntduyliem-source.github.io/liemtaphat/`. Các build trung gian không phải bộ cài Desktop.

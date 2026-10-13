@@ -75,7 +75,9 @@ internal static class ApplicationVerification
             Assert(rejected&&s.IsComposing&&s.State.Settings.EnabledDomains==DetectionDomains.Math);
         }));
         await Check("legacy/frozen-web1-file",()=>Sync(()=>{
-            string bytes=File.ReadAllText(Path.Combine(root,"artifacts/web1/runs/chromium/selected.locus"));
+            var fixture=Path.Combine(root,"tests/Locus.Science.Tests/Fixtures/legacy-web1-selected.locus");
+            Assert(Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(fixture)))=="A343E186D156C322C26610E0659C18A0DB90E4E6D5F3029AA8F2EBA276CA232F");
+            string bytes=File.ReadAllText(fixture);
             var result=DocumentCodec.Open(bytes);Assert(result.Document is FormulaDocument);
             var doc=(FormulaDocument)result.Document!;Assert(doc.State.Settings.EnabledDomains==DetectionDomains.Math&&doc.State.Candidate!=null);
             var original=AnalysisWire.Serialize(doc.State.Analysis!);

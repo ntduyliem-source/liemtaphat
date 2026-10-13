@@ -130,15 +130,19 @@ Check("application/late-result-after-config-or-source-change",()=>{
         Require(ReferenceEquals(state,session.State)&&version==session.Version&&!session.CanExport,"Late reply changed current state");
     }
 });
-Check("legacy/504-wire-fixtures-unchanged",()=>{
-    foreach(var path in new[]{"artifacts/e3/worker-fixtures.json","artifacts/web1/worker-native-fixtures.json"})
+Check("wire/current-science-and-frozen-web1-parity",()=>{
+    // Science runs first and writes its current parity cases. The old Web1
+    // fixture is checked in so a clean checkout does not depend on local runs.
+    var frozen=Path.Combine(root,"tests/Locus.SmartChemistry.Tests/Fixtures/legacy-web1-worker.json");
+    Require(Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(frozen)))=="992AF870A1F598DA86E5638B53732E2E215A4434E69CA3B5ECAA9DB1D5D12BD5","Frozen Web1 wire fixture was modified");
+    foreach(var path in new[]{"artifacts/e3/worker-fixtures.json","tests/Locus.SmartChemistry.Tests/Fixtures/legacy-web1-worker.json"})
     {
         using var data=JsonDocument.Parse(File.ReadAllText(Path.Combine(root,path)));
         foreach(var item in data.RootElement.EnumerateArray())
         {
             string? expected=item.TryGetProperty("result",out var r)?r.GetString():null;bool expectsError=item.TryGetProperty("error",out var e)&&e.ValueKind!=JsonValueKind.Null;string? actual=null;bool error=false;
             try{actual=AnalysisWire.Run(item.GetProperty("request").GetString()!);}catch{error=true;}
-            Require(expectsError?error:!error&&actual==expected,"Historical wire changed: "+item.GetProperty("id"));
+            Require(expectsError?error:!error&&actual==expected,"Wire parity changed: "+item.GetProperty("id"));
         }
     }
 });

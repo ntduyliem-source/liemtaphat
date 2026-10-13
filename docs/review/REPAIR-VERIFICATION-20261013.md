@@ -1,6 +1,6 @@
 # Biên bản sửa lỗi Locus — 13/10/2026
 
-Thực hiện [FIX0–FIX5](REPAIR-PLAN-20261013.md) trên baseline `4d4f91e4ca587dece7909596568f01e545b19a46`. Mã sửa nằm trong commit chứa biên bản này. FIX0–FIX4 đã triển khai; FIX5 đạt phạm vi logic/Web. Nghiệm thu native Desktop/Word còn mở. Các kết quả lịch sử không được dùng để thay bằng chứng của bản mới.
+Thực hiện [FIX0–FIX5](REPAIR-PLAN-20261013.md) trên baseline `4d4f91e4ca587dece7909596568f01e545b19a46`. Sửa chính ở `f3d7a9c`; Web đã phát hành từ `0bb4345e3369f772b9120420fd008f4109db3054`, gồm hai sửa bổ sung để CI chạy trên checkout sạch. FIX0–FIX4 đã triển khai; FIX5 đạt phạm vi logic/Web local và live. Nghiệm thu native Desktop/Word còn mở. Các kết quả lịch sử không được dùng để thay bằng chứng của bản mới.
 
 ## Những gì đã thay đổi
 
@@ -45,11 +45,13 @@ Bằng chứng máy nằm trong `artifacts/repair-20261013` (không đưa build/
 | Application | Default, detection, content, CT4, balance, Studio, export, plot, geometry đạt | `portable-regression-final.log` |
 | Snapshot lịch sử | 4/4 | `compatibility.json` tại đầu ra suite |
 | Editor | DOM/selection/IME guard và history hình học đạt | `portable-regression-final.log` |
-| Web sử dụng thực tế | Nhận diện, đổi môn/gõ nhanh, Hóa, Undo/Redo, gợi ý, SVG/PNG, clipboard PNG, Đồ thị, Hình học đạt | `web/results.json`, `web/*.png`, SVG/PNG xuất |
+| Web sử dụng thực tế | 9/9 trên local và live: nhận diện, đổi môn/gõ nhanh, Hóa, Undo/Redo, gợi ý, SVG/PNG, clipboard PNG, Đồ thị, Hình học | `web/results.json` (live), `web-local/results.json`, ảnh/file xuất |
 | Navigation | 10/10 trên root và project path | `navigation` |
 | Update ứng dụng thật | 6/6 cho mỗi base; không có resource request ngoài release | `full-update/results.json`, `full-update/project-results.json` |
 | Static release | Manifest/hash khớp đủ asset và renderer | `artifacts/web1/static-validation.json` |
 | Design system | Check catalog/source đạt | `node tools/design-system/check.mjs` |
+| CI Pages từ checkout sạch | Toàn bộ build, regression, static, navigation, actual update và deploy đạt | [Run 38349720505](https://github.com/ntduyliem-source/liemtaphat/actions/runs/38349720505), `pages-ci-build.log` |
+| Link live cũ, browser chưa có cache | Được đưa về URL ổn định, mở đúng build mới và dựng MathML thật; không có pageerror | `live-shared-link.json`, `live-shared-link.png` |
 
 Corpus hiện hành còn 8 mục pending có sẵn; các guard native Word không được asserted bằng corpus logic. Những mục này không được đổi thành PASS.
 
@@ -78,7 +80,7 @@ Hai fixture Web1 lịch sử vốn nằm trong `artifacts` đã chuyển vào `t
 
 ## Phạm vi từng sản phẩm
 
-**Web:** bản local chốt `20261013-045105-617`, ứng dụng phục vụ ở `http://127.0.0.1:4204/` sau khi cập nhật server. Release online sẽ có ID riêng do workflow dựng từ commit; lấy commit, kết quả job và ID trên trang để xác định bản live. URL chia sẻ chính là `https://ntduyliem-source.github.io/liemtaphat/`. Các build trung gian không phải bộ cài Desktop.
+**Web:** bản local chốt `20261013-045105-617`, phục vụ ở `http://127.0.0.1:4204/`. Bản live `20261013-050800-813` được workflow dựng từ `0bb4345`, deploy thành công và đã kiểm 9/9 luồng trực tiếp trên URL công khai. URL chia sẻ chính là [Locus Web](https://ntduyliem-source.github.io/liemtaphat/). Link cũ `releases/20261006-080034-426/` đã kiểm bằng browser context mới, trở về root và mở đúng build live. Bằng chứng `live-release.json`, `web-smoke-live.log`, `live-shared-link.json`. Các build Web không phải bộ cài Desktop.
 
 **Desktop:** `Desktop.Shared` và Catalog build Release đạt, không cảnh báo/lỗi; Desktop tests 40 PASS/0 FAIL. Đây là build và logic host. Đợt này chưa tạo bộ cài mới hoặc nghiệm thu IME/clipboard/Undo/lưu mở trong cửa sổ Desktop chứa đúng bản sửa cuối. Phần đó vẫn mở.
 
@@ -88,7 +90,8 @@ Add-in đăng ký trên máy vẫn trỏ tới gói `Locus-F-20260929-051756-959
 
 ## Những việc còn lại
 
-1. Phát hành Web bằng workflow đã có cổng kiểm; xác minh bản live và link release cũ từ browser chưa có cache. Nếu phát hành lỗi, dùng artifact/commit ổn định trước; không thay đổi dữ liệu người dùng khi rollback.
-2. Đóng gói Desktop chứa core mới, rồi kiểm native IME, clipboard sang phần mềm khác, lưu/mở và Undo.
-3. Đăng ký Word build mới bằng installer/luồng đóng gói hiện có; xác nhận DLL trước native test. Kiểm equation/metadata/Undo, focus/IME, stale source và Find state.
-4. C01–C08/H/WEB2 tiếp tục là phạm vi riêng sau đợt ổn định; không tính cổng host còn thiếu là đã hoàn thành.
+1. Đóng gói Desktop chứa core mới, rồi kiểm native IME, clipboard sang phần mềm khác, lưu/mở và Undo.
+2. Đăng ký Word build mới bằng installer/luồng đóng gói hiện có; xác nhận DLL trước native test. Kiểm equation/metadata/Undo, focus/IME, stale source và Find state.
+3. C01–C08/H/WEB2 tiếp tục là phạm vi riêng sau đợt ổn định; không tính cổng host còn thiếu là đã hoàn thành.
+
+Web đã hoàn tất phát hành trong đợt này. Nếu cần rollback, dùng artifact/commit ổn định trước; giữ dữ liệu người dùng. Commit ghi nhận kết quả sau deploy chỉ cập nhật biên bản, không thay mã/runtime đã nghiệm thu.
